@@ -49,10 +49,37 @@ Research from BMAD Method demonstrates that strategic document sharding can redu
 
 | Metric | Threshold | Action |
 |--------|-----------|--------|
-| Lines | >500 | Consider sharding |
-| File size | >20KB | Consider sharding |
-| Tokens | >2000 | Consider sharding |
-| Sections | >5 major | Consider sharding |
+| Lines | >1000 | MUST shard |
+| Lines | 800-1000 | Consider sharding |
+| File size | >40KB | MUST shard |
+| File size | 20-40KB | Consider sharding |
+| Tokens | >4000 | MUST shard |
+| Tokens | 2000-4000 | Consider sharding |
+| Sections | >7 major | Consider sharding |
+
+### Auto-Sharding Rules (MANDATORY)
+
+When creating PRD, Architecture, or Epic documents:
+
+```
+IF document_lines > 1000:
+    1. Create index file: {doc-name}/00-index.md
+    2. Split into shards of ~800-1000 lines each
+    3. Name shards: 01-{section}.md, 02-{section}.md, etc.
+    4. Update index with links to all shards
+    5. Original file becomes the index
+```
+
+**Example:**
+```
+prd.md (1500 lines)
+    ↓ AUTO-SHARD
+prd/
+  ├── 00-index.md (overview + links)
+  ├── 01-executive-summary.md
+  ├── 02-requirements.md
+  └── 03-specifications.md
+```
 
 ### Signs a Document Needs Sharding
 
