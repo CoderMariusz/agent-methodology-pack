@@ -15,7 +15,7 @@ This project uses the Agent Methodology Pack.
 See `.claude/agents/ORCHESTRATOR.md` for entry point.
 
 ## Key Commands
-- Start planning: `@ORCHESTRATOR.md`
+- Start planning: `@.claude/agents/ORCHESTRATOR.md`
 - View state: `@PROJECT-STATE.md`
 
 ## Conventions

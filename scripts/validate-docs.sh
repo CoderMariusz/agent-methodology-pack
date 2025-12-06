@@ -2,12 +2,12 @@
 # Validate Documentation Structure
 # Checks all required files, folders, and references in the Agent Methodology Pack
 #
-# Usage: bash scripts/validate-docs.sh
+# Usage:
+#   bash scripts/validate-docs.sh                    # Validate current directory
+#   bash scripts/validate-docs.sh --path /my/project # Validate specific path
 #
 # Author: Agent Methodology Pack
-# Version: 1.0
-
-# Don't use set -e because counter increments return non-zero when incrementing from 0
+# Version: 2.0 (Added --path parameter for target project)
 
 # Colors for output
 RED='\033[0;31m'
@@ -20,6 +20,42 @@ NC='\033[0m' # No Color
 ERROR_COUNT=0
 WARNING_COUNT=0
 SUCCESS_COUNT=0
+
+# Parse arguments
+TARGET_PATH="."
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --path)
+            TARGET_PATH="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --path PATH    Path to project to validate (default: current directory)"
+            echo "  -h, --help     Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0                          # Validate current directory"
+            echo "  $0 --path /path/to/project  # Validate specific project"
+            echo "  $0 --path ..                # Validate parent directory"
+            exit 0
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Resolve to absolute path
+TARGET_PATH="$(cd "$TARGET_PATH" 2>/dev/null && pwd)"
+if [ -z "$TARGET_PATH" ]; then
+    echo -e "${RED}ERROR: Invalid path${NC}"
+    exit 1
+fi
 
 # Helper functions
 print_error() {
@@ -48,37 +84,37 @@ print_header() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
-# Check if file exists
+# Check if file exists (relative to TARGET_PATH)
 check_file() {
-    local file="$1"
+    local file="$TARGET_PATH/$1"
     local description="$2"
 
     if [ -f "$file" ]; then
         print_success "$description exists"
         return 0
     else
-        print_error "$description missing: $file"
+        print_error "$description missing: $1"
         return 1
     fi
 }
 
-# Check if directory exists
+# Check if directory exists (relative to TARGET_PATH)
 check_dir() {
-    local dir="$1"
+    local dir="$TARGET_PATH/$1"
     local description="$2"
 
     if [ -d "$dir" ]; then
         print_success "$description exists"
         return 0
     else
-        print_error "$description missing: $dir"
+        print_error "$description missing: $1"
         return 1
     fi
 }
 
 # Count lines in file
 count_lines() {
-    local file="$1"
+    local file="$TARGET_PATH/$1"
     if [ -f "$file" ]; then
         wc -l < "$file" | tr -d ' '
     else
@@ -88,7 +124,7 @@ count_lines() {
 
 # Extract @references from a file
 extract_references() {
-    local file="$1"
+    local file="$TARGET_PATH/$1"
     if [ -f "$file" ]; then
         grep -oP '@[a-zA-Z0-9_/.\\-]+\.(md|dart|yaml|json|sh)' "$file" 2>/dev/null || true
     fi
@@ -100,6 +136,8 @@ main() {
     echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${BLUE}║         AGENT METHODOLOGY PACK - VALIDATION SCRIPT         ║${NC}"
     echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    print_info "Validating: $TARGET_PATH"
 
     # ============================================================
     # 1. CHECK CORE FILES
@@ -117,7 +155,7 @@ main() {
     # ============================================================
     print_header "2. CLAUDE.md Validation"
 
-    if [ -f "CLAUDE.md" ]; then
+    if [ -f "$TARGET_PATH/CLAUDE.md" ]; then
         CLAUDE_LINES=$(count_lines "CLAUDE.md")
         print_info "CLAUDE.md has $CLAUDE_LINES lines"
 
@@ -246,7 +284,7 @@ main() {
     BROKEN_REFS=0
 
     for file in "${FILES_TO_CHECK[@]}"; do
-        if [ -f "$file" ]; then
+        if [ -f "$TARGET_PATH/$file" ]; then
             refs=$(extract_references "$file")
             if [ -n "$refs" ]; then
                 while IFS= read -r ref; do
@@ -254,7 +292,7 @@ main() {
                     # Remove @ symbol
                     ref_path="${ref:1}"
 
-                    if [ ! -f "$ref_path" ]; then
+                    if [ ! -f "$TARGET_PATH/$ref_path" ]; then
                         print_warning "Broken reference in $file: $ref"
                         ((BROKEN_REFS++))
                     fi

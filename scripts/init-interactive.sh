@@ -1,18 +1,22 @@
 #!/bin/bash
-# Interactive Project Setup Wizard
+# Interactive Project Setup Wizard v2.0
 # Guides user through new project creation or existing project migration
+#
+# IMPORTANT: This script distinguishes between:
+#   - PACK_ROOT: Where agent-methodology-pack is located
+#   - TARGET_PROJECT: Where the user's project is located
 #
 # Usage:
 #   Interactive mode: bash scripts/init-interactive.sh
-#   CLI mode: bash scripts/init-interactive.sh --mode {new|existing|audit} [--name PROJECT_NAME] [--path PROJECT_PATH]
+#   CLI mode: bash scripts/init-interactive.sh --mode {new|existing|migrate} [OPTIONS]
 #
 # Examples:
-#   bash scripts/init-interactive.sh --mode new --name my-project
-#   bash scripts/init-interactive.sh --mode existing --path /path/to/project
-#   bash scripts/init-interactive.sh --mode audit --path .
+#   bash scripts/init-interactive.sh --mode new --name my-project --target ../my-project
+#   bash scripts/init-interactive.sh --mode migrate --target /path/to/project
+#   bash scripts/init-interactive.sh --mode existing --target . --lang typescript
 #
 # Author: Agent Methodology Pack
-# Version: 1.1 (Fixed stdin handling for non-interactive environments)
+# Version: 2.0 (Separated PACK_ROOT from TARGET_PROJECT, added language & suggestions)
 
 set -e
 
@@ -25,11 +29,22 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m' # No Color
 
-# Get script directory
+# Get script directory (this is where the pack is)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACK_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Helper functions (defined early so they can be used in argument parsing)
+# Target project (will be set by user)
+TARGET_PROJECT=""
+
+# Project configuration
+PROJECT_NAME=""
+PROJECT_LANG=""
+SKIP_DISCOVERY=false
+
+# Supported languages
+SUPPORTED_LANGS=("typescript" "javascript" "python" "go" "rust" "java" "csharp" "dart" "other")
+
+# Helper functions
 print_header() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -61,491 +76,253 @@ print_menu_item() {
     echo -e "${CYAN}  [$1]${NC} $2"
 }
 
-# Parse CLI arguments (for non-interactive mode)
-# Must be after helper functions are defined
-CLI_MODE=""
-CLI_NAME=""
-CLI_PATH=""
-SKIP_DISCOVERY=false
+# Detect parent directory as suggested target
+suggest_target_path() {
+    local parent_dir="$(dirname "$PACK_ROOT")"
+    local current_dir="$(pwd)"
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --mode)
-            CLI_MODE="$2"
-            shift 2
-            ;;
-        --name)
-            CLI_NAME="$2"
-            shift 2
-            ;;
-        --path)
-            CLI_PATH="$2"
-            shift 2
-            ;;
-        --skip-discovery)
-            SKIP_DISCOVERY=true
-            shift
-            ;;
-        -h|--help)
-            echo "Usage: $0 [OPTIONS]"
-            echo ""
-            echo "Interactive mode (no arguments):"
-            echo "  $0"
-            echo ""
-            echo "CLI mode:"
-            echo "  $0 --mode {new|existing|audit} [OPTIONS]"
-            echo ""
-            echo "Options:"
-            echo "  --mode MODE        Operation mode: new, existing, or audit"
-            echo "  --name NAME        Project name (for new mode)"
-            echo "  --path PATH        Project path (for existing/audit mode)"
-            echo "  --skip-discovery   Skip DISCOVERY-FLOW (advanced users only)"
-            echo "  -h, --help         Show this help message"
-            echo ""
-            echo "Examples:"
-            echo "  $0 --mode new --name my-project"
-            echo "  $0 --mode existing --path /path/to/project"
-            echo "  $0 --mode audit --path ."
-            echo ""
-            echo "After initialization, DISCOVERY-FLOW will be triggered to:"
-            echo "  - Conduct project interview (DISCOVERY-AGENT)"
-            echo "  - Ask clarifying questions"
-            echo "  - Build PROJECT-UNDERSTANDING.md"
-            exit 0
-            ;;
-        *)
-            print_error "Unknown argument: $1"
-            echo "Use --help for usage information"
-            exit 1
-            ;;
+    echo ""
+    print_info "Suggested target paths:"
+    echo ""
+    echo -e "  ${GREEN}[1]${NC} Parent directory: ${CYAN}$parent_dir${NC}"
+    echo -e "  ${GREEN}[2]${NC} Current directory: ${CYAN}$current_dir${NC}"
+
+    # Check if we're inside another project (has package.json, etc.)
+    if [ -f "$parent_dir/package.json" ]; then
+        echo -e "      ${YELLOW}(Node.js project detected)${NC}"
+    elif [ -f "$parent_dir/requirements.txt" ] || [ -f "$parent_dir/pyproject.toml" ]; then
+        echo -e "      ${YELLOW}(Python project detected)${NC}"
+    elif [ -f "$parent_dir/go.mod" ]; then
+        echo -e "      ${YELLOW}(Go project detected)${NC}"
+    elif [ -f "$parent_dir/Cargo.toml" ]; then
+        echo -e "      ${YELLOW}(Rust project detected)${NC}"
+    elif [ -f "$parent_dir/pubspec.yaml" ]; then
+        echo -e "      ${YELLOW}(Dart/Flutter project detected)${NC}"
+    fi
+
+    echo -e "  ${GREEN}[3]${NC} Custom path (you will enter it)"
+    echo ""
+}
+
+# Detect project language from files
+detect_language() {
+    local path="$1"
+
+    if [ -f "$path/package.json" ]; then
+        if grep -q "typescript" "$path/package.json" 2>/dev/null; then
+            echo "typescript"
+        else
+            echo "javascript"
+        fi
+    elif [ -f "$path/tsconfig.json" ]; then
+        echo "typescript"
+    elif [ -f "$path/requirements.txt" ] || [ -f "$path/pyproject.toml" ] || [ -f "$path/setup.py" ]; then
+        echo "python"
+    elif [ -f "$path/go.mod" ]; then
+        echo "go"
+    elif [ -f "$path/Cargo.toml" ]; then
+        echo "rust"
+    elif [ -f "$path/pom.xml" ] || [ -f "$path/build.gradle" ]; then
+        echo "java"
+    elif [ -f "$path/pubspec.yaml" ]; then
+        echo "dart"
+    elif [ -f "$path/*.csproj" ] 2>/dev/null || [ -f "$path/*.sln" ] 2>/dev/null; then
+        echo "csharp"
+    else
+        echo "unknown"
+    fi
+}
+
+# Show language selection menu
+show_language_menu() {
+    print_header "Select Project Language"
+    echo ""
+    print_menu_item "1" "TypeScript"
+    print_menu_item "2" "JavaScript"
+    print_menu_item "3" "Python"
+    print_menu_item "4" "Go"
+    print_menu_item "5" "Rust"
+    print_menu_item "6" "Java"
+    print_menu_item "7" "C#"
+    print_menu_item "8" "Dart/Flutter"
+    print_menu_item "9" "Other"
+    echo ""
+}
+
+# Get language from selection
+get_language_from_selection() {
+    local selection="$1"
+    case "$selection" in
+        1) echo "typescript" ;;
+        2) echo "javascript" ;;
+        3) echo "python" ;;
+        4) echo "go" ;;
+        5) echo "rust" ;;
+        6) echo "java" ;;
+        7) echo "csharp" ;;
+        8) echo "dart" ;;
+        9) echo "other" ;;
+        *) echo "unknown" ;;
     esac
-done
-
-# Check if we're in a terminal (for interactive mode)
-# NOTE: Git Bash on Windows often reports stdin as NOT a terminal
-# even when running interactively, so we need to handle both cases
-IS_TERMINAL=false
-if [ -t 0 ]; then
-    IS_TERMINAL=true
-fi
-
-# Show welcome banner
-show_welcome() {
-    clear
-    echo ""
-    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║       AGENT METHODOLOGY PACK - INTERACTIVE SETUP           ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    echo -e "${MAGENTA}Welcome to the Agent Methodology Pack Setup Wizard!${NC}"
-    echo ""
-    echo -e "This wizard will guide you through:"
-    echo -e "  • Setting up a new project"
-    echo -e "  • Migrating an existing project"
-    echo -e "  • Auditing project structure"
-    echo ""
-    echo -e "${YELLOW}Note: After initialization, DISCOVERY-FLOW will be triggered${NC}"
-    echo -e "${YELLOW}      to ensure complete project understanding.${NC}"
-    echo ""
 }
 
-# Main menu
-show_main_menu() {
-    print_header "What would you like to do?"
-    echo ""
-    print_menu_item "1" "Create NEW project (initialize from scratch)"
-    print_menu_item "2" "Migrate EXISTING project (analyze and migrate)"
-    print_menu_item "3" "AUDIT ONLY (analyze without changes)"
-    print_menu_item "4" "Exit"
-    echo ""
-}
-
-# Get user choice
-# Handles both interactive terminal and non-interactive (piped) input
-# In non-interactive mode, provides clear error message
+# Get user input (handles both interactive and non-interactive)
 get_choice() {
     local prompt="$1"
     local choice
 
-    # IMPORTANT: Prompt goes to stderr (>&2) so it's not captured by command substitution
     echo -n -e "${YELLOW}${prompt}${NC} " >&2
 
-    # Try to read from stdin
-    # IMPORTANT: Using 'read -r' requires stdin to be a terminal
-    # If stdin is redirected/piped, read will fail or hang
     if read -r choice 2>/dev/null; then
-        # IMPORTANT: Remove Windows CR (carriage return) and trim whitespace
-        # Git Bash on Windows may include \r in input
-        choice="${choice%$'\r'}"      # Remove trailing CR
-        choice="${choice#"${choice%%[![:space:]]*}"}"  # Trim leading whitespace
-        choice="${choice%"${choice##*[![:space:]]}"}"  # Trim trailing whitespace
+        choice="${choice%$'\r'}"
+        choice="${choice#"${choice%%[![:space:]]*}"}"
+        choice="${choice%"${choice##*[![:space:]]}"}"
         echo "$choice"
     else
-        # stdin is not available (piped input, non-interactive mode)
         echo ""
         print_error "Cannot read input in non-interactive mode"
-        print_info "Use CLI arguments instead:"
-        print_info "  bash $0 --mode {new|existing|audit} [--name PROJECT_NAME] [--path PATH]"
-        print_info "  See --help for more details"
+        print_info "Use CLI arguments instead. See --help for details"
         exit 1
     fi
 }
 
-# New project flow (CLI version)
-new_project_flow_cli() {
-    local project_name="$1"
+# Copy pack to target project
+copy_pack_to_target() {
+    local target="$1"
 
-    print_header "NEW PROJECT SETUP (CLI MODE)"
-    echo ""
+    print_step "Copying Agent Methodology Pack to target..."
 
-    # Validate project name
-    if [ -z "$project_name" ]; then
-        print_error "Project name is required in CLI mode"
-        print_info "Usage: $0 --mode new --name PROJECT_NAME"
-        exit 1
-    fi
+    # Create target if it doesn't exist
+    mkdir -p "$target"
 
-    if [[ ! "$project_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-        print_error "Project name can only contain letters, numbers, hyphens, and underscores"
-        exit 1
-    fi
+    # Copy essential directories
+    cp -r "$PACK_ROOT/.claude" "$target/" 2>/dev/null || true
+    cp -r "$PACK_ROOT/docs" "$target/" 2>/dev/null || true
+    cp -r "$PACK_ROOT/scripts" "$target/" 2>/dev/null || true
+    cp -r "$PACK_ROOT/templates" "$target/" 2>/dev/null || true
 
-    print_info "Project name: ${project_name}"
+    # Copy essential files (but not overwrite existing README, etc.)
+    cp "$PACK_ROOT/CLAUDE.md" "$target/" 2>/dev/null || true
+    cp "$PACK_ROOT/PROJECT-STATE.md" "$target/" 2>/dev/null || true
 
-    # Run init-project.sh
-    print_header "INITIALIZING PROJECT"
-    echo ""
+    # Don't copy pack's README, INSTALL, etc. to target
+    # User's project should keep its own README
 
-    if [ -f "$PACK_ROOT/scripts/init-project.sh" ]; then
-        bash "$PACK_ROOT/scripts/init-project.sh" "$project_name"
-        print_success "Project initialized successfully!"
-
-        # Show DISCOVERY-FLOW info with project data
-        show_discovery_flow_info "." "new" "$project_name"
-    else
-        print_error "init-project.sh not found"
-        exit 1
-    fi
+    print_success "Pack copied to: $target"
 }
 
-# New project flow (Interactive version)
-new_project_flow() {
-    print_header "NEW PROJECT SETUP"
-    echo ""
+# Update CLAUDE.md with project info
+update_claude_md() {
+    local target="$1"
+    local name="$2"
+    local lang="$3"
 
-    # Get project name
-    local project_name
-    while true; do
-        project_name=$(get_choice "Enter project name (e.g., my-awesome-app):")
+    local claude_file="$target/CLAUDE.md"
 
-        if [ -z "$project_name" ]; then
-            print_error "Project name cannot be empty"
-            continue
-        fi
+    # Get language-specific tech stack
+    local backend_tech=""
+    local frontend_tech=""
+    local db_tech="PostgreSQL"
 
-        if [[ ! "$project_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-            print_error "Project name can only contain letters, numbers, hyphens, and underscores"
-            continue
-        fi
+    case "$lang" in
+        typescript|javascript)
+            backend_tech="Node.js + Express"
+            frontend_tech="React + TypeScript"
+            ;;
+        python)
+            backend_tech="Python + FastAPI"
+            frontend_tech="React or Vue.js"
+            ;;
+        go)
+            backend_tech="Go + Gin/Echo"
+            frontend_tech="React or Vue.js"
+            ;;
+        rust)
+            backend_tech="Rust + Actix/Axum"
+            frontend_tech="React or Yew"
+            ;;
+        java)
+            backend_tech="Java + Spring Boot"
+            frontend_tech="React or Angular"
+            ;;
+        dart)
+            backend_tech="Dart + Shelf/Serverpod"
+            frontend_tech="Flutter"
+            db_tech="Firebase/PostgreSQL"
+            ;;
+        csharp)
+            backend_tech="C# + ASP.NET Core"
+            frontend_tech="Blazor or React"
+            ;;
+        *)
+            backend_tech="{technology}"
+            frontend_tech="{technology}"
+            ;;
+    esac
 
-        break
-    done
+    cat > "$claude_file" << EOF
+# CLAUDE.md
 
-    # Confirm
-    echo ""
-    print_info "Project name: ${project_name}"
-    local confirm=$(get_choice "Proceed with initialization? (y/n):")
+## Project: $name
 
-    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-        print_warning "Initialization cancelled"
-        return
-    fi
+## Quick Context
+{Brief project description - fill this in}
 
-    # Run init-project.sh
-    print_header "INITIALIZING PROJECT"
-    echo ""
+## Tech Stack
+- Backend: $backend_tech
+- Frontend: $frontend_tech
+- Database: $db_tech
 
-    if [ -f "$PACK_ROOT/scripts/init-project.sh" ]; then
-        bash "$PACK_ROOT/scripts/init-project.sh" "$project_name"
+## Agent System
+This project uses the Agent Methodology Pack.
+See \`.claude/agents/ORCHESTRATOR.md\` for entry point.
 
-        # Show DISCOVERY-FLOW info with project data
-        show_discovery_flow_info "." "new" "$project_name"
-    else
-        print_error "init-project.sh not found"
-        exit 1
-    fi
+## Key Commands
+- Start planning: \`@.claude/agents/ORCHESTRATOR.md\`
+- View state: \`@PROJECT-STATE.md\`
+
+## Conventions
+- Language: $lang
+- {Add your coding conventions}
+- {Add your naming conventions}
+
+## Current Sprint
+See \`@PROJECT-STATE.md\` for current sprint status.
+EOF
+
+    print_success "Updated CLAUDE.md with project configuration"
 }
 
-# Existing project flow (CLI version)
-existing_project_flow_cli() {
-    local project_path="$1"
+# Create startup prompt for Claude
+create_startup_prompt() {
+    local target="$1"
+    local flow_type="$2"
+    local name="$3"
+    local lang="$4"
 
-    print_header "EXISTING PROJECT MIGRATION (CLI MODE)"
-    echo ""
-
-    # Default to current directory if not provided
-    if [ -z "$project_path" ]; then
-        project_path="."
-    fi
-
-    # Validate path
-    if [ ! -d "$project_path" ]; then
-        print_error "Directory does not exist: $project_path"
-        exit 1
-    fi
-
-    # Show info
-    print_info "Project path: $(cd "$project_path" && pwd)"
-    print_info "Analyzing project structure..."
-    echo ""
-
-    # Run analyze-project.sh
-    print_header "ANALYZING PROJECT"
-    echo ""
-
-    if [ -f "$PACK_ROOT/scripts/analyze-project.sh" ]; then
-        bash "$PACK_ROOT/scripts/analyze-project.sh" "$project_path"
-
-        # Show results
-        local audit_file="$project_path/.claude/migration/AUDIT-REPORT.md"
-        if [ -f "$audit_file" ]; then
-            echo ""
-            print_header "ANALYSIS COMPLETE"
-            echo ""
-            print_success "Audit report generated: $audit_file"
-            echo ""
-
-            # Show summary
-            print_info "Summary:"
-            echo ""
-            grep -A 10 "^## Summary" "$audit_file" 2>/dev/null || echo "No summary available"
-            echo ""
-            print_info "Migration features coming soon!"
-            print_info "Please review $audit_file for recommendations"
-
-            # Show DISCOVERY-FLOW info with project data
-            show_discovery_flow_info "$project_path" "migrate" "$(basename "$(cd "$project_path" && pwd)")"
-        fi
-    else
-        print_error "analyze-project.sh not found"
-        exit 1
-    fi
-}
-
-# Existing project flow (Interactive version)
-existing_project_flow() {
-    print_header "EXISTING PROJECT MIGRATION"
-    echo ""
-
-    # Get project path
-    local project_path
-    project_path=$(get_choice "Enter path to existing project (or press Enter for current directory):")
-
-    if [ -z "$project_path" ]; then
-        project_path="."
-    fi
-
-    # Validate path
-    if [ ! -d "$project_path" ]; then
-        print_error "Directory does not exist: $project_path"
-        return
-    fi
-
-    # Show info
-    echo ""
-    print_info "Project path: $(cd "$project_path" && pwd)"
-    print_info "This will analyze your project structure"
-    echo ""
-
-    local confirm=$(get_choice "Start analysis? (y/n):")
-
-    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-        print_warning "Analysis cancelled"
-        return
-    fi
-
-    # Run analyze-project.sh
-    print_header "ANALYZING PROJECT"
-    echo ""
-
-    if [ -f "$PACK_ROOT/scripts/analyze-project.sh" ]; then
-        bash "$PACK_ROOT/scripts/analyze-project.sh" "$project_path"
-
-        # Show results
-        local audit_file="$project_path/.claude/migration/AUDIT-REPORT.md"
-        if [ -f "$audit_file" ]; then
-            echo ""
-            print_header "ANALYSIS COMPLETE"
-            echo ""
-            print_success "Audit report generated: $audit_file"
-            echo ""
-
-            # Show summary
-            print_info "Summary:"
-            echo ""
-            grep -A 10 "^## Summary" "$audit_file" 2>/dev/null || echo "No summary available"
-            echo ""
-
-            # Ask about migration
-            local migrate=$(get_choice "Would you like to migrate documentation now? (y/n):")
-
-            if [[ "$migrate" == "y" || "$migrate" == "Y" ]]; then
-                echo ""
-                print_header "MIGRATION"
-                echo ""
-                print_info "Migration features coming soon!"
-                print_info "For now, please review $audit_file"
-                print_info "And manually organize files according to recommendations"
-            fi
-
-            # Show DISCOVERY-FLOW info
-            show_discovery_flow_info
-        fi
-    else
-        print_error "analyze-project.sh not found"
-        exit 1
-    fi
-}
-
-# Audit only flow (CLI version)
-audit_only_flow_cli() {
-    local project_path="$1"
-
-    print_header "PROJECT AUDIT (CLI MODE)"
-    echo ""
-
-    # Default to current directory if not provided
-    if [ -z "$project_path" ]; then
-        project_path="."
-    fi
-
-    # Validate path
-    if [ ! -d "$project_path" ]; then
-        print_error "Directory does not exist: $project_path"
-        exit 1
-    fi
-
-    print_info "Project path: $(cd "$project_path" && pwd)"
-    print_info "Starting audit..."
-    echo ""
-
-    # Run analyze-project.sh with audit flag
-    print_header "AUDITING PROJECT"
-    echo ""
-
-    if [ -f "$PACK_ROOT/scripts/analyze-project.sh" ]; then
-        bash "$PACK_ROOT/scripts/analyze-project.sh" "$project_path" --output "$project_path/.claude/audit"
-
-        # Show results
-        local audit_file="$project_path/.claude/audit/AUDIT-REPORT.md"
-        if [ -f "$audit_file" ]; then
-            echo ""
-            print_header "AUDIT COMPLETE"
-            echo ""
-            print_success "Audit report: $audit_file"
-            echo ""
-            print_info "Review the audit report for project analysis"
-        fi
-    else
-        print_error "analyze-project.sh not found"
-        exit 1
-    fi
-}
-
-# Audit only flow (Interactive version)
-audit_only_flow() {
-    print_header "PROJECT AUDIT"
-    echo ""
-
-    # Get project path
-    local project_path
-    project_path=$(get_choice "Enter path to project (or press Enter for current directory):")
-
-    if [ -z "$project_path" ]; then
-        project_path="."
-    fi
-
-    # Validate path
-    if [ ! -d "$project_path" ]; then
-        print_error "Directory does not exist: $project_path"
-        return
-    fi
-
-    # Run analyze-project.sh with audit flag
-    print_header "AUDITING PROJECT"
-    echo ""
-
-    if [ -f "$PACK_ROOT/scripts/analyze-project.sh" ]; then
-        bash "$PACK_ROOT/scripts/analyze-project.sh" "$project_path" --output "$project_path/.claude/audit"
-
-        # Show results
-        local audit_file="$project_path/.claude/audit/AUDIT-REPORT.md"
-        if [ -f "$audit_file" ]; then
-            echo ""
-            print_header "AUDIT COMPLETE"
-            echo ""
-            print_success "Audit report: $audit_file"
-            echo ""
-
-            # Ask to view
-            local view=$(get_choice "Open audit report? (y/n):")
-
-            if [[ "$view" == "y" || "$view" == "Y" ]]; then
-                if command -v less &> /dev/null; then
-                    less "$audit_file"
-                elif command -v more &> /dev/null; then
-                    more "$audit_file"
-                else
-                    cat "$audit_file"
-                fi
-            fi
-        fi
-    else
-        print_error "analyze-project.sh not found"
-        exit 1
-    fi
-}
-
-# Show progress indicator
-show_progress() {
-    local message="$1"
-    local duration="${2:-3}"
-
-    print_step "$message"
-    for i in $(seq 1 $duration); do
-        echo -n "."
-        sleep 0.3
-    done
-    echo ""
-}
-
-# Create startup prompt file for Claude
-# This file contains all collected data and instructions to start the right flow
-create_claude_startup() {
-    local project_path="$1"
-    local flow_type="$2"  # "new" or "migrate" or "audit"
-    local project_name="$3"
-
-    local startup_file="$project_path/.claude/STARTUP-PROMPT.md"
-    mkdir -p "$project_path/.claude"
+    local startup_file="$target/.claude/STARTUP-PROMPT.md"
+    mkdir -p "$target/.claude"
 
     cat > "$startup_file" << EOF
 # Claude Startup Prompt
 
-## Auto-generated by init-interactive.sh
+## Auto-generated by init-interactive.sh v2.0
 **Date:** $(date +%Y-%m-%d)
 **Flow Type:** $flow_type
-**Project:** $project_name
-**Path:** $(cd "$project_path" && pwd)
+**Project:** $name
+**Language:** $lang
+**Path:** $target
 
 ---
 
 ## Instructions for Claude
 
-@ORCHESTRATOR.md
+@.claude/agents/ORCHESTRATOR.md
 
 ### Context
 This is a ${flow_type} project initialization.
+- **Project Name:** $name
+- **Primary Language:** $lang
 
 ### Required Flow
 Start with **DISCOVERY-FLOW** to ensure complete project understanding.
@@ -557,16 +334,11 @@ Start with **DISCOVERY-FLOW** to ensure complete project understanding.
 4. **Gap Analysis** - Identify missing information
 5. **Confirmation** - Get user approval
 
-### Project Data Collected
-- **Project Name:** $project_name
-- **Project Path:** $(cd "$project_path" && pwd)
-- **Flow Type:** $flow_type
-- **Initialized:** $(date)
-
 ### Start Command
 \`\`\`
 Start DISCOVERY-FLOW for this ${flow_type} project.
-Project name: $project_name
+Project name: $name
+Language: $lang
 \`\`\`
 
 ---
@@ -577,159 +349,420 @@ EOF
     echo "$startup_file"
 }
 
-# Show DISCOVERY-FLOW information and create startup file
-show_discovery_flow_info() {
-    local project_path="${1:-.}"
-    local flow_type="${2:-new}"
-    local project_name="${3:-$(basename "$(cd "$project_path" && pwd)")}"
-
-    if [ "$SKIP_DISCOVERY" = false ]; then
-        # Create startup file
-        local startup_file
-        startup_file=$(create_claude_startup "$project_path" "$flow_type" "$project_name")
-
-        echo ""
-        print_header "DISCOVERY FLOW"
-        print_info "Before starting development, DISCOVERY-FLOW will be triggered."
-        print_info "This ensures complete project understanding."
-        echo ""
-        print_info "DISCOVERY-FLOW phases:"
-        echo "  1. Initial Scan (DOC-AUDITOR)"
-        echo "  2. Discovery Interview (DISCOVERY-AGENT)"
-        echo "  3. Domain Questions (ARCHITECT + PM + RESEARCH)"
-        echo "  4. Gap Analysis"
-        echo "  5. Confirmation"
-        echo ""
-
-        # Show startup file location
-        print_success "Startup file created: $startup_file"
-        echo ""
-        print_header "HOW TO START CLAUDE"
-        echo ""
-        echo -e "  ${GREEN}Option 1:${NC} Open Claude Code in this directory and say:"
-        echo -e "           ${YELLOW}Read @.claude/STARTUP-PROMPT.md and start the flow${NC}"
-        echo ""
-        echo -e "  ${GREEN}Option 2:${NC} Copy this command:"
-        echo -e "           ${YELLOW}@ORCHESTRATOR.md Start DISCOVERY-FLOW for $flow_type project${NC}"
-        echo ""
-
-        # Try to copy to clipboard (cross-platform)
-        local startup_content="Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW"
-        if command -v clip.exe &> /dev/null; then
-            echo "$startup_content" | clip.exe
-            print_success "Command copied to clipboard!"
-        elif command -v pbcopy &> /dev/null; then
-            echo "$startup_content" | pbcopy
-            print_success "Command copied to clipboard!"
-        elif command -v xclip &> /dev/null; then
-            echo "$startup_content" | xclip -selection clipboard
-            print_success "Command copied to clipboard!"
-        fi
-
-        echo ""
-        # Ask if user wants to auto-start Claude
-        echo -n -e "${YELLOW}Start Claude Code automatically? (y/n):${NC} " >&2
-        read -r auto_start
-        auto_start="${auto_start%$'\r'}"
-
-        if [[ "$auto_start" == "y" || "$auto_start" == "Y" ]]; then
-            if command -v claude &> /dev/null; then
-                echo ""
-                print_info "Starting Claude Code..."
-                echo ""
-
-                # Change to project directory and start Claude with prompt
-                cd "$project_path" 2>/dev/null || true
-
-                # Start Claude with the startup prompt (interactive session)
-                claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this $flow_type project. Project: $project_name"
-            else
-                print_error "Claude CLI not found. Please start Claude manually."
-                print_info "Install: npm install -g @anthropic-ai/claude-code"
-            fi
-        fi
-    fi
+# Show CLI help
+show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Interactive mode (no arguments):"
+    echo "  $0"
+    echo ""
+    echo "CLI mode:"
+    echo "  $0 --mode {new|existing|migrate} [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --mode MODE        Operation mode: new, existing, or migrate"
+    echo "  --name NAME        Project name"
+    echo "  --target PATH      Target project path (where to set up)"
+    echo "  --lang LANGUAGE    Project language (typescript, python, go, etc.)"
+    echo "  --skip-discovery   Skip DISCOVERY-FLOW (advanced users only)"
+    echo "  -h, --help         Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0 --mode new --name my-app --target ../my-app --lang typescript"
+    echo "  $0 --mode migrate --target /path/to/existing/project"
+    echo "  $0 --mode existing --target . --lang python"
+    echo ""
+    echo "Supported languages:"
+    echo "  typescript, javascript, python, go, rust, java, csharp, dart, other"
+    echo ""
+    echo "IMPORTANT:"
+    echo "  - PACK_ROOT: $PACK_ROOT (where this script lives)"
+    echo "  - TARGET: Where your project is/will be"
+    echo "  - After migration, you can delete the pack directory"
+    exit 0
 }
 
-# Main function - handles both CLI and interactive modes
+# Parse CLI arguments
+CLI_MODE=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --mode)
+            CLI_MODE="$2"
+            shift 2
+            ;;
+        --name)
+            PROJECT_NAME="$2"
+            shift 2
+            ;;
+        --target)
+            TARGET_PROJECT="$2"
+            shift 2
+            ;;
+        --lang)
+            PROJECT_LANG="$2"
+            shift 2
+            ;;
+        --skip-discovery)
+            SKIP_DISCOVERY=true
+            shift
+            ;;
+        -h|--help)
+            show_help
+            ;;
+        *)
+            print_error "Unknown argument: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# New project flow (CLI)
+new_project_flow_cli() {
+    print_header "NEW PROJECT SETUP (CLI MODE)"
+
+    # Validate required params
+    if [ -z "$PROJECT_NAME" ]; then
+        print_error "Project name required. Use --name PROJECT_NAME"
+        exit 1
+    fi
+
+    if [ -z "$TARGET_PROJECT" ]; then
+        print_error "Target path required. Use --target PATH"
+        exit 1
+    fi
+
+    # Create target directory
+    mkdir -p "$TARGET_PROJECT"
+    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
+
+    # Detect or use provided language
+    if [ -z "$PROJECT_LANG" ]; then
+        PROJECT_LANG="typescript"  # Default
+    fi
+
+    print_info "Project: $PROJECT_NAME"
+    print_info "Target: $TARGET_PROJECT"
+    print_info "Language: $PROJECT_LANG"
+    echo ""
+
+    # Copy pack to target
+    copy_pack_to_target "$TARGET_PROJECT"
+
+    # Update CLAUDE.md
+    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
+
+    # Create startup prompt
+    local startup_file
+    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "new" "$PROJECT_NAME" "$PROJECT_LANG")
+
+    print_success "Project initialized at: $TARGET_PROJECT"
+    print_success "Startup file: $startup_file"
+
+    echo ""
+    print_header "NEXT STEPS"
+    echo ""
+    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
+    echo -e "  2. ${GREEN}Open Claude Code and say:${NC}"
+    echo -e "     ${YELLOW}Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW${NC}"
+    echo ""
+    echo -e "  3. ${GREEN}After setup is complete, you can delete the pack:${NC}"
+    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
+    echo ""
+}
+
+# Migrate existing project flow (CLI)
+migrate_project_flow_cli() {
+    print_header "PROJECT MIGRATION (CLI MODE)"
+
+    if [ -z "$TARGET_PROJECT" ]; then
+        print_error "Target path required. Use --target PATH"
+        exit 1
+    fi
+
+    # Resolve path
+    if [ ! -d "$TARGET_PROJECT" ]; then
+        print_error "Target directory does not exist: $TARGET_PROJECT"
+        exit 1
+    fi
+
+    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
+
+    # Get project name from directory if not provided
+    if [ -z "$PROJECT_NAME" ]; then
+        PROJECT_NAME="$(basename "$TARGET_PROJECT")"
+    fi
+
+    # Detect language if not provided
+    if [ -z "$PROJECT_LANG" ]; then
+        PROJECT_LANG=$(detect_language "$TARGET_PROJECT")
+        if [ "$PROJECT_LANG" = "unknown" ]; then
+            PROJECT_LANG="other"
+        fi
+    fi
+
+    print_info "Project: $PROJECT_NAME"
+    print_info "Target: $TARGET_PROJECT"
+    print_info "Detected Language: $PROJECT_LANG"
+    echo ""
+
+    # Check if target already has .claude
+    if [ -d "$TARGET_PROJECT/.claude" ]; then
+        print_warning "Target already has .claude directory"
+        print_info "Will merge/update existing configuration"
+    fi
+
+    # Copy pack to target
+    copy_pack_to_target "$TARGET_PROJECT"
+
+    # Update CLAUDE.md
+    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
+
+    # Create startup prompt
+    local startup_file
+    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "migrate" "$PROJECT_NAME" "$PROJECT_LANG")
+
+    print_success "Migration complete: $TARGET_PROJECT"
+
+    echo ""
+    print_header "NEXT STEPS"
+    echo ""
+    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
+    echo -e "  2. ${GREEN}Open Claude Code and say:${NC}"
+    echo -e "     ${YELLOW}Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW${NC}"
+    echo ""
+    echo -e "  3. ${GREEN}After migration is verified, delete the pack:${NC}"
+    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
+    echo ""
+}
+
+# Interactive new project flow
+new_project_flow_interactive() {
+    print_header "NEW PROJECT SETUP"
+    echo ""
+
+    # 1. Get project name
+    PROJECT_NAME=$(get_choice "Enter project name:")
+    if [ -z "$PROJECT_NAME" ]; then
+        print_error "Project name cannot be empty"
+        return
+    fi
+
+    # 2. Suggest and get target path
+    suggest_target_path
+    local path_choice=$(get_choice "Select target path [1-3]:")
+
+    case "$path_choice" in
+        1) TARGET_PROJECT="$(dirname "$PACK_ROOT")/$PROJECT_NAME" ;;
+        2) TARGET_PROJECT="$(pwd)/$PROJECT_NAME" ;;
+        3) TARGET_PROJECT=$(get_choice "Enter custom path:") ;;
+        *) TARGET_PROJECT="$(dirname "$PACK_ROOT")/$PROJECT_NAME" ;;
+    esac
+
+    # 3. Get language
+    show_language_menu
+    local lang_choice=$(get_choice "Select language [1-9]:")
+    PROJECT_LANG=$(get_language_from_selection "$lang_choice")
+
+    # 4. Confirm
+    echo ""
+    print_header "CONFIRM CONFIGURATION"
+    echo ""
+    echo -e "  Project Name: ${GREEN}$PROJECT_NAME${NC}"
+    echo -e "  Target Path:  ${GREEN}$TARGET_PROJECT${NC}"
+    echo -e "  Language:     ${GREEN}$PROJECT_LANG${NC}"
+    echo ""
+
+    local confirm=$(get_choice "Proceed? (y/n):")
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+        print_warning "Setup cancelled"
+        return
+    fi
+
+    # Create and set up
+    mkdir -p "$TARGET_PROJECT"
+    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
+
+    copy_pack_to_target "$TARGET_PROJECT"
+    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
+
+    local startup_file
+    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "new" "$PROJECT_NAME" "$PROJECT_LANG")
+
+    print_success "Project initialized!"
+
+    echo ""
+    print_header "NEXT STEPS"
+    echo ""
+    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
+    echo -e "  2. ${GREEN}Start Claude and run DISCOVERY-FLOW${NC}"
+    echo -e "  3. ${GREEN}Delete pack after setup: rm -rf $PACK_ROOT${NC}"
+    echo ""
+}
+
+# Interactive migrate flow
+migrate_project_flow_interactive() {
+    print_header "MIGRATE EXISTING PROJECT"
+    echo ""
+
+    # 1. Suggest and get target path
+    suggest_target_path
+    local path_choice=$(get_choice "Select project to migrate [1-3]:")
+
+    case "$path_choice" in
+        1) TARGET_PROJECT="$(dirname "$PACK_ROOT")" ;;
+        2) TARGET_PROJECT="$(pwd)" ;;
+        3) TARGET_PROJECT=$(get_choice "Enter project path:") ;;
+        *) TARGET_PROJECT="$(dirname "$PACK_ROOT")" ;;
+    esac
+
+    # Validate
+    if [ ! -d "$TARGET_PROJECT" ]; then
+        print_error "Directory does not exist: $TARGET_PROJECT"
+        return
+    fi
+
+    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
+
+    # 2. Get/detect project name
+    local detected_name="$(basename "$TARGET_PROJECT")"
+    PROJECT_NAME=$(get_choice "Project name [$detected_name]:")
+    if [ -z "$PROJECT_NAME" ]; then
+        PROJECT_NAME="$detected_name"
+    fi
+
+    # 3. Detect/get language
+    local detected_lang=$(detect_language "$TARGET_PROJECT")
+    print_info "Detected language: $detected_lang"
+
+    show_language_menu
+    local lang_choice=$(get_choice "Select language [1-9] (Enter to keep detected):")
+    if [ -n "$lang_choice" ]; then
+        PROJECT_LANG=$(get_language_from_selection "$lang_choice")
+    else
+        PROJECT_LANG="$detected_lang"
+        if [ "$PROJECT_LANG" = "unknown" ]; then
+            PROJECT_LANG="other"
+        fi
+    fi
+
+    # 4. Confirm
+    echo ""
+    print_header "CONFIRM MIGRATION"
+    echo ""
+    echo -e "  Project Name: ${GREEN}$PROJECT_NAME${NC}"
+    echo -e "  Target Path:  ${GREEN}$TARGET_PROJECT${NC}"
+    echo -e "  Language:     ${GREEN}$PROJECT_LANG${NC}"
+    echo ""
+
+    local confirm=$(get_choice "Proceed with migration? (y/n):")
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+        print_warning "Migration cancelled"
+        return
+    fi
+
+    # Migrate
+    copy_pack_to_target "$TARGET_PROJECT"
+    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
+
+    local startup_file
+    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "migrate" "$PROJECT_NAME" "$PROJECT_LANG")
+
+    print_success "Migration complete!"
+
+    echo ""
+    print_header "NEXT STEPS"
+    echo ""
+    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
+    echo -e "  2. ${GREEN}Start Claude and run DISCOVERY-FLOW${NC}"
+    echo -e "  3. ${GREEN}Delete pack after setup: rm -rf $PACK_ROOT${NC}"
+    echo ""
+}
+
+# Show welcome banner
+show_welcome() {
+    clear
+    echo ""
+    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║       AGENT METHODOLOGY PACK - INTERACTIVE SETUP v2.0      ║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${MAGENTA}Welcome to the Agent Methodology Pack Setup Wizard!${NC}"
+    echo ""
+    echo -e "Pack location: ${CYAN}$PACK_ROOT${NC}"
+    echo ""
+    echo -e "${YELLOW}This wizard will help you:${NC}"
+    echo -e "  • Set up a new project with the agent framework"
+    echo -e "  • Migrate an existing project to use agents"
+    echo -e "  • Configure project-specific settings"
+    echo ""
+}
+
+# Main menu
+show_main_menu() {
+    print_header "What would you like to do?"
+    echo ""
+    print_menu_item "1" "Create NEW project"
+    print_menu_item "2" "Migrate EXISTING project"
+    print_menu_item "3" "Exit"
+    echo ""
+}
+
+# Main function
 main() {
-    # CLI MODE: If --mode argument provided
+    # CLI MODE
     if [ -n "$CLI_MODE" ]; then
         case "$CLI_MODE" in
             new)
-                new_project_flow_cli "$CLI_NAME"
+                new_project_flow_cli
                 ;;
-            existing)
-                existing_project_flow_cli "$CLI_PATH"
-                ;;
-            audit)
-                audit_only_flow_cli "$CLI_PATH"
+            existing|migrate)
+                migrate_project_flow_cli
                 ;;
             *)
                 print_error "Invalid mode: $CLI_MODE"
-                print_info "Valid modes: new, existing, audit"
-                print_info "Use --help for more information"
+                print_info "Valid modes: new, existing, migrate"
                 exit 1
                 ;;
         esac
         exit 0
     fi
 
-    # INTERACTIVE MODE: Check if stdin is available
-    # NOTE: In Git Bash on Windows, stdin might not be detected as terminal
-    # even when running interactively. We'll try to proceed and let get_choice()
-    # handle the error if stdin is truly unavailable.
-
-    if [ "$IS_TERMINAL" = false ]; then
-        print_warning "Warning: stdin is not detected as a terminal"
-        print_info "If you encounter issues, use CLI mode instead:"
-        print_info "  bash $0 --mode {new|existing|audit} [OPTIONS]"
-        print_info "  Use --help for details"
-        echo ""
-        print_info "Attempting to continue in interactive mode..."
-        echo ""
-        sleep 2
-    fi
-
-    # Show welcome screen
+    # INTERACTIVE MODE
     show_welcome
 
-    # Interactive menu loop
     while true; do
         show_main_menu
 
         local choice
-        choice=$(get_choice "Select option [1-4]:")
+        choice=$(get_choice "Select option [1-3]:")
 
         case "$choice" in
             1)
-                new_project_flow
+                new_project_flow_interactive
                 ;;
             2)
-                existing_project_flow
+                migrate_project_flow_interactive
                 ;;
             3)
-                audit_only_flow
-                ;;
-            4)
                 echo ""
                 print_info "Thank you for using Agent Methodology Pack!"
                 echo ""
                 exit 0
                 ;;
             *)
-                print_error "Invalid option. Please select 1-4."
+                print_error "Invalid option. Please select 1-3."
                 sleep 1
                 ;;
         esac
 
-        # Pause before showing menu again
         echo ""
         echo -e "${YELLOW}Press Enter to return to main menu...${NC}"
         read -r
         clear
+        show_welcome
     done
 }
 
-# Run main function
+# Run main
 main
