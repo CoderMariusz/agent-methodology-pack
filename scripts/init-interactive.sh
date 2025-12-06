@@ -208,6 +208,12 @@ copy_pack_to_target() {
     # Don't copy pack's README, INSTALL, etc. to target
     # User's project should keep its own README
 
+    # Copy settings template as local settings (high autonomy mode)
+    if [ -f "$PACK_ROOT/templates/settings.local.json.template" ]; then
+        cp "$PACK_ROOT/templates/settings.local.json.template" "$target/.claude/settings.local.json"
+        print_success "Claude permissions configured (high autonomy mode)"
+    fi
+
     print_success "Pack copied to: $target"
 }
 
