@@ -65,6 +65,37 @@ The DOC-AUDITOR is a specialized migration agent that analyzes existing projects
    - Identify patterns relevant to the project
    - Propose workflow adaptations
 
+## Documentation Questions
+
+### Questions to Ask During Audit
+
+DOC-AUDITOR must ask clarifying questions when encountering:
+
+#### Unclear Documentation
+- "This file {X} mentions {Y} but doesn't explain it. What is {Y}?"
+- "The README references {feature} but I can't find documentation for it. Where is it?"
+- "There are conflicting descriptions in {file1} and {file2}. Which is correct?"
+
+#### Missing Documentation
+- "I found code for {module} but no documentation. Should I create docs for it?"
+- "The API has {N} endpoints but only {M} are documented. Should I document the rest?"
+- "There's no architecture diagram. Would you like me to create one?"
+
+#### Stale Documentation
+- "This doc was last updated {date} and references {old_version}. Is it still accurate?"
+- "The changelog stops at version {X} but current is {Y}. Should I update it?"
+
+#### Ambiguous Structure
+- "I found docs in {path1} and {path2}. Which is the canonical location?"
+- "Some docs use {convention1}, others use {convention2}. Which should I standardize on?"
+
+### Question Collection Protocol
+
+1. **During Scan:** Collect questions as you encounter issues
+2. **After Scan:** Present questions grouped by category
+3. **Wait for Answers:** Do not proceed with migration until answered
+4. **Document Answers:** Add answers to AUDIT-REPORT.md
+
 ## Input Files
 
 ```
@@ -89,6 +120,7 @@ The DOC-AUDITOR is a specialized migration agent that analyzes existing projects
 @.claude/migration/AUDIT-REPORT.md      # Comprehensive audit findings
 @.claude/migration/MIGRATION-PLAN.md    # Step-by-step migration plan
 @.claude/migration/FILE-MAP.md          # Complete file mapping
+@.claude/migration/AUDIT-QUESTIONS.md   # Questions needing user answers
 @.claude/migration/TECH-PROFILE.md      # Tech stack analysis (optional)
 ```
 
@@ -194,6 +226,14 @@ Cargo.toml        -> crate documentation
 - [ ] Stale documentation flagged
 - [ ] Duplicate content identified
 - [ ] Missing critical documentation noted
+
+### Question Collection
+- [ ] Unclear documentation questions collected
+- [ ] Missing documentation questions collected
+- [ ] Stale documentation questions collected
+- [ ] Structure questions collected
+- [ ] Questions presented to user
+- [ ] Answers documented
 
 ### Tech Stack Profile
 - [ ] Primary language identified
@@ -717,6 +757,32 @@ docs/
 | ... | ... | ... | ... |
 ```
 
+## Output Format - AUDIT-QUESTIONS.md
+
+```markdown
+# Audit Questions
+
+## Documentation Clarity Questions
+
+| # | File | Question | Category | Priority |
+|---|------|----------|----------|----------|
+| 1 | {file} | {question} | Unclear | High |
+| 2 | {file} | {question} | Missing | Medium |
+
+## Answers (filled by user)
+
+### Q1: {question}
+**Answer:** {to be filled}
+
+### Q2: {question}
+**Answer:** {to be filled}
+
+## Status
+- Questions asked: {N}
+- Questions answered: {N}
+- Ready to proceed: Yes/No
+```
+
 ## Workflow Integration
 
 ### Position in Agent Workflow
@@ -799,6 +865,7 @@ Scan the project and create:
 1. @.claude/migration/AUDIT-REPORT.md - Complete audit findings
 2. @.claude/migration/MIGRATION-PLAN.md - Step-by-step migration plan
 3. @.claude/migration/FILE-MAP.md - Complete file mapping
+4. @.claude/migration/AUDIT-QUESTIONS.md - Questions needing clarification
 
 Analysis required:
 - Scan all directories (max depth 10, skip node_modules, .git, vendor, __pycache__)
@@ -813,6 +880,10 @@ Large file thresholds:
 - Flag files >500 lines for review
 - Flag files >20KB for sharding
 - Estimate tokens as (chars/4)*1.1
+
+IMPORTANT: During audit, collect clarifying questions.
+Do NOT guess answers - ask the user.
+Present questions in AUDIT-QUESTIONS.md before proceeding with migration.
 
 Output comprehensive reports following the templates in this agent definition.
 

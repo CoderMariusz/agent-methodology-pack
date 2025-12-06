@@ -2,10 +2,17 @@
 # Interactive Project Setup Wizard
 # Guides user through new project creation or existing project migration
 #
-# Usage: bash scripts/init-interactive.sh
+# Usage:
+#   Interactive mode: bash scripts/init-interactive.sh
+#   CLI mode: bash scripts/init-interactive.sh --mode {new|existing|audit} [--name PROJECT_NAME] [--path PROJECT_PATH]
+#
+# Examples:
+#   bash scripts/init-interactive.sh --mode new --name my-project
+#   bash scripts/init-interactive.sh --mode existing --path /path/to/project
+#   bash scripts/init-interactive.sh --mode audit --path .
 #
 # Author: Agent Methodology Pack
-# Version: 1.0
+# Version: 1.1 (Fixed stdin handling for non-interactive environments)
 
 set -e
 
@@ -22,7 +29,7 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACK_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Helper functions
+# Helper functions (defined early so they can be used in argument parsing)
 print_header() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -54,6 +61,74 @@ print_menu_item() {
     echo -e "${CYAN}  [$1]${NC} $2"
 }
 
+# Parse CLI arguments (for non-interactive mode)
+# Must be after helper functions are defined
+CLI_MODE=""
+CLI_NAME=""
+CLI_PATH=""
+SKIP_DISCOVERY=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --mode)
+            CLI_MODE="$2"
+            shift 2
+            ;;
+        --name)
+            CLI_NAME="$2"
+            shift 2
+            ;;
+        --path)
+            CLI_PATH="$2"
+            shift 2
+            ;;
+        --skip-discovery)
+            SKIP_DISCOVERY=true
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Interactive mode (no arguments):"
+            echo "  $0"
+            echo ""
+            echo "CLI mode:"
+            echo "  $0 --mode {new|existing|audit} [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --mode MODE        Operation mode: new, existing, or audit"
+            echo "  --name NAME        Project name (for new mode)"
+            echo "  --path PATH        Project path (for existing/audit mode)"
+            echo "  --skip-discovery   Skip DISCOVERY-FLOW (advanced users only)"
+            echo "  -h, --help         Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0 --mode new --name my-project"
+            echo "  $0 --mode existing --path /path/to/project"
+            echo "  $0 --mode audit --path ."
+            echo ""
+            echo "After initialization, DISCOVERY-FLOW will be triggered to:"
+            echo "  - Conduct project interview (DISCOVERY-AGENT)"
+            echo "  - Ask clarifying questions"
+            echo "  - Build PROJECT-UNDERSTANDING.md"
+            exit 0
+            ;;
+        *)
+            print_error "Unknown argument: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Check if we're in a terminal (for interactive mode)
+# NOTE: Git Bash on Windows often reports stdin as NOT a terminal
+# even when running interactively, so we need to handle both cases
+IS_TERMINAL=false
+if [ -t 0 ]; then
+    IS_TERMINAL=true
+fi
+
 # Show welcome banner
 show_welcome() {
     clear
@@ -69,6 +144,9 @@ show_welcome() {
     echo -e "  • Migrating an existing project"
     echo -e "  • Auditing project structure"
     echo ""
+    echo -e "${YELLOW}Note: After initialization, DISCOVERY-FLOW will be triggered${NC}"
+    echo -e "${YELLOW}      to ensure complete project understanding.${NC}"
+    echo ""
 }
 
 # Main menu
@@ -83,15 +161,74 @@ show_main_menu() {
 }
 
 # Get user choice
+# Handles both interactive terminal and non-interactive (piped) input
+# In non-interactive mode, provides clear error message
 get_choice() {
     local prompt="$1"
     local choice
-    echo -n -e "${YELLOW}${prompt}${NC} "
-    read -r choice
-    echo "$choice"
+
+    # IMPORTANT: Prompt goes to stderr (>&2) so it's not captured by command substitution
+    echo -n -e "${YELLOW}${prompt}${NC} " >&2
+
+    # Try to read from stdin
+    # IMPORTANT: Using 'read -r' requires stdin to be a terminal
+    # If stdin is redirected/piped, read will fail or hang
+    if read -r choice 2>/dev/null; then
+        # IMPORTANT: Remove Windows CR (carriage return) and trim whitespace
+        # Git Bash on Windows may include \r in input
+        choice="${choice%$'\r'}"      # Remove trailing CR
+        choice="${choice#"${choice%%[![:space:]]*}"}"  # Trim leading whitespace
+        choice="${choice%"${choice##*[![:space:]]}"}"  # Trim trailing whitespace
+        echo "$choice"
+    else
+        # stdin is not available (piped input, non-interactive mode)
+        echo ""
+        print_error "Cannot read input in non-interactive mode"
+        print_info "Use CLI arguments instead:"
+        print_info "  bash $0 --mode {new|existing|audit} [--name PROJECT_NAME] [--path PATH]"
+        print_info "  See --help for more details"
+        exit 1
+    fi
 }
 
-# New project flow
+# New project flow (CLI version)
+new_project_flow_cli() {
+    local project_name="$1"
+
+    print_header "NEW PROJECT SETUP (CLI MODE)"
+    echo ""
+
+    # Validate project name
+    if [ -z "$project_name" ]; then
+        print_error "Project name is required in CLI mode"
+        print_info "Usage: $0 --mode new --name PROJECT_NAME"
+        exit 1
+    fi
+
+    if [[ ! "$project_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        print_error "Project name can only contain letters, numbers, hyphens, and underscores"
+        exit 1
+    fi
+
+    print_info "Project name: ${project_name}"
+
+    # Run init-project.sh
+    print_header "INITIALIZING PROJECT"
+    echo ""
+
+    if [ -f "$PACK_ROOT/scripts/init-project.sh" ]; then
+        bash "$PACK_ROOT/scripts/init-project.sh" "$project_name"
+        print_success "Project initialized successfully!"
+
+        # Show DISCOVERY-FLOW info
+        show_discovery_flow_info
+    else
+        print_error "init-project.sh not found"
+        exit 1
+    fi
+}
+
+# New project flow (Interactive version)
 new_project_flow() {
     print_header "NEW PROJECT SETUP"
     echo ""
@@ -130,13 +267,72 @@ new_project_flow() {
 
     if [ -f "$PACK_ROOT/scripts/init-project.sh" ]; then
         bash "$PACK_ROOT/scripts/init-project.sh" "$project_name"
+
+        # Show DISCOVERY-FLOW info
+        show_discovery_flow_info
     else
         print_error "init-project.sh not found"
         exit 1
     fi
 }
 
-# Existing project flow
+# Existing project flow (CLI version)
+existing_project_flow_cli() {
+    local project_path="$1"
+
+    print_header "EXISTING PROJECT MIGRATION (CLI MODE)"
+    echo ""
+
+    # Default to current directory if not provided
+    if [ -z "$project_path" ]; then
+        project_path="."
+    fi
+
+    # Validate path
+    if [ ! -d "$project_path" ]; then
+        print_error "Directory does not exist: $project_path"
+        exit 1
+    fi
+
+    # Show info
+    print_info "Project path: $(cd "$project_path" && pwd)"
+    print_info "Analyzing project structure..."
+    echo ""
+
+    # Run analyze-project.sh
+    print_header "ANALYZING PROJECT"
+    echo ""
+
+    if [ -f "$PACK_ROOT/scripts/analyze-project.sh" ]; then
+        bash "$PACK_ROOT/scripts/analyze-project.sh" "$project_path"
+
+        # Show results
+        local audit_file="$project_path/.claude/migration/AUDIT-REPORT.md"
+        if [ -f "$audit_file" ]; then
+            echo ""
+            print_header "ANALYSIS COMPLETE"
+            echo ""
+            print_success "Audit report generated: $audit_file"
+            echo ""
+
+            # Show summary
+            print_info "Summary:"
+            echo ""
+            grep -A 10 "^## Summary" "$audit_file" 2>/dev/null || echo "No summary available"
+            echo ""
+            print_info "Migration features coming soon!"
+            print_info "Please review $audit_file for recommendations"
+
+            # Show DISCOVERY-FLOW info
+            show_discovery_flow_info
+        fi
+    else
+        print_error "analyze-project.sh not found"
+        exit 1
+    fi
+}
+
+# Existing project flow (Interactive version)
 existing_project_flow() {
     print_header "EXISTING PROJECT MIGRATION"
     echo ""
@@ -201,6 +397,9 @@ existing_project_flow() {
                 print_info "For now, please review $audit_file"
                 print_info "And manually organize files according to recommendations"
             fi
+
+            # Show DISCOVERY-FLOW info
+            show_discovery_flow_info
         fi
     else
         print_error "analyze-project.sh not found"
@@ -208,7 +407,52 @@ existing_project_flow() {
     fi
 }
 
-# Audit only flow
+# Audit only flow (CLI version)
+audit_only_flow_cli() {
+    local project_path="$1"
+
+    print_header "PROJECT AUDIT (CLI MODE)"
+    echo ""
+
+    # Default to current directory if not provided
+    if [ -z "$project_path" ]; then
+        project_path="."
+    fi
+
+    # Validate path
+    if [ ! -d "$project_path" ]; then
+        print_error "Directory does not exist: $project_path"
+        exit 1
+    fi
+
+    print_info "Project path: $(cd "$project_path" && pwd)"
+    print_info "Starting audit..."
+    echo ""
+
+    # Run analyze-project.sh with audit flag
+    print_header "AUDITING PROJECT"
+    echo ""
+
+    if [ -f "$PACK_ROOT/scripts/analyze-project.sh" ]; then
+        bash "$PACK_ROOT/scripts/analyze-project.sh" "$project_path" --output "$project_path/.claude/audit"
+
+        # Show results
+        local audit_file="$project_path/.claude/audit/AUDIT-REPORT.md"
+        if [ -f "$audit_file" ]; then
+            echo ""
+            print_header "AUDIT COMPLETE"
+            echo ""
+            print_success "Audit report: $audit_file"
+            echo ""
+            print_info "Review the audit report for project analysis"
+        fi
+    else
+        print_error "analyze-project.sh not found"
+        exit 1
+    fi
+}
+
+# Audit only flow (Interactive version)
 audit_only_flow() {
     print_header "PROJECT AUDIT"
     echo ""
@@ -275,10 +519,69 @@ show_progress() {
     echo ""
 }
 
-# Main function
+# Show DISCOVERY-FLOW information
+show_discovery_flow_info() {
+    if [ "$SKIP_DISCOVERY" = false ]; then
+        echo ""
+        print_header "DISCOVERY FLOW"
+        print_info "Before starting development, DISCOVERY-FLOW will be triggered."
+        print_info "This ensures complete project understanding."
+        echo ""
+        print_info "DISCOVERY-FLOW phases:"
+        echo "  1. Initial Scan (DOC-AUDITOR)"
+        echo "  2. Discovery Interview (DISCOVERY-AGENT)"
+        echo "  3. Domain Questions (ARCHITECT + PM + RESEARCH)"
+        echo "  4. Gap Analysis"
+        echo "  5. Confirmation"
+        echo ""
+        print_info "To start: Invoke @ORCHESTRATOR.md"
+    fi
+}
+
+# Main function - handles both CLI and interactive modes
 main() {
+    # CLI MODE: If --mode argument provided
+    if [ -n "$CLI_MODE" ]; then
+        case "$CLI_MODE" in
+            new)
+                new_project_flow_cli "$CLI_NAME"
+                ;;
+            existing)
+                existing_project_flow_cli "$CLI_PATH"
+                ;;
+            audit)
+                audit_only_flow_cli "$CLI_PATH"
+                ;;
+            *)
+                print_error "Invalid mode: $CLI_MODE"
+                print_info "Valid modes: new, existing, audit"
+                print_info "Use --help for more information"
+                exit 1
+                ;;
+        esac
+        exit 0
+    fi
+
+    # INTERACTIVE MODE: Check if stdin is available
+    # NOTE: In Git Bash on Windows, stdin might not be detected as terminal
+    # even when running interactively. We'll try to proceed and let get_choice()
+    # handle the error if stdin is truly unavailable.
+
+    if [ "$IS_TERMINAL" = false ]; then
+        print_warning "Warning: stdin is not detected as a terminal"
+        print_info "If you encounter issues, use CLI mode instead:"
+        print_info "  bash $0 --mode {new|existing|audit} [OPTIONS]"
+        print_info "  Use --help for details"
+        echo ""
+        print_info "Attempting to continue in interactive mode..."
+        echo ""
+        sleep 2
+    fi
+
+    # Show welcome screen
     show_welcome
 
+    # Interactive menu loop
     while true; do
         show_main_menu
 

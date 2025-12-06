@@ -442,9 +442,120 @@ Update state IMMEDIATELY when:
 7. **Escalate Blocks Quickly** - Don't let impediments linger
 8. **Clean Up on Completion** - Release resources properly
 
+## Fast-Track State Transitions
+
+### Overview
+Fast-track tasks follow an accelerated state transition path with reduced overhead for simple, well-defined tasks.
+
+### Fast-Track Transition Flow
+
+```
+                     FAST-TRACK PATH (< 30 seconds total)
+
++------------+     Eligibility      +------------+     Immediate      +------------+
+|   READY    | ----  Check   -----> |  ASSIGNED  | ----  Start  ----> |   ACTIVE   |
++------------+   (< 10 seconds)     +------------+                     +------------+
+                                                                             |
+                                                                        Completion
+                                                                        (standard)
+                                                                             |
+                                                                             v
+                                                                      +------------+
+                                                                      |    DONE    |
+                                                                      +------------+
+```
+
+### Fast-Track State: ASSIGNED
+
+A new intermediate state for fast-track tasks:
+
+**Characteristics:**
+- Task passed eligibility check
+- Agent selected based on direct match
+- Minimal context loaded
+- Ready for immediate execution
+
+**Entry Conditions:**
+- Fast-track eligibility check passed (3+ criteria met)
+- Target agent available
+- Single-file scope confirmed
+
+**Duration:** < 20 seconds (transition to ACTIVE)
+
+### Fast-Track Eligible Criteria
+
+For a task to use fast-track transitions:
+
+| Criterion | Required | Check Time |
+|-----------|----------|------------|
+| Complexity S/XS | Yes | < 2s |
+| Single file | Yes | < 2s |
+| Clear acceptance criteria | Yes | < 3s |
+| No architecture decisions | Yes | < 2s |
+| Known solution path | Preferred | < 1s |
+
+**Total eligibility check:** < 10 seconds
+
+### Fast-Track vs Standard Comparison
+
+| Aspect | Standard Transition | Fast-Track Transition |
+|--------|--------------------|-----------------------|
+| Ready -> Active | 1-5 minutes | < 30 seconds |
+| Context loading | Full | Minimal (target file only) |
+| Agent selection | Skill evaluation | Direct match |
+| Prompt generation | Complete template | Minimal template |
+| State updates | Full documentation | Abbreviated |
+
+### Fast-Track State Update Protocol
+
+For fast-track tasks, use abbreviated state updates:
+
+```markdown
+## Fast-Track State Update
+
+**Timestamp:** {HH:MM}
+**Agent:** {AGENT-NAME}
+**Task:** {one-line description}
+**Transition:** READY -> ASSIGNED -> ACTIVE
+**File:** {target file path}
+**Fast-Track:** Yes
+```
+
+### When Fast-Track Fails
+
+If a fast-track task encounters issues:
+
+1. **Scope Expansion Detected**
+   - Transition to standard flow immediately
+   - Document reason for expansion
+   - Full context loading required
+
+2. **Complexity Increase**
+   - Return task to queue
+   - Re-evaluate as standard task
+   - Update Fast-Track flag to No
+
+3. **Blocker Discovered**
+   - Standard Blocked state handling applies
+   - Fast-track status does not change handling
+
+### Metrics Integration
+
+Track fast-track transitions in state files:
+
+```markdown
+## Transition Metrics
+
+| Transition Type | Count | Avg Duration | Success Rate |
+|-----------------|-------|--------------|--------------|
+| Fast-Track | {N} | {seconds}s | {%} |
+| Standard | {N} | {minutes}m | {%} |
+```
+
 ## Integration with Other Patterns
 
 - **HANDOFF-PROTOCOL.md** - Waiting state often involves handoffs
 - **ERROR-RECOVERY.md** - Blocked state uses error recovery
 - **PLAN-ACT-MODE.md** - Active state follows plan-act pattern
 - **QUALITY-RUBRIC.md** - Task completion triggers quality checks
+- **ORCHESTRATOR.md** - Fast-Track Delegation section defines eligibility

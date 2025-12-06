@@ -4,6 +4,16 @@
 
 TDD-based story implementation workflow following the RED-GREEN-REFACTOR cycle. This workflow ensures code quality through test-first development, continuous validation, and comprehensive review.
 
+## Phase Requirements Legend
+
+| Marker | Meaning |
+|--------|---------|
+| `[MANDATORY]` | Cannot be skipped - phase MUST be completed |
+| `[OPTIONAL]` | Can be skipped with documented reason |
+| `[USER-CHOICE]` | User decides between provided options |
+
+**IMPORTANT:** All phases in Story Workflow are `[MANDATORY]` by default except Phase 1 (UX Design) which is optional for non-UI stories.
+
 ## ASCII Flow Diagram
 
 ```
@@ -260,7 +270,16 @@ TDD-based story implementation workflow following the RED-GREEN-REFACTOR cycle. 
 
 ## Detailed Steps
 
-### Pre-Workflow: Story Ready Check
+---
+
+### Pre-Workflow: Story Ready Check [MANDATORY]
+
+#### Why This Check Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Validated story ready for implementation |
+| **If skipped** | Unclear requirements, blocked development, wasted effort |
+| **Problems prevented** | Mid-sprint confusion, scope creep, incomplete features |
 
 Before starting the workflow, verify the story is ready:
 
@@ -278,9 +297,23 @@ Before starting the workflow, verify the story is ready:
 
 **If not ready:** Return to SCRUM-MASTER for refinement
 
+### Pre-Workflow Completion Checklist
+- [ ] Story Ready Checklist all items verified
+- [ ] Story type determined (UI/Backend/Full-stack)
+- [ ] Handoff to Phase 1 or Phase 2 confirmed
+
 ---
 
-### Phase 1: UX Design (UI Stories Only)
+### Phase 1: UX Design (UI Stories Only) [OPTIONAL]
+
+#### Why This Phase Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Detailed component mockups, interaction specs, accessibility requirements |
+| **If skipped (when required)** | Inconsistent UI, poor user experience, accessibility issues |
+| **Problems prevented** | Design-implementation mismatch, rework, UX debt |
+
+**Skip Condition:** This phase is automatically skipped for backend-only stories. For UI stories, this phase is MANDATORY.
 
 **Agent:** UX-DESIGNER
 **Model:** Sonnet
@@ -305,9 +338,23 @@ Before starting the workflow, verify the story is ready:
 - [ ] Accessibility requirements documented
 - [ ] Developer can implement from specs
 
+### Phase 1 Completion Checklist
+- [ ] Component mockups created
+- [ ] All states defined (default, hover, active, disabled, error, loading)
+- [ ] Responsive behavior documented
+- [ ] Accessibility checklist complete
+- [ ] Handoff to Phase 2 confirmed
+
 ---
 
-### Phase 2: RED (Test First)
+### Phase 2: RED (Test First) [MANDATORY]
+
+#### Why This Phase Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Comprehensive test suite that defines expected behavior |
+| **If skipped** | No test coverage, untested code, bugs reach production |
+| **Problems prevented** | Regression bugs, undefined behavior, brittle code |
 
 **Agent:** TEST-ENGINEER
 **Model:** Sonnet
@@ -356,9 +403,32 @@ Before starting the workflow, verify the story is ready:
 - [ ] Coverage targets defined (min 80% for new code)
 - [ ] No tests pass yet
 
+#### User Choice Point: Test Coverage Level
+**Options:**
+1. **Standard Coverage (80%)** - Unit + Integration tests for new code
+2. **High Coverage (90%)** - Additional edge case and boundary tests
+3. **Critical Coverage (95%)** - Exhaustive testing for critical paths
+
+**Default:** Standard Coverage (80%)
+**Decision Required:** No - Standard recommended, user may increase for critical features
+
+### Phase 2 Completion Checklist
+- [ ] Tests written for all acceptance criteria
+- [ ] All tests fail correctly (expected errors)
+- [ ] Test coverage targets defined
+- [ ] Test strategy documented
+- [ ] Handoff to Phase 3 confirmed
+
 ---
 
-### Phase 3: GREEN (Implementation)
+### Phase 3: GREEN (Implementation) [MANDATORY]
+
+#### Why This Phase Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Working implementation that passes all tests |
+| **If skipped** | No code, no product |
+| **Problems prevented** | Over-engineering, gold-plating, untested features |
 
 **Agent:** BACKEND-DEV, FRONTEND-DEV, or SENIOR-DEV
 **Model:** Sonnet (Opus for complex stories)
@@ -408,9 +478,32 @@ DON'T:
 - [ ] No skipped or pending tests
 - [ ] Build succeeds
 
+#### User Choice Point: Developer Assignment
+**Options:**
+1. **BACKEND-DEV** - For backend/API work
+2. **FRONTEND-DEV** - For UI/frontend work
+3. **SENIOR-DEV** - For complex or full-stack work
+
+**Default:** Based on story type
+**Decision Required:** No - Orchestrator assigns based on story type
+
+### Phase 3 Completion Checklist
+- [ ] All tests pass
+- [ ] Coverage threshold met
+- [ ] Build succeeds
+- [ ] No skipped tests
+- [ ] Handoff to Phase 4 confirmed
+
 ---
 
-### Phase 4: REFACTOR (Clean Up)
+### Phase 4: REFACTOR (Clean Up) [MANDATORY]
+
+#### Why This Phase Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Clean, maintainable, DRY code |
+| **If skipped** | Technical debt accumulates, code becomes unmaintainable |
+| **Problems prevented** | Code rot, duplication, complex maintenance |
 
 **Agent:** Same DEV as GREEN phase
 **Model:** Sonnet
@@ -458,9 +551,23 @@ DON'T:
 - [ ] All tests still pass
 - [ ] No code smells detected
 
+### Phase 4 Completion Checklist
+- [ ] Code refactored and clean
+- [ ] No duplication (DRY)
+- [ ] Clear naming throughout
+- [ ] All tests still pass
+- [ ] Handoff to Phase 5 confirmed
+
 ---
 
-### Phase 5: QA Validation
+### Phase 5: QA Validation [MANDATORY]
+
+#### Why This Phase Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Validated functionality, confirmed acceptance criteria |
+| **If skipped** | Untested edge cases, missed requirements, poor quality |
+| **Problems prevented** | Production bugs, user complaints, rework |
 
 **Agent:** QA-AGENT
 **Model:** Sonnet
@@ -527,9 +634,24 @@ APPROVE / NEEDS FIXES
 
 **If bugs found:** Route to BUG-WORKFLOW, then return to QA
 
+### Phase 5 Completion Checklist
+- [ ] Full test suite executed
+- [ ] Manual testing complete
+- [ ] All acceptance criteria validated
+- [ ] No critical/high bugs
+- [ ] QA report generated
+- [ ] Handoff to Phase 6 confirmed
+
 ---
 
-### Phase 6: Code Review
+### Phase 6: Code Review [MANDATORY]
+
+#### Why This Phase Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Reviewed, approved code meeting standards |
+| **If skipped** | Knowledge silos, inconsistent code, security vulnerabilities |
+| **Problems prevented** | Bad patterns spreading, security issues, maintainability problems |
 
 **Agent:** CODE-REVIEWER
 **Model:** Sonnet (Haiku for simple stories)
@@ -591,9 +713,23 @@ APPROVE / NEEDS FIXES
 4. Return to Phase 5 (QA Validation)
 5. Re-review focused on changes
 
+### Phase 6 Completion Checklist
+- [ ] Code review completed
+- [ ] All "Must Fix" items addressed
+- [ ] All "Should Fix" items addressed
+- [ ] Review APPROVED
+- [ ] Handoff to Phase 7 confirmed
+
 ---
 
-### Phase 7: Documentation
+### Phase 7: Documentation [MANDATORY]
+
+#### Why This Phase Matters
+| Aspect | Description |
+|--------|-------------|
+| **What it delivers** | Updated documentation, changelog entry |
+| **If skipped** | Outdated docs, knowledge gaps, onboarding difficulties |
+| **Problems prevented** | Support overhead, developer confusion, tribal knowledge |
 
 **Agent:** TECH-WRITER
 **Model:** Sonnet
@@ -648,20 +784,48 @@ APPROVE / NEEDS FIXES
 - [ ] User docs updated (if applicable)
 - [ ] Changelog entry added
 
+#### User Choice Point: Documentation Scope
+**Options:**
+1. **Full Documentation** - Code comments, API docs, user docs, changelog
+2. **Essential Documentation** - Code comments and changelog only
+3. **API Focus** - Code comments and API documentation only
+
+**Default:** Full Documentation for user-facing features, API Focus for backend
+**Decision Required:** No - Default recommended
+
+### Phase 7 Completion Checklist
+- [ ] Code comments adequate
+- [ ] API docs updated (if applicable)
+- [ ] User docs updated (if applicable)
+- [ ] Changelog entry added
+- [ ] Story marked as DONE
+- [ ] Metrics recorded
+- [ ] Scrum Master notified
+
 ---
 
 ## Quality Gates Summary
 
-| Phase | Gate | Criteria |
-|-------|------|----------|
-| Pre | Story Ready | Clear AC, estimated, dependencies resolved |
-| 1 | UX Ready | All states, responsive, accessible |
-| 2 | Tests Ready | All AC covered, tests fail correctly |
-| 3 | Tests Pass | All green, coverage met |
-| 4 | Code Clean | No smells, patterns followed |
-| 5 | QA Passed | AC validated, no critical bugs |
-| 6 | Review Approved | Standards met, secure |
-| 7 | Docs Complete | All docs updated |
+| Phase | Gate | Criteria | Status |
+|-------|------|----------|--------|
+| Pre | Story Ready | Clear AC, estimated, dependencies resolved | [MANDATORY] |
+| 1 | UX Ready | All states, responsive, accessible | [OPTIONAL - UI only] |
+| 2 | Tests Ready | All AC covered, tests fail correctly | [MANDATORY] |
+| 3 | Tests Pass | All green, coverage met | [MANDATORY] |
+| 4 | Code Clean | No smells, patterns followed | [MANDATORY] |
+| 5 | QA Passed | AC validated, no critical bugs | [MANDATORY] |
+| 6 | Review Approved | Standards met, secure | [MANDATORY] |
+| 7 | Docs Complete | All docs updated | [MANDATORY] |
+
+### Gate Enforcement Rules
+
+**CRITICAL:** All MANDATORY gates MUST PASS before proceeding to next phase. No agent can skip gates autonomously.
+
+**Skip Protocol (for all gates):**
+1. User must explicitly request skip
+2. User must provide documented reason
+3. User must acknowledge specific risks
+4. Skip must be logged in GATE-OVERRIDES.md
 
 ## Error Recovery Paths
 

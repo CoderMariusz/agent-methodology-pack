@@ -1,50 +1,27 @@
-# Agent Methodology Pack
+# CLAUDE.md Template
 
-## Quick Facts
-| Aspect | Value |
-|--------|-------|
-| Name | Agent Methodology Pack |
-| Type | Multi-Agent Development System |
-| Version | 1.0.0 |
-| Status | Ready for use |
+## Project: test-project
 
-## Current Focus
-See: @PROJECT-STATE.md
+## Quick Context
+{Brief project description}
 
-## Documentation Map
-- **Current State:** @PROJECT-STATE.md
-- **Orchestrator:** @.claude/agents/ORCHESTRATOR.md
-- **Agent Registry:** @.claude/agents/
-- **Workflows:** @.claude/workflows/
-- **Patterns:** @.claude/patterns/
+## Tech Stack
+- Backend: {technology}
+- Frontend: {technology}
+- Database: {technology}
 
 ## Agent System
-- **Planning:** Research, PM, UX, Architect, PO, Scrum Master
-- **Development:** Test Engineer, Backend, Frontend, Senior
-- **Quality:** QA, Code Reviewer, Tech Writer
+This project uses the Agent Methodology Pack.
+See `.claude/agents/ORCHESTRATOR.md` for entry point.
 
-## Quick Commands
-```bash
-# Initialize new project
-bash scripts/init-project.sh my-project
+## Key Commands
+- Start planning: `@ORCHESTRATOR.md`
+- View state: `@PROJECT-STATE.md`
 
-# Validate structure
-bash scripts/validate-docs.sh
+## Conventions
+- {coding conventions}
+- {naming conventions}
+- {file organization}
 
-# Check token usage
-bash scripts/token-counter.sh
-```
-
-## AI Workflow
-1. Read @PROJECT-STATE.md first
-2. Check @.claude/state/TASK-QUEUE.md
-3. Follow agent definitions in @.claude/agents/
-4. Update state files after work
-
-## Getting Started
-See @QUICK-START.md for immediate setup.
-See @INSTALL.md for detailed installation.
-
----
-*Agent Methodology Pack v1.0.0*
-*Last updated: 2025-12-05*
+## Current Sprint
+See `@PROJECT-STATE.md` for current sprint status.

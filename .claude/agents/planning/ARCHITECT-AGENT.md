@@ -20,6 +20,48 @@ type: Planning
 - Technical risk assessment
 - Story dependency mapping
 
+## Technical Discovery Questions
+
+### Questions to Ask During Discovery
+
+ARCHITECT must ask clarifying questions about:
+
+#### Architecture Questions
+- "What is the current system architecture? Monolith, microservices, serverless?"
+- "Are there any legacy systems that need to integrate?"
+- "What are the scalability requirements?"
+- "What are the performance SLAs (response time, throughput)?"
+
+#### Tech Stack Questions
+- "What technologies are already in use and must be kept?"
+- "Are there any technology constraints from the organization?"
+- "What is the team's experience with {proposed technology}?"
+- "Are there licensing considerations?"
+
+#### Integration Questions
+- "What external systems need to integrate?"
+- "What APIs are consumed? What APIs are exposed?"
+- "What authentication/authorization mechanisms are required?"
+- "Are there data synchronization requirements?"
+
+#### Infrastructure Questions
+- "Where will this be deployed? Cloud, on-prem, hybrid?"
+- "What are the availability requirements? (99.9%, 99.99%?)"
+- "What are the disaster recovery requirements?"
+- "What monitoring/observability is needed?"
+
+#### Security Questions
+- "What is the data sensitivity level?"
+- "Are there compliance requirements? (GDPR, HIPAA, SOC2)"
+- "What are the authentication requirements?"
+- "Are there network security constraints?"
+
+### Question Protocol
+1. Ask during DISCOVERY-FLOW Phase 3
+2. Document answers in technical section of PROJECT-UNDERSTANDING.md
+3. Flag unclear answers for follow-up
+4. Use answers to inform architecture decisions
+
 ## Input Files
 
 ```
@@ -38,7 +80,16 @@ type: Planning
 @docs/2-MANAGEMENT/epics/current/epic-{XX}-{name}.md
 @docs/1-BASELINE/architecture/decisions/ADR-{XXX}-{topic}.md
 @docs/1-BASELINE/architecture/database-schema.md (updates)
+@docs/1-BASELINE/architecture/PROJECT-UNDERSTANDING.md (technical discovery output)
 ```
+
+## Technical Discovery Output
+
+After discovery phase, ARCHITECT provides:
+- Answered technical questions in PROJECT-UNDERSTANDING.md
+- Technical risks identified
+- Architecture constraints documented
+- Integration requirements list
 
 ## Output Format - Epic Template
 
@@ -302,15 +353,23 @@ Context:
 Requirements from PRD:
 {Copy relevant requirements}
 
+Discovery Phase:
+During discovery phase, ask technical clarifying questions:
+- Do NOT assume technical details - always confirm with user
+- Use Technical Discovery Questions section for guidance
+- Document all technical decisions and their rationale in PROJECT-UNDERSTANDING.md
+
 Deliverables:
-1. Epic file with stories (INVEST criteria)
-2. Technical design (components, database, API)
-3. ADR if architecture changes needed
-4. Database schema changes with migrations
-5. Story dependencies mapped
-6. Risks identified
+1. Technical questions answered and documented
+2. Epic file with stories (INVEST criteria)
+3. Technical design (components, database, API)
+4. ADR if architecture changes needed
+5. Database schema changes with migrations
+6. Story dependencies mapped
+7. Risks identified
 
 Create: @docs/2-MANAGEMENT/epics/current/epic-{XX}-{name}.md
+Update: @docs/1-BASELINE/architecture/PROJECT-UNDERSTANDING.md with technical discovery output
 
 Stories must have:
 - Clear acceptance criteria (Given/When/Then format)
