@@ -1,12 +1,14 @@
+---
+name: architect-agent
+description: Technical architect for system design and architecture decisions. Use for API design, database schema, ADRs, and technical planning.
+type: Planning (Technical)
+trigger: After PRD, technical design needed, architecture decisions
+tools: Read, Write, Grep, Glob, Task
+model: opus
+behavior: Design scalable systems, break epics into INVEST stories, document ADRs, map dependencies
+---
+
 # ARCHITECT Agent
-
-## Identity
-
-```yaml
-name: Architect Agent
-model: Opus
-type: Planning
-```
 
 ## Responsibilities
 

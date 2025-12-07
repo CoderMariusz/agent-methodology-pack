@@ -195,24 +195,107 @@ copy_pack_to_target() {
     # Create target if it doesn't exist
     mkdir -p "$target"
 
-    # Copy essential directories
-    cp -r "$PACK_ROOT/.claude" "$target/" 2>/dev/null || true
-    cp -r "$PACK_ROOT/docs" "$target/" 2>/dev/null || true
-    cp -r "$PACK_ROOT/scripts" "$target/" 2>/dev/null || true
-    cp -r "$PACK_ROOT/templates" "$target/" 2>/dev/null || true
+    # Create .claude directory structure first
+    mkdir -p "$target/.claude"
+    mkdir -p "$target/.claude/agents"
+    mkdir -p "$target/.claude/agents/planning"
+    mkdir -p "$target/.claude/agents/development"
+    mkdir -p "$target/.claude/agents/quality"
+    mkdir -p "$target/.claude/workflows"
+    mkdir -p "$target/.claude/state"
 
-    # Copy essential files (but not overwrite existing README, etc.)
+    # Copy agents - explicit copy to ensure all files are copied
+    print_step "Copying agents..."
+
+    # Copy ORCHESTRATOR
+    if [ -f "$PACK_ROOT/.claude/agents/ORCHESTRATOR.md" ]; then
+        cp "$PACK_ROOT/.claude/agents/ORCHESTRATOR.md" "$target/.claude/agents/"
+        print_success "ORCHESTRATOR.md copied"
+    else
+        print_error "ORCHESTRATOR.md not found at $PACK_ROOT/.claude/agents/"
+    fi
+
+    # Copy planning agents
+    for agent in DISCOVERY-AGENT DOC-AUDITOR RESEARCH-AGENT PM-AGENT UX-DESIGNER ARCHITECT-AGENT PRODUCT-OWNER SCRUM-MASTER; do
+        if [ -f "$PACK_ROOT/.claude/agents/planning/$agent.md" ]; then
+            cp "$PACK_ROOT/.claude/agents/planning/$agent.md" "$target/.claude/agents/planning/"
+        fi
+    done
+    print_success "Planning agents copied ($(ls -1 "$target/.claude/agents/planning/" 2>/dev/null | wc -l) files)"
+
+    # Copy development agents
+    for agent in TEST-ENGINEER BACKEND-DEV FRONTEND-DEV SENIOR-DEV; do
+        if [ -f "$PACK_ROOT/.claude/agents/development/$agent.md" ]; then
+            cp "$PACK_ROOT/.claude/agents/development/$agent.md" "$target/.claude/agents/development/"
+        fi
+    done
+    print_success "Development agents copied ($(ls -1 "$target/.claude/agents/development/" 2>/dev/null | wc -l) files)"
+
+    # Copy quality agents
+    for agent in QA-AGENT CODE-REVIEWER TECH-WRITER; do
+        if [ -f "$PACK_ROOT/.claude/agents/quality/$agent.md" ]; then
+            cp "$PACK_ROOT/.claude/agents/quality/$agent.md" "$target/.claude/agents/quality/"
+        fi
+    done
+    print_success "Quality agents copied ($(ls -1 "$target/.claude/agents/quality/" 2>/dev/null | wc -l) files)"
+
+    # Copy workflows
+    print_step "Copying workflows..."
+    if [ -d "$PACK_ROOT/.claude/workflows" ]; then
+        cp -r "$PACK_ROOT/.claude/workflows/"* "$target/.claude/workflows/" 2>/dev/null || true
+        print_success "Workflows copied ($(ls -1 "$target/.claude/workflows/" 2>/dev/null | wc -l) files)"
+    fi
+
+    # Copy state templates
+    print_step "Copying state templates..."
+    if [ -d "$PACK_ROOT/.claude/state" ]; then
+        cp -r "$PACK_ROOT/.claude/state/"* "$target/.claude/state/" 2>/dev/null || true
+        print_success "State templates copied"
+    fi
+
+    # Copy docs (but not MIGRATION-GUIDE which is too large)
+    print_step "Copying documentation..."
+    mkdir -p "$target/docs"
+    if [ -d "$PACK_ROOT/docs" ]; then
+        # Copy docs but exclude large files
+        find "$PACK_ROOT/docs" -name "*.md" -size -100k -exec cp {} "$target/docs/" \; 2>/dev/null || true
+        print_success "Documentation copied"
+    fi
+
+    # Copy scripts
+    print_step "Copying scripts..."
+    if [ -d "$PACK_ROOT/scripts" ]; then
+        cp -r "$PACK_ROOT/scripts" "$target/" 2>/dev/null || true
+        print_success "Scripts copied"
+    fi
+
+    # Copy templates
+    print_step "Copying templates..."
+    if [ -d "$PACK_ROOT/templates" ]; then
+        cp -r "$PACK_ROOT/templates" "$target/" 2>/dev/null || true
+        print_success "Templates copied"
+    fi
+
+    # Copy essential root files
     cp "$PACK_ROOT/CLAUDE.md" "$target/" 2>/dev/null || true
     cp "$PACK_ROOT/PROJECT-STATE.md" "$target/" 2>/dev/null || true
-
-    # Don't copy pack's README, INSTALL, etc. to target
-    # User's project should keep its own README
 
     # Copy settings template as local settings (high autonomy mode)
     if [ -f "$PACK_ROOT/templates/settings.local.json.template" ]; then
         cp "$PACK_ROOT/templates/settings.local.json.template" "$target/.claude/settings.local.json"
         print_success "Claude permissions configured (high autonomy mode)"
     fi
+
+    # Verify copy
+    echo ""
+    print_header "COPY VERIFICATION"
+    echo ""
+    echo -e "  Agents total: ${GREEN}$(find "$target/.claude/agents" -name "*.md" 2>/dev/null | wc -l)${NC} files"
+    echo -e "  - Planning:   $(ls -1 "$target/.claude/agents/planning/" 2>/dev/null | wc -l) agents"
+    echo -e "  - Development: $(ls -1 "$target/.claude/agents/development/" 2>/dev/null | wc -l) agents"
+    echo -e "  - Quality:    $(ls -1 "$target/.claude/agents/quality/" 2>/dev/null | wc -l) agents"
+    echo -e "  Workflows:    $(ls -1 "$target/.claude/workflows/" 2>/dev/null | wc -l) files"
+    echo ""
 
     print_success "Pack copied to: $target"
 }
@@ -466,15 +549,14 @@ new_project_flow_cli() {
     print_success "Startup file: $startup_file"
 
     echo ""
-    print_header "NEXT STEPS"
-    echo ""
-    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
-    echo -e "  2. ${GREEN}Open Claude Code and say:${NC}"
-    echo -e "     ${YELLOW}Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW${NC}"
-    echo ""
-    echo -e "  3. ${GREEN}After setup is complete, you can delete the pack:${NC}"
+    print_info "After setup is complete, you can delete the pack:"
     echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
     echo ""
+
+    # Auto-launch Claude Code with DISCOVERY-FLOW
+    print_step "Launching Claude Code..."
+    cd "$TARGET_PROJECT"
+    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this new project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
 }
 
 # Migrate existing project flow (CLI)
@@ -531,15 +613,14 @@ migrate_project_flow_cli() {
     print_success "Migration complete: $TARGET_PROJECT"
 
     echo ""
-    print_header "NEXT STEPS"
-    echo ""
-    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
-    echo -e "  2. ${GREEN}Open Claude Code and say:${NC}"
-    echo -e "     ${YELLOW}Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW${NC}"
-    echo ""
-    echo -e "  3. ${GREEN}After migration is verified, delete the pack:${NC}"
+    print_info "After migration is verified, you can delete the pack:"
     echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
     echo ""
+
+    # Auto-launch Claude Code with DISCOVERY-FLOW
+    print_step "Launching Claude Code..."
+    cd "$TARGET_PROJECT"
+    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this migrate project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
 }
 
 # Interactive new project flow
@@ -598,12 +679,14 @@ new_project_flow_interactive() {
     print_success "Project initialized!"
 
     echo ""
-    print_header "NEXT STEPS"
+    print_info "After setup is complete, you can delete the pack:"
+    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
     echo ""
-    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
-    echo -e "  2. ${GREEN}Start Claude and run DISCOVERY-FLOW${NC}"
-    echo -e "  3. ${GREEN}Delete pack after setup: rm -rf $PACK_ROOT${NC}"
-    echo ""
+
+    # Auto-launch Claude Code with DISCOVERY-FLOW
+    print_step "Launching Claude Code..."
+    cd "$TARGET_PROJECT"
+    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this new project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
 }
 
 # Interactive migrate flow
@@ -677,12 +760,14 @@ migrate_project_flow_interactive() {
     print_success "Migration complete!"
 
     echo ""
-    print_header "NEXT STEPS"
+    print_info "After setup is complete, you can delete the pack:"
+    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
     echo ""
-    echo -e "  1. ${GREEN}cd $TARGET_PROJECT${NC}"
-    echo -e "  2. ${GREEN}Start Claude and run DISCOVERY-FLOW${NC}"
-    echo -e "  3. ${GREEN}Delete pack after setup: rm -rf $PACK_ROOT${NC}"
-    echo ""
+
+    # Auto-launch Claude Code with DISCOVERY-FLOW
+    print_step "Launching Claude Code..."
+    cd "$TARGET_PROJECT"
+    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this migrate project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
 }
 
 # Show welcome banner

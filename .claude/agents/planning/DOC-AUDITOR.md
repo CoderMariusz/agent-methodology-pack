@@ -1,13 +1,14 @@
-# DOC-AUDITOR Agent
-
-## Identity
-
-```yaml
-name: Documentation Auditor
-model: Sonnet
+---
+name: doc-auditor
+description: Audits and scans existing documentation for migrations. Use for existing project migrations and documentation audits.
 type: Planning (Migration)
 trigger: Existing project migration, documentation audit, onboarding assessment
-```
+tools: Read, Grep, Glob, Write
+model: sonnet
+behavior: Scan project structure, map to BMAD structure, identify gaps, create migration plan
+---
+
+# DOC-AUDITOR Agent
 
 ## Purpose
 
