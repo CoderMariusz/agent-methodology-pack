@@ -144,6 +144,38 @@ User Request
             └─► discovery-agent first
 ```
 
+### Phase-Aware Routing
+
+**CRITICAL:** Before starting any feature work, check PROJECT-STATE.md for current phase.
+
+```
+Feature Request
+    │
+    ├─► Check PROJECT-STATE.md current phase
+    │
+    ├─► Feature phase == Current phase?
+    │       └─► YES: Proceed with workflow
+    │
+    └─► Feature phase > Current phase?
+            └─► WARN user: "MVP not complete. Options:"
+                [1] Add to {phase} backlog
+                [2] Override with reason
+```
+
+### Routing Configuration
+
+Custom routing rules can be defined in: `@.claude/config/routing-rules.yaml`
+
+```yaml
+- match:
+    request_type: "new_project"
+  workflow: "product/new_project.yaml"
+
+- match:
+    request_type: "clarify"
+  direct_agent: "discovery-agent"
+```
+
 ---
 
 ## Parallel Execution
@@ -183,16 +215,30 @@ QA → DONE:      qa-agent: PASS
 2. Create summary (MAX 50 words)
 3. Pass to agents: summary + file refs + IDs only
 
-```yaml
-# TO agent:
-task: string
-context_refs: ["@file1.md", "@file2.ts"]
-previous_summary: "MAX 50 words"
+### Delegation Payload Format
 
-# FROM agent:
-status: success | blocked | failed
-summary: "MAX 100 words"
-deliverables: [{path, type}]
+```yaml
+# Sending TO agent:
+task: string              # clear, single objective
+type: string              # agent-specific task type
+context_refs:             # files agent should read (paths only)
+  - @docs/prd.md
+  - @src/module.ts
+previous_summary: string  # MAX 50 words from prior agent
+constraints: []           # specific limitations
+workflow_step: string     # if part of workflow (e.g., "RED", "GREEN")
+```
+
+```yaml
+# Receiving FROM agent:
+status: success | needs_input | blocked | failed
+summary: string           # MAX 100 words
+deliverables:
+  - path: string
+    type: doc | code | test | data | config
+data_refs: []             # paths to large data, NOT content
+blockers: []              # if status=blocked
+questions: []             # if status=needs_input
 ```
 
 ---
@@ -210,13 +256,38 @@ deliverables: [{path, type}]
 
 ## Workflows
 
+### Workflow Definitions
 ```
 @.claude/workflows/definitions/product/new-project.yaml
 @.claude/workflows/definitions/engineering/story-delivery.yaml
 @.claude/workflows/definitions/engineering/quick-fix.yaml
 ```
 
-**Execution:** Load → Execute steps → Log to `@.claude/logs/workflows/` → Stop on `blocked`/`failed`
+### Workflow Documentation
+```
+@.claude/workflows/documentation/DISCOVERY-FLOW.md
+@.claude/workflows/documentation/STORY-WORKFLOW.md
+@.claude/workflows/documentation/EPIC-WORKFLOW.md
+@.claude/workflows/documentation/SPRINT-WORKFLOW.md
+@.claude/workflows/documentation/BUG-WORKFLOW.md
+```
+
+### Workflow Execution
+
+1. **Load** workflow file
+2. **Execute** each step:
+   - Resolve input references
+   - Compress context
+   - Invoke agent via Task tool
+   - Log output to `@.claude/logs/workflows/{workflow-id}.jsonl`
+3. **Stop** if agent returns `blocked` or `failed`
+4. **Continue** to next step on `success`
+
+### Workflow Logging Format
+```jsonl
+{"step": 1, "agent": "discovery-agent", "status": "success", "timestamp": "..."}
+{"step": 2, "agent": "pm-agent", "status": "success", "timestamp": "..."}
+```
 
 ---
 
