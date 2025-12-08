@@ -11,7 +11,7 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
                                         |
                                         v
 +=====================================================================================+
-|                            PHASE 1: DISCOVERY (30 min)                             |
+|                            PHASE 1: DISCOVERY (30-45 min)                          |
 +=====================================================================================+
 |                                                                                     |
 |   +------------------+     +------------------+     +------------------+            |
@@ -23,8 +23,20 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
 |   | - Find orphans   |     | - Large files    |              |   |                  |
 |   | - Tech stack     |     | - Tech stack     |              |   +---> Re-scan      |
 |   | - Dependencies   |     | - Issues found   |              |                      |
+|   | - Flag gaps      |     | - Context gaps   |              |                      |
 |   +------------------+     +------------------+              |                      |
-|                                                              |                      |
+|                                                              v                      |
+|   +-------------------------------------------------------------------------+      |
+|   | OPTIONAL: Quick Context Interview (DISCOVERY-AGENT, depth=quick)        |      |
+|   +-------------------------------------------------------------------------+      |
+|   | Trigger: scan.has_gaps OR scan.missing_context                          |      |
+|   | Skip if: complete docs found OR --skip-interview                        |      |
+|   |                                                                          |      |
+|   | - Max 7 questions about blocking unknowns                                |      |
+|   | - Focus: pain points, priorities, what NOT to touch                      |      |
+|   | - Output: MIGRATION-CONTEXT.md                                           |      |
+|   +-------------------------------------------------------------------------+      |
+|                                                                                     |
 +=====================================================================================+
                                          |
                                          v
@@ -204,6 +216,53 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
 5. Analyze tech stack from code
 6. Map existing documentation structure
 7. Identify potential issues
+8. **Flag context gaps** for optional interview
+
+#### Step 1.2: Quick Context Interview (OPTIONAL)
+
+**Agent:** DISCOVERY-AGENT
+**Model:** Sonnet
+**Duration:** 5-15 minutes
+**Depth:** quick
+
+**When to run:**
+- Scan found significant gaps in documentation
+- Project context unclear from files alone
+- User explicitly requests interview
+- First-time migration (no prior knowledge)
+
+**When to skip:**
+- Scan found complete PRD with goals
+- Documentation is comprehensive
+- User passed `--skip-interview` flag
+- Re-migration of known project
+
+**Activities:**
+1. Read AUDIT-REPORT.md to understand gaps
+2. Ask ONLY about blocking unknowns (max 7 questions)
+3. Focus on: pain points, priorities, what NOT to touch
+4. Stop as soon as basic understanding achieved
+5. Save to MIGRATION-CONTEXT.md
+
+**Quick Interview Questions (dynamic, pick relevant):**
+```
+Based on scan gaps, ask about:
+- "What's the main goal of this migration?"
+- "Are there areas we should NOT touch?"
+- "What's causing the most pain currently?"
+- "Which files/features are most critical?"
+- "Any recent changes we should know about?"
+- "Who should we contact if questions arise?"
+- "What's the priority order for migration?"
+```
+
+**Output:** `docs/0-DISCOVERY/MIGRATION-CONTEXT.md` (if interview conducted)
+
+#### Quality Gate 1.5: Context Complete
+- [ ] Scan completed
+- [ ] Context gaps assessed
+- [ ] Interview conducted (if needed) OR skipped (if not needed)
+- [ ] Basic project understanding achieved
 
 **Scan Checklist:**
 ```markdown

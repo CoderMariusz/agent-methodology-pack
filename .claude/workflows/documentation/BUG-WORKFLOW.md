@@ -241,6 +241,29 @@ Bug fix workflow with complexity-based routing. Bugs are triaged by severity and
 |   Duration: 1+ days                                                               |
 |                                                                                   |
 |   +-----------------------------------------------------------------------+      |
+|   |                    PHASE C0: RESEARCH (if unknown domain)             |      |
+|   +-----------------------------------------------------------------------+      |
+|   |                                                                        |      |
+|   |   +------------------------------------------------------------+      |      |
+|   |   | RESEARCH-AGENT (Sonnet) - OPTIONAL                          |      |      |
+|   |   +------------------------------------------------------------+      |      |
+|   |   | When to use:                                                |      |      |
+|   |   | - Bug in unfamiliar technology/library                      |      |      |
+|   |   | - Security vulnerability requiring CVE research             |      |      |
+|   |   | - Performance issue needing benchmark data                  |      |      |
+|   |   | - Integration bug with external system                      |      |      |
+|   |   |                                                             |      |      |
+|   |   | Tasks:                                                      |      |      |
+|   |   | 1. Research technology/library involved                     |      |      |
+|   |   | 2. Find similar issues in community                         |      |      |
+|   |   | 3. Identify known solutions/workarounds                     |      |      |
+|   |   | 4. Document findings for ARCHITECT-AGENT                    |      |      |
+|   |   +------------------------------------------------------------+      |      |
+|   |                                                                        |      |
+|   +-----------------------------------------------------------------------+      |
+|                                    |                                              |
+|                                    v                                              |
+|   +-----------------------------------------------------------------------+      |
 |   |                    PHASE C1: ARCHITECTURE REVIEW                      |      |
 |   +-----------------------------------------------------------------------+      |
 |   |                                                                        |      |
@@ -608,11 +631,42 @@ Decision: APPROVE / REJECT
 **Total Duration:** 1+ days
 **Models:** Opus (architecture) + Sonnet (implementation)
 
+### Step C0: Research (RESEARCH-AGENT) - OPTIONAL
+**Model:** Sonnet
+**Duration:** 1-2 hours
+**When to use:** Unfamiliar technology, security CVE, external integration, performance benchmarks
+
+1. Research technology/library involved in bug
+2. Search for similar issues in community (GitHub, StackOverflow, vendor docs)
+3. Identify known solutions, patches, or workarounds
+4. Document findings for ARCHITECT-AGENT
+
+**Research Output:**
+```markdown
+## Research: BUG-{ID}
+
+### Technology Context
+- Library/Framework: {name} v{version}
+- Known issues: {list}
+
+### Community Findings
+| Source | Finding | Relevance |
+|--------|---------|-----------|
+| {url} | {summary} | High/Medium/Low |
+
+### Recommended Approaches
+1. {approach from research}
+2. {alternative}
+
+### References
+- {links to docs, issues, discussions}
+```
+
 ### Step C1: Architecture Review (ARCHITECT-AGENT)
 **Model:** Opus
 **Duration:** 2-4 hours
 
-1. Deep analysis of bug and impact
+1. Deep analysis of bug and impact (use RESEARCH-AGENT findings if available)
 2. Identify architectural root cause
 3. Evaluate solution options
 4. Decide if ADR needed

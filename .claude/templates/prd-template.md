@@ -45,23 +45,44 @@
 
 ---
 
-## Scope
+## Scope & Phases
 
-### In Scope (MVP)
-| Item | Description | Priority |
-|------|-------------|----------|
-| {Feature 1} | {brief description} | Must Have |
-| {Feature 2} | {brief description} | Should Have |
+### Phase Roadmap
+```
+MVP (P0) ──────► P1 ──────► P2 ──────► P3
+Core features    Essential   Nice to    Future
+                 improve.    have       enhance.
+```
 
-### Out of Scope
+### MVP (P0) - Minimum Viable Product
+| Item | Description | Status | Date |
+|------|-------------|--------|------|
+| {Feature 1} | {brief description} | ⬜ Todo | - |
+| {Feature 2} | {brief description} | ⬜ Todo | - |
+
+**MVP Gate:** All MVP features MUST be done before starting P1.
+
+### P1 - Essential Improvements
+| Item | Description | Status | Date |
+|------|-------------|--------|------|
+| {Feature 1} | {brief description} | 🔒 Blocked | - |
+| {Feature 2} | {brief description} | 🔒 Blocked | - |
+
+### P2 - Nice to Have
+| Item | Description | Status | Date |
+|------|-------------|--------|------|
+| {Feature 1} | {brief description} | 🔒 Blocked | - |
+
+### P3 - Future Enhancements
+| Item | Description | Status | Date |
+|------|-------------|--------|------|
+| {Feature 1} | {brief description} | 📋 Backlog | - |
+
+### Out of Scope (All Phases)
 | Item | Reason |
 |------|--------|
 | {Excluded 1} | {why excluded} |
 | {Excluded 2} | {why excluded} |
-
-### Future Considerations (v2+)
-- {Future feature 1}
-- {Future feature 2}
 
 ---
 
@@ -143,6 +164,33 @@
 
 - [ ] {Question requiring stakeholder input}
 - [ ] {Question requiring research}
+
+---
+
+## Updates Log
+
+> **Auto-updated by FEATURE-FLOW** - tracks all changes after initial PRD approval
+
+| Date | Feature | Phase | Type | Description | Impact |
+|------|---------|-------|------|-------------|--------|
+| - | - | - | - | - | - |
+
+### Update Types
+- `ADD` - New feature added
+- `MODIFY` - Existing feature changed
+- `REMOVE` - Feature removed
+- `MOVE` - Feature moved between phases
+- `SCOPE` - Scope adjustment
+
+---
+
+## Architecture Updates Reference
+
+> Features that impacted architecture are tracked here for cross-reference
+
+| Date | Feature | Architecture Doc | Change Summary |
+|------|---------|------------------|----------------|
+| - | - | - | - |
 
 ---
 

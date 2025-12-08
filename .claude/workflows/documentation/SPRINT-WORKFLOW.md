@@ -295,12 +295,48 @@ Sprint management workflow covering the complete sprint lifecycle from initializ
    **Goal:** {sprint goal}
    ```
 
+#### Step 1.5: Documentation Sync Check (DOC-AUDITOR)
+**Model:** Sonnet
+**Duration:** 30 minutes
+**Trigger:** Every sprint start
+
+**Purpose:** Catch documentation drift BEFORE sprint work begins
+
+1. **Quick Drift Detection**
+   ```markdown
+   ## Sprint {N} Documentation Sync Check
+
+   ### Changed Since Last Sprint
+   | Area | Code Changes | Doc Status | Action |
+   |------|--------------|------------|--------|
+   | API endpoints | 3 new | Not documented | UPDATE |
+   | Database schema | 2 modified | Outdated | UPDATE |
+   | Config options | 1 new | Missing | CREATE |
+
+   ### Drift Score: X%
+   - 0-10%: GREEN - proceed with sprint
+   - 11-25%: YELLOW - schedule doc updates this sprint
+   - 26%+: RED - prioritize doc sync before new features
+   ```
+
+2. **Auto-detect Changes**
+   - Compare git commits since last sprint
+   - Identify API/schema/config changes
+   - Cross-reference with docs/ folder
+   - Flag undocumented changes
+
+3. **Output**
+   - If GREEN: Continue to planning
+   - If YELLOW: Add doc tasks to sprint backlog
+   - If RED: Alert SCRUM-MASTER, may need doc sprint
+
 #### Step 2: Sprint Planning (SCRUM-MASTER)
 **Model:** Sonnet
 **Duration:** 1-2 hours
 
 1. **Review Backlog**
    - Read prioritized backlog from PRODUCT-OWNER
+   - **Review doc sync check results** (from Step 1.5)
    - Review story readiness
    - Check dependencies
 
@@ -542,6 +578,40 @@ Multiple workflows execute in parallel:
 
 ### Sprint End
 
+#### Documentation Audit (DOC-AUDITOR) - Before Review
+**Model:** Sonnet
+**Duration:** 30 minutes - 1 hour
+
+**Purpose:** Verify documentation quality before sprint closes
+
+1. **Check Documentation Completeness**
+   - All completed features documented
+   - API changes reflected in docs
+   - README updated if needed
+   - Architecture docs current
+
+2. **Audit Output**
+   ```markdown
+   ## Sprint {N} Documentation Audit
+
+   ### Documentation Status
+   | Story | Feature Docs | API Docs | README | Status |
+   |-------|--------------|----------|--------|--------|
+   | S-1.1 | ✓ | ✓ | N/A | OK |
+   | S-1.2 | ✓ | Missing | N/A | NEEDS UPDATE |
+
+   ### Required Updates
+   - [ ] {doc that needs update}
+
+   ### Recommendation
+   - PASS: Docs complete
+   - NEEDS WORK: {list items}
+   ```
+
+3. **Handoff**
+   - If NEEDS WORK: Route to TECH-WRITER before review
+   - If PASS: Continue to Sprint Review
+
 #### Sprint Review (SCRUM-MASTER + PRODUCT-OWNER)
 **Model:** Sonnet
 **Duration:** 1-2 hours
@@ -723,6 +793,7 @@ Multiple workflows execute in parallel:
 | Daily | Standup | Report generated, blockers identified |
 | Daily | Progress | Tasks moving, no stuck items |
 | Daily | Quality | Tests passing, reviews complete |
+| End | Doc Audit | DOC-AUDITOR verifies documentation complete |
 | End | Review | Demo complete, stories accepted/rejected |
 | End | Retro | Lessons captured, actions defined |
 | End | Velocity | Metrics updated, forecast adjusted |

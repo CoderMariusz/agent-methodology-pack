@@ -77,7 +77,9 @@ issues:
   minor: number                # Nice to fix
 security_status: pass | fail
 test_coverage: number
-next: QA-AGENT | DEV
+doc_update_required: boolean   # NEW: trigger for doc sync
+doc_areas_affected: []         # NEW: api | schema | config | interface
+next: QA-AGENT | DEV | TECH-WRITER  # NEW: can route to TECH-WRITER
 blockers: []
 ```
 
@@ -135,6 +137,13 @@ blockers: []
 - [ ] DRY - no duplication
 - [ ] Follows project patterns
 - [ ] No magic numbers
+
+### Documentation Impact (TRIGGER DOC CHECK)
+- [ ] API endpoints changed? → Flag for doc update
+- [ ] Database schema changed? → Flag for doc update
+- [ ] Config options changed? → Flag for doc update
+- [ ] Public interfaces changed? → Flag for doc update
+- [ ] Breaking changes? → MUST update docs before merge
 
 ### Tests
 - [ ] Coverage meets target
@@ -202,6 +211,18 @@ review: "docs/2-MANAGEMENT/reviews/code-review-story-{N}-{M}.md"
 focus_areas: ["{areas to test}"]
 coverage: "{X}%"
 issues_found: "0 critical, {N} major, {M} minor"
+doc_update_required: true | false
+doc_areas_affected: ["api", "schema"]  # if doc update needed
+```
+
+### If APPROVED + DOC_UPDATE → TECH-WRITER (parallel with QA):
+```yaml
+story: "{N}.{M}"
+trigger: code_change_doc_sync
+areas_affected: ["api", "schema", "config"]
+changed_files: ["{list of changed source files}"]
+priority: high | normal
+blocking: true  # if breaking changes
 ```
 
 ### If REQUEST_CHANGES → DEV:

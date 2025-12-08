@@ -1,54 +1,166 @@
 #!/bin/bash
-# Interactive Project Setup Wizard v2.0
-# Guides user through new project creation or existing project migration
+# Interactive Project Setup Wizard v3.0
+# Complete project initialization with agent methodology pack
 #
-# IMPORTANT: This script distinguishes between:
-#   - PACK_ROOT: Where agent-methodology-pack is located
-#   - TARGET_PROJECT: Where the user's project is located
+# Features:
+#   - Multi-language support (communication)
+#   - Full tech stack configuration
+#   - Database selection
+#   - Multiple flow types (New/Migration/Audit/QuickStart)
+#   - Advanced mode (CI/CD, Testing, Hosting)
+#   - High autonomy settings
 #
 # Usage:
-#   Interactive mode: bash scripts/init-interactive.sh
-#   CLI mode: bash scripts/init-interactive.sh --mode {new|existing|migrate} [OPTIONS]
-#
-# Examples:
-#   bash scripts/init-interactive.sh --mode new --name my-project --target ../my-project
-#   bash scripts/init-interactive.sh --mode migrate --target /path/to/project
-#   bash scripts/init-interactive.sh --mode existing --target . --lang typescript
+#   Interactive: bash scripts/init-interactive.sh
+#   CLI: bash scripts/init-interactive.sh --mode new --name my-project [OPTIONS]
 #
 # Author: Agent Methodology Pack
-# Version: 2.0 (Separated PACK_ROOT from TARGET_PROJECT, added language & suggestions)
+# Version: 3.0
 
 set -e
 
-# Colors for output
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
-NC='\033[0m' # No Color
+WHITE='\033[1;37m'
+NC='\033[0m'
 
-# Get script directory (this is where the pack is)
+# Script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACK_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Target project (will be set by user)
-TARGET_PROJECT=""
+# Project configuration (will be set by user)
+CONFIG_COMM_LANG=""
+CONFIG_PROJECT_NAME=""
+CONFIG_TECH_STACK=""
+CONFIG_FRONTEND=""
+CONFIG_DATABASE=""
+CONFIG_TARGET_PATH=""
+CONFIG_FLOW_TYPE=""
+CONFIG_PROJECT_DESC=""
+CONFIG_DONE_STATUS=""
+CONFIG_UNCERTAINTIES=""
+CONFIG_ADVANCED_MODE=false
+CONFIG_CI_CD=""
+CONFIG_TESTING=""
+CONFIG_HOSTING=""
 
-# Project configuration
-PROJECT_NAME=""
-PROJECT_LANG=""
-SKIP_DISCOVERY=false
+# Options
+declare -A LANGUAGES=(
+    [1]="English"
+    [2]="Polish"
+    [3]="Spanish"
+    [4]="German"
+    [5]="French"
+    [6]="Portuguese"
+    [7]="Italian"
+    [8]="Ukrainian"
+)
 
-# Supported languages
-SUPPORTED_LANGS=("typescript" "javascript" "python" "go" "rust" "java" "csharp" "dart" "other")
+declare -A TECH_STACKS=(
+    [1]="typescript"
+    [2]="javascript"
+    [3]="python"
+    [4]="go"
+    [5]="rust"
+    [6]="java"
+    [7]="csharp"
+    [8]="dart"
+    [9]="php"
+    [10]="ruby"
+)
 
-# Helper functions
+declare -A FRONTENDS=(
+    [1]="React"
+    [2]="Vue"
+    [3]="Angular"
+    [4]="Svelte"
+    [5]="Next.js"
+    [6]="Nuxt"
+    [7]="Flutter"
+    [8]="None"
+)
+
+declare -A DATABASES=(
+    [1]="Firebase"
+    [2]="Supabase"
+    [3]="PostgreSQL"
+    [4]="MongoDB"
+    [5]="MySQL"
+    [6]="SQLite"
+    [7]="Redis"
+    [8]="None"
+)
+
+declare -A FLOW_TYPES=(
+    [1]="new_project"
+    [2]="migration"
+    [3]="doc_audit"
+    [4]="quick_start"
+)
+
+declare -A CI_CD_OPTIONS=(
+    [1]="GitHub Actions"
+    [2]="GitLab CI"
+    [3]="CircleCI"
+    [4]="Jenkins"
+    [5]="None"
+)
+
+declare -A TESTING_OPTIONS=(
+    [1]="Jest"
+    [2]="Vitest"
+    [3]="Pytest"
+    [4]="Go Test"
+    [5]="JUnit"
+    [6]="xUnit"
+    [7]="None"
+)
+
+declare -A HOSTING_OPTIONS=(
+    [1]="Vercel"
+    [2]="Netlify"
+    [3]="AWS"
+    [4]="GCP"
+    [5]="Azure"
+    [6]="DigitalOcean"
+    [7]="Self-hosted"
+    [8]="None"
+)
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+print_banner() {
+    clear
+    echo ""
+    echo -e "${BLUE}"
+    echo "    _                    _     __  __      _   _               _       "
+    echo "   / \   __ _  ___ _ __ | |_  |  \/  | ___| |_| |__   ___   __| |___   "
+    echo "  / _ \ / _\` |/ _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _\` / __|  "
+    echo " / ___ \ (_| |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| \__ \  "
+    echo "/_/   \_\__, |\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|___/  "
+    echo "        |___/                                                          "
+    echo -e "${NC}"
+    echo -e "${CYAN}                    Interactive Setup Wizard v3.0${NC}"
+    echo ""
+    echo -e "${WHITE}Pack location: ${YELLOW}$PACK_ROOT${NC}"
+    echo ""
+}
+
 print_header() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}  $1${NC}"
+    echo -e "${WHITE}  $1${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
@@ -57,803 +169,1829 @@ print_step() {
 }
 
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}✓ $1${NC}"
 }
 
 print_info() {
-    echo -e "${YELLOW}ℹ️  $1${NC}"
+    echo -e "${YELLOW}ℹ $1${NC}"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}⚠ $1${NC}"
 }
 
 print_error() {
-    echo -e "${RED}❌ ERROR: $1${NC}"
+    echo -e "${RED}✗ ERROR: $1${NC}"
 }
 
-print_menu_item() {
-    echo -e "${CYAN}  [$1]${NC} $2"
-}
-
-# Detect parent directory as suggested target
-suggest_target_path() {
-    local parent_dir="$(dirname "$PACK_ROOT")"
-    local current_dir="$(pwd)"
-
-    echo ""
-    print_info "Suggested target paths:"
-    echo ""
-    echo -e "  ${GREEN}[1]${NC} Parent directory: ${CYAN}$parent_dir${NC}"
-    echo -e "  ${GREEN}[2]${NC} Current directory: ${CYAN}$current_dir${NC}"
-
-    # Check if we're inside another project (has package.json, etc.)
-    if [ -f "$parent_dir/package.json" ]; then
-        echo -e "      ${YELLOW}(Node.js project detected)${NC}"
-    elif [ -f "$parent_dir/requirements.txt" ] || [ -f "$parent_dir/pyproject.toml" ]; then
-        echo -e "      ${YELLOW}(Python project detected)${NC}"
-    elif [ -f "$parent_dir/go.mod" ]; then
-        echo -e "      ${YELLOW}(Go project detected)${NC}"
-    elif [ -f "$parent_dir/Cargo.toml" ]; then
-        echo -e "      ${YELLOW}(Rust project detected)${NC}"
-    elif [ -f "$parent_dir/pubspec.yaml" ]; then
-        echo -e "      ${YELLOW}(Dart/Flutter project detected)${NC}"
-    fi
-
-    echo -e "  ${GREEN}[3]${NC} Custom path (you will enter it)"
-    echo ""
-}
-
-# Detect project language from files
-detect_language() {
-    local path="$1"
-
-    if [ -f "$path/package.json" ]; then
-        if grep -q "typescript" "$path/package.json" 2>/dev/null; then
-            echo "typescript"
-        else
-            echo "javascript"
-        fi
-    elif [ -f "$path/tsconfig.json" ]; then
-        echo "typescript"
-    elif [ -f "$path/requirements.txt" ] || [ -f "$path/pyproject.toml" ] || [ -f "$path/setup.py" ]; then
-        echo "python"
-    elif [ -f "$path/go.mod" ]; then
-        echo "go"
-    elif [ -f "$path/Cargo.toml" ]; then
-        echo "rust"
-    elif [ -f "$path/pom.xml" ] || [ -f "$path/build.gradle" ]; then
-        echo "java"
-    elif [ -f "$path/pubspec.yaml" ]; then
-        echo "dart"
-    elif [ -f "$path/*.csproj" ] 2>/dev/null || [ -f "$path/*.sln" ] 2>/dev/null; then
-        echo "csharp"
+print_option() {
+    local num="$1"
+    local text="$2"
+    local selected="$3"
+    if [ "$selected" = "true" ]; then
+        echo -e "  ${GREEN}[$num]${NC} ${WHITE}$text${NC} ${GREEN}◀${NC}"
     else
-        echo "unknown"
+        echo -e "  ${CYAN}[$num]${NC} $text"
     fi
 }
 
-# Show language selection menu
-show_language_menu() {
-    print_header "Select Project Language"
-    echo ""
-    print_menu_item "1" "TypeScript"
-    print_menu_item "2" "JavaScript"
-    print_menu_item "3" "Python"
-    print_menu_item "4" "Go"
-    print_menu_item "5" "Rust"
-    print_menu_item "6" "Java"
-    print_menu_item "7" "C#"
-    print_menu_item "8" "Dart/Flutter"
-    print_menu_item "9" "Other"
-    echo ""
+get_input() {
+    local prompt="$1"
+    local default="$2"
+    local result
+
+    if [ -n "$default" ]; then
+        echo -n -e "${YELLOW}$prompt ${WHITE}[$default]${NC}: "
+    else
+        echo -n -e "${YELLOW}$prompt${NC}: "
+    fi
+
+    read -r result
+    result="${result%$'\r'}"
+    result="${result#"${result%%[![:space:]]*}"}"
+    result="${result%"${result##*[![:space:]]}"}"
+
+    if [ -z "$result" ] && [ -n "$default" ]; then
+        echo "$default"
+    else
+        echo "$result"
+    fi
 }
 
-# Get language from selection
-get_language_from_selection() {
-    local selection="$1"
-    case "$selection" in
-        1) echo "typescript" ;;
-        2) echo "javascript" ;;
-        3) echo "python" ;;
-        4) echo "go" ;;
-        5) echo "rust" ;;
-        6) echo "java" ;;
-        7) echo "csharp" ;;
-        8) echo "dart" ;;
-        9) echo "other" ;;
-        *) echo "unknown" ;;
-    esac
-}
-
-# Get user input (handles both interactive and non-interactive)
 get_choice() {
     local prompt="$1"
+    local max="$2"
     local choice
 
-    echo -n -e "${YELLOW}${prompt}${NC} " >&2
+    while true; do
+        choice=$(get_input "$prompt")
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$max" ]; then
+            echo "$choice"
+            return 0
+        fi
+        print_error "Please enter a number between 1 and $max"
+    done
+}
 
-    if read -r choice 2>/dev/null; then
-        choice="${choice%$'\r'}"
-        choice="${choice#"${choice%%[![:space:]]*}"}"
-        choice="${choice%"${choice##*[![:space:]]}"}"
-        echo "$choice"
+confirm() {
+    local prompt="$1"
+    local response
+    response=$(get_input "$prompt (y/n)" "y")
+    [[ "$response" =~ ^[Yy]$ ]]
+}
+
+# ============================================================================
+# VALIDATION FUNCTIONS
+# ============================================================================
+
+check_claude_cli() {
+    print_step "Checking Claude CLI..."
+    if command -v claude &> /dev/null; then
+        print_success "Claude CLI is installed"
+        return 0
     else
+        print_error "Claude CLI is not installed!"
         echo ""
-        print_error "Cannot read input in non-interactive mode"
-        print_info "Use CLI arguments instead. See --help for details"
-        exit 1
+        print_info "Install with: npm install -g @anthropic-ai/claude-code"
+        print_info "Or visit: https://claude.com/claude-code"
+        echo ""
+        return 1
     fi
 }
 
-# Copy pack to target project
-copy_pack_to_target() {
-    local target="$1"
+check_target_path() {
+    local path="$1"
 
-    print_step "Copying Agent Methodology Pack to target..."
-
-    # Create target if it doesn't exist
-    mkdir -p "$target"
-
-    # Create .claude directory structure first
-    mkdir -p "$target/.claude"
-    mkdir -p "$target/.claude/agents"
-    mkdir -p "$target/.claude/agents/planning"
-    mkdir -p "$target/.claude/agents/development"
-    mkdir -p "$target/.claude/agents/quality"
-    mkdir -p "$target/.claude/workflows"
-    mkdir -p "$target/.claude/state"
-
-    # Copy agents - explicit copy to ensure all files are copied
-    print_step "Copying agents..."
-
-    # Copy ORCHESTRATOR
-    if [ -f "$PACK_ROOT/.claude/agents/ORCHESTRATOR.md" ]; then
-        cp "$PACK_ROOT/.claude/agents/ORCHESTRATOR.md" "$target/.claude/agents/"
-        print_success "ORCHESTRATOR.md copied"
-    else
-        print_error "ORCHESTRATOR.md not found at $PACK_ROOT/.claude/agents/"
+    # Check if parent directory exists
+    local parent_dir="$(dirname "$path")"
+    if [ ! -d "$parent_dir" ]; then
+        print_error "Parent directory does not exist: $parent_dir"
+        return 1
     fi
 
-    # Copy planning agents
-    for agent in DISCOVERY-AGENT DOC-AUDITOR RESEARCH-AGENT PM-AGENT UX-DESIGNER ARCHITECT-AGENT PRODUCT-OWNER SCRUM-MASTER; do
-        if [ -f "$PACK_ROOT/.claude/agents/planning/$agent.md" ]; then
-            cp "$PACK_ROOT/.claude/agents/planning/$agent.md" "$target/.claude/agents/planning/"
+    # Check if writable
+    if [ ! -w "$parent_dir" ]; then
+        print_error "Cannot write to: $parent_dir"
+        return 1
+    fi
+
+    # Check for existing .claude
+    if [ -d "$path/.claude" ]; then
+        print_warning "Target already has .claude/ directory"
+        if confirm "Merge with existing configuration?"; then
+            return 0
+        else
+            return 1
         fi
+    fi
+
+    return 0
+}
+
+# ============================================================================
+# QUESTION FUNCTIONS
+# ============================================================================
+
+ask_language() {
+    print_header "STEP 1/7: Communication Language"
+    echo ""
+    echo -e "  ${WHITE}Select your preferred language for Claude responses:${NC}"
+    echo ""
+
+    for i in "${!LANGUAGES[@]}"; do
+        print_option "$i" "${LANGUAGES[$i]}"
     done
-    print_success "Planning agents copied ($(ls -1 "$target/.claude/agents/planning/" 2>/dev/null | wc -l) files)"
-
-    # Copy development agents
-    for agent in TEST-ENGINEER BACKEND-DEV FRONTEND-DEV SENIOR-DEV; do
-        if [ -f "$PACK_ROOT/.claude/agents/development/$agent.md" ]; then
-            cp "$PACK_ROOT/.claude/agents/development/$agent.md" "$target/.claude/agents/development/"
-        fi
-    done
-    print_success "Development agents copied ($(ls -1 "$target/.claude/agents/development/" 2>/dev/null | wc -l) files)"
-
-    # Copy quality agents
-    for agent in QA-AGENT CODE-REVIEWER TECH-WRITER; do
-        if [ -f "$PACK_ROOT/.claude/agents/quality/$agent.md" ]; then
-            cp "$PACK_ROOT/.claude/agents/quality/$agent.md" "$target/.claude/agents/quality/"
-        fi
-    done
-    print_success "Quality agents copied ($(ls -1 "$target/.claude/agents/quality/" 2>/dev/null | wc -l) files)"
-
-    # Copy workflows
-    print_step "Copying workflows..."
-    if [ -d "$PACK_ROOT/.claude/workflows" ]; then
-        cp -r "$PACK_ROOT/.claude/workflows/"* "$target/.claude/workflows/" 2>/dev/null || true
-        print_success "Workflows copied ($(ls -1 "$target/.claude/workflows/" 2>/dev/null | wc -l) files)"
-    fi
-
-    # Copy state templates
-    print_step "Copying state templates..."
-    if [ -d "$PACK_ROOT/.claude/state" ]; then
-        cp -r "$PACK_ROOT/.claude/state/"* "$target/.claude/state/" 2>/dev/null || true
-        print_success "State templates copied"
-    fi
-
-    # Copy docs (but not MIGRATION-GUIDE which is too large)
-    print_step "Copying documentation..."
-    mkdir -p "$target/docs"
-    if [ -d "$PACK_ROOT/docs" ]; then
-        # Copy docs but exclude large files
-        find "$PACK_ROOT/docs" -name "*.md" -size -100k -exec cp {} "$target/docs/" \; 2>/dev/null || true
-        print_success "Documentation copied"
-    fi
-
-    # Copy scripts
-    print_step "Copying scripts..."
-    if [ -d "$PACK_ROOT/scripts" ]; then
-        cp -r "$PACK_ROOT/scripts" "$target/" 2>/dev/null || true
-        print_success "Scripts copied"
-    fi
-
-    # Copy templates
-    print_step "Copying templates..."
-    if [ -d "$PACK_ROOT/templates" ]; then
-        cp -r "$PACK_ROOT/templates" "$target/" 2>/dev/null || true
-        print_success "Templates copied"
-    fi
-
-    # Copy essential root files
-    cp "$PACK_ROOT/CLAUDE.md" "$target/" 2>/dev/null || true
-    cp "$PACK_ROOT/PROJECT-STATE.md" "$target/" 2>/dev/null || true
-
-    # Copy settings template as local settings (high autonomy mode)
-    if [ -f "$PACK_ROOT/templates/settings.local.json.template" ]; then
-        cp "$PACK_ROOT/templates/settings.local.json.template" "$target/.claude/settings.local.json"
-        print_success "Claude permissions configured (high autonomy mode)"
-    fi
-
-    # Verify copy
-    echo ""
-    print_header "COPY VERIFICATION"
-    echo ""
-    echo -e "  Agents total: ${GREEN}$(find "$target/.claude/agents" -name "*.md" 2>/dev/null | wc -l)${NC} files"
-    echo -e "  - Planning:   $(ls -1 "$target/.claude/agents/planning/" 2>/dev/null | wc -l) agents"
-    echo -e "  - Development: $(ls -1 "$target/.claude/agents/development/" 2>/dev/null | wc -l) agents"
-    echo -e "  - Quality:    $(ls -1 "$target/.claude/agents/quality/" 2>/dev/null | wc -l) agents"
-    echo -e "  Workflows:    $(ls -1 "$target/.claude/workflows/" 2>/dev/null | wc -l) files"
     echo ""
 
-    print_success "Pack copied to: $target"
+    local choice
+    choice=$(get_choice "Select language [1-${#LANGUAGES[@]}]" "${#LANGUAGES[@]}")
+    CONFIG_COMM_LANG="${LANGUAGES[$choice]}"
+
+    print_success "Language: $CONFIG_COMM_LANG"
 }
 
-# Update CLAUDE.md with project info
-update_claude_md() {
-    local target="$1"
-    local name="$2"
-    local lang="$3"
-
-    local claude_file="$target/CLAUDE.md"
-
-    # Get language-specific tech stack
-    local backend_tech=""
-    local frontend_tech=""
-    local db_tech="PostgreSQL"
-
-    case "$lang" in
-        typescript|javascript)
-            backend_tech="Node.js + Express"
-            frontend_tech="React + TypeScript"
-            ;;
-        python)
-            backend_tech="Python + FastAPI"
-            frontend_tech="React or Vue.js"
-            ;;
-        go)
-            backend_tech="Go + Gin/Echo"
-            frontend_tech="React or Vue.js"
-            ;;
-        rust)
-            backend_tech="Rust + Actix/Axum"
-            frontend_tech="React or Yew"
-            ;;
-        java)
-            backend_tech="Java + Spring Boot"
-            frontend_tech="React or Angular"
-            ;;
-        dart)
-            backend_tech="Dart + Shelf/Serverpod"
-            frontend_tech="Flutter"
-            db_tech="Firebase/PostgreSQL"
-            ;;
-        csharp)
-            backend_tech="C# + ASP.NET Core"
-            frontend_tech="Blazor or React"
-            ;;
-        *)
-            backend_tech="{technology}"
-            frontend_tech="{technology}"
-            ;;
-    esac
-
-    cat > "$claude_file" << EOF
-# CLAUDE.md
-
-## Project: $name
-
-## Quick Context
-{Brief project description - fill this in}
-
-## Tech Stack
-- Backend: $backend_tech
-- Frontend: $frontend_tech
-- Database: $db_tech
-
-## Agent System
-This project uses the Agent Methodology Pack.
-See \`.claude/agents/ORCHESTRATOR.md\` for entry point.
-
-## Key Commands
-- Start planning: \`@.claude/agents/ORCHESTRATOR.md\`
-- View state: \`@PROJECT-STATE.md\`
-
-## Conventions
-- Language: $lang
-- {Add your coding conventions}
-- {Add your naming conventions}
-
-## Current Sprint
-See \`@PROJECT-STATE.md\` for current sprint status.
-EOF
-
-    print_success "Updated CLAUDE.md with project configuration"
-}
-
-# Create startup prompt for Claude
-create_startup_prompt() {
-    local target="$1"
-    local flow_type="$2"
-    local name="$3"
-    local lang="$4"
-
-    local startup_file="$target/.claude/STARTUP-PROMPT.md"
-    mkdir -p "$target/.claude"
-
-    cat > "$startup_file" << EOF
-# Claude Startup Prompt
-
-## Auto-generated by init-interactive.sh v2.0
-**Date:** $(date +%Y-%m-%d)
-**Flow Type:** $flow_type
-**Project:** $name
-**Language:** $lang
-**Path:** $target
-
----
-
-## Instructions for Claude
-
-@.claude/agents/ORCHESTRATOR.md
-
-### Context
-This is a ${flow_type} project initialization.
-- **Project Name:** $name
-- **Primary Language:** $lang
-
-### Required Flow
-Start with **DISCOVERY-FLOW** to ensure complete project understanding.
-
-### Flow Steps
-1. **DISCOVERY-AGENT** - Conduct project interview
-2. **Domain agents** - Ask specific questions (ARCHITECT, PM, RESEARCH)
-3. **DOC-AUDITOR** - Scan and validate documentation
-4. **Gap Analysis** - Identify missing information
-5. **Confirmation** - Get user approval
-
-### Start Command
-\`\`\`
-Start DISCOVERY-FLOW for this ${flow_type} project.
-Project name: $name
-Language: $lang
-\`\`\`
-
----
-
-**To use:** Copy this file content or reference @.claude/STARTUP-PROMPT.md
-EOF
-
-    echo "$startup_file"
-}
-
-# Show CLI help
-show_help() {
-    echo "Usage: $0 [OPTIONS]"
-    echo ""
-    echo "Interactive mode (no arguments):"
-    echo "  $0"
-    echo ""
-    echo "CLI mode:"
-    echo "  $0 --mode {new|existing|migrate} [OPTIONS]"
-    echo ""
-    echo "Options:"
-    echo "  --mode MODE        Operation mode: new, existing, or migrate"
-    echo "  --name NAME        Project name"
-    echo "  --target PATH      Target project path (where to set up)"
-    echo "  --lang LANGUAGE    Project language (typescript, python, go, etc.)"
-    echo "  --skip-discovery   Skip DISCOVERY-FLOW (advanced users only)"
-    echo "  -h, --help         Show this help message"
-    echo ""
-    echo "Examples:"
-    echo "  $0 --mode new --name my-app --target ../my-app --lang typescript"
-    echo "  $0 --mode migrate --target /path/to/existing/project"
-    echo "  $0 --mode existing --target . --lang python"
-    echo ""
-    echo "Supported languages:"
-    echo "  typescript, javascript, python, go, rust, java, csharp, dart, other"
-    echo ""
-    echo "IMPORTANT:"
-    echo "  - PACK_ROOT: $PACK_ROOT (where this script lives)"
-    echo "  - TARGET: Where your project is/will be"
-    echo "  - After migration, you can delete the pack directory"
-    exit 0
-}
-
-# Parse CLI arguments
-CLI_MODE=""
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --mode)
-            CLI_MODE="$2"
-            shift 2
-            ;;
-        --name)
-            PROJECT_NAME="$2"
-            shift 2
-            ;;
-        --target)
-            TARGET_PROJECT="$2"
-            shift 2
-            ;;
-        --lang)
-            PROJECT_LANG="$2"
-            shift 2
-            ;;
-        --skip-discovery)
-            SKIP_DISCOVERY=true
-            shift
-            ;;
-        -h|--help)
-            show_help
-            ;;
-        *)
-            print_error "Unknown argument: $1"
-            echo "Use --help for usage information"
-            exit 1
-            ;;
-    esac
-done
-
-# New project flow (CLI)
-new_project_flow_cli() {
-    print_header "NEW PROJECT SETUP (CLI MODE)"
-
-    # Validate required params
-    if [ -z "$PROJECT_NAME" ]; then
-        print_error "Project name required. Use --name PROJECT_NAME"
-        exit 1
-    fi
-
-    if [ -z "$TARGET_PROJECT" ]; then
-        print_error "Target path required. Use --target PATH"
-        exit 1
-    fi
-
-    # Create target directory
-    mkdir -p "$TARGET_PROJECT"
-    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
-
-    # Detect or use provided language
-    if [ -z "$PROJECT_LANG" ]; then
-        PROJECT_LANG="typescript"  # Default
-    fi
-
-    print_info "Project: $PROJECT_NAME"
-    print_info "Target: $TARGET_PROJECT"
-    print_info "Language: $PROJECT_LANG"
+ask_project_name() {
+    print_header "STEP 2/7: Project Name"
     echo ""
 
-    # Copy pack to target
-    copy_pack_to_target "$TARGET_PROJECT"
+    local name
+    name=$(get_input "Enter project name")
 
-    # Update CLAUDE.md
-    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
-
-    # Create startup prompt
-    local startup_file
-    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "new" "$PROJECT_NAME" "$PROJECT_LANG")
-
-    print_success "Project initialized at: $TARGET_PROJECT"
-    print_success "Startup file: $startup_file"
-
-    echo ""
-    print_info "After setup is complete, you can delete the pack:"
-    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
-    echo ""
-
-    # Auto-launch Claude Code with DISCOVERY-FLOW
-    print_step "Launching Claude Code..."
-    cd "$TARGET_PROJECT"
-    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this new project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
-}
-
-# Migrate existing project flow (CLI)
-migrate_project_flow_cli() {
-    print_header "PROJECT MIGRATION (CLI MODE)"
-
-    if [ -z "$TARGET_PROJECT" ]; then
-        print_error "Target path required. Use --target PATH"
-        exit 1
-    fi
-
-    # Resolve path
-    if [ ! -d "$TARGET_PROJECT" ]; then
-        print_error "Target directory does not exist: $TARGET_PROJECT"
-        exit 1
-    fi
-
-    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
-
-    # Get project name from directory if not provided
-    if [ -z "$PROJECT_NAME" ]; then
-        PROJECT_NAME="$(basename "$TARGET_PROJECT")"
-    fi
-
-    # Detect language if not provided
-    if [ -z "$PROJECT_LANG" ]; then
-        PROJECT_LANG=$(detect_language "$TARGET_PROJECT")
-        if [ "$PROJECT_LANG" = "unknown" ]; then
-            PROJECT_LANG="other"
-        fi
-    fi
-
-    print_info "Project: $PROJECT_NAME"
-    print_info "Target: $TARGET_PROJECT"
-    print_info "Detected Language: $PROJECT_LANG"
-    echo ""
-
-    # Check if target already has .claude
-    if [ -d "$TARGET_PROJECT/.claude" ]; then
-        print_warning "Target already has .claude directory"
-        print_info "Will merge/update existing configuration"
-    fi
-
-    # Copy pack to target
-    copy_pack_to_target "$TARGET_PROJECT"
-
-    # Update CLAUDE.md
-    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
-
-    # Create startup prompt
-    local startup_file
-    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "migrate" "$PROJECT_NAME" "$PROJECT_LANG")
-
-    print_success "Migration complete: $TARGET_PROJECT"
-
-    echo ""
-    print_info "After migration is verified, you can delete the pack:"
-    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
-    echo ""
-
-    # Auto-launch Claude Code with DISCOVERY-FLOW
-    print_step "Launching Claude Code..."
-    cd "$TARGET_PROJECT"
-    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this migrate project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
-}
-
-# Interactive new project flow
-new_project_flow_interactive() {
-    print_header "NEW PROJECT SETUP"
-    echo ""
-
-    # 1. Get project name
-    PROJECT_NAME=$(get_choice "Enter project name:")
-    if [ -z "$PROJECT_NAME" ]; then
+    while [ -z "$name" ]; do
         print_error "Project name cannot be empty"
-        return
-    fi
+        name=$(get_input "Enter project name")
+    done
 
-    # 2. Suggest and get target path
-    suggest_target_path
-    local path_choice=$(get_choice "Select target path [1-3]:")
+    # Sanitize name (lowercase, replace spaces with dashes)
+    CONFIG_PROJECT_NAME=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
 
-    case "$path_choice" in
-        1) TARGET_PROJECT="$(dirname "$PACK_ROOT")/$PROJECT_NAME" ;;
-        2) TARGET_PROJECT="$(pwd)/$PROJECT_NAME" ;;
-        3) TARGET_PROJECT=$(get_choice "Enter custom path:") ;;
-        *) TARGET_PROJECT="$(dirname "$PACK_ROOT")/$PROJECT_NAME" ;;
-    esac
-
-    # 3. Get language
-    show_language_menu
-    local lang_choice=$(get_choice "Select language [1-9]:")
-    PROJECT_LANG=$(get_language_from_selection "$lang_choice")
-
-    # 4. Confirm
-    echo ""
-    print_header "CONFIRM CONFIGURATION"
-    echo ""
-    echo -e "  Project Name: ${GREEN}$PROJECT_NAME${NC}"
-    echo -e "  Target Path:  ${GREEN}$TARGET_PROJECT${NC}"
-    echo -e "  Language:     ${GREEN}$PROJECT_LANG${NC}"
-    echo ""
-
-    local confirm=$(get_choice "Proceed? (y/n):")
-    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-        print_warning "Setup cancelled"
-        return
-    fi
-
-    # Create and set up
-    mkdir -p "$TARGET_PROJECT"
-    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
-
-    copy_pack_to_target "$TARGET_PROJECT"
-    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
-
-    local startup_file
-    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "new" "$PROJECT_NAME" "$PROJECT_LANG")
-
-    print_success "Project initialized!"
-
-    echo ""
-    print_info "After setup is complete, you can delete the pack:"
-    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
-    echo ""
-
-    # Auto-launch Claude Code with DISCOVERY-FLOW
-    print_step "Launching Claude Code..."
-    cd "$TARGET_PROJECT"
-    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this new project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
+    print_success "Project name: $CONFIG_PROJECT_NAME"
 }
 
-# Interactive migrate flow
-migrate_project_flow_interactive() {
-    print_header "MIGRATE EXISTING PROJECT"
+ask_tech_stack() {
+    print_header "STEP 3/7: Tech Stack"
+    echo ""
+    echo -e "  ${WHITE}Select primary programming language:${NC}"
     echo ""
 
-    # 1. Suggest and get target path
-    suggest_target_path
-    local path_choice=$(get_choice "Select project to migrate [1-3]:")
+    for i in "${!TECH_STACKS[@]}"; do
+        print_option "$i" "${TECH_STACKS[$i]}"
+    done
+    echo ""
 
-    case "$path_choice" in
-        1) TARGET_PROJECT="$(dirname "$PACK_ROOT")" ;;
-        2) TARGET_PROJECT="$(pwd)" ;;
-        3) TARGET_PROJECT=$(get_choice "Enter project path:") ;;
-        *) TARGET_PROJECT="$(dirname "$PACK_ROOT")" ;;
+    local choice
+    choice=$(get_choice "Select tech stack [1-${#TECH_STACKS[@]}]" "${#TECH_STACKS[@]}")
+    CONFIG_TECH_STACK="${TECH_STACKS[$choice]}"
+
+    print_success "Tech stack: $CONFIG_TECH_STACK"
+}
+
+ask_frontend() {
+    print_header "STEP 4/7: Frontend Framework"
+    echo ""
+    echo -e "  ${WHITE}Select frontend framework (or None for backend-only):${NC}"
+    echo ""
+
+    for i in "${!FRONTENDS[@]}"; do
+        print_option "$i" "${FRONTENDS[$i]}"
+    done
+    echo ""
+
+    local choice
+    choice=$(get_choice "Select frontend [1-${#FRONTENDS[@]}]" "${#FRONTENDS[@]}")
+    CONFIG_FRONTEND="${FRONTENDS[$choice]}"
+
+    print_success "Frontend: $CONFIG_FRONTEND"
+}
+
+ask_database() {
+    print_header "STEP 5/7: Database"
+    echo ""
+    echo -e "  ${WHITE}Select database (or None):${NC}"
+    echo ""
+
+    for i in "${!DATABASES[@]}"; do
+        print_option "$i" "${DATABASES[$i]}"
+    done
+    echo ""
+
+    local choice
+    choice=$(get_choice "Select database [1-${#DATABASES[@]}]" "${#DATABASES[@]}")
+    CONFIG_DATABASE="${DATABASES[$choice]}"
+
+    print_success "Database: $CONFIG_DATABASE"
+}
+
+ask_target_path() {
+    print_header "STEP 6/7: Target Path"
+    echo ""
+
+    local parent_dir="$(dirname "$PACK_ROOT")"
+    local suggested_path="$parent_dir/$CONFIG_PROJECT_NAME"
+
+    echo -e "  ${WHITE}Where should the project be created?${NC}"
+    echo ""
+    print_option "1" "Suggested: $suggested_path"
+    print_option "2" "Current directory: $(pwd)/$CONFIG_PROJECT_NAME"
+    print_option "3" "Custom path"
+    echo ""
+
+    local choice
+    choice=$(get_choice "Select option [1-3]" 3)
+
+    case "$choice" in
+        1) CONFIG_TARGET_PATH="$suggested_path" ;;
+        2) CONFIG_TARGET_PATH="$(pwd)/$CONFIG_PROJECT_NAME" ;;
+        3) CONFIG_TARGET_PATH=$(get_input "Enter full path") ;;
     esac
 
     # Validate
-    if [ ! -d "$TARGET_PROJECT" ]; then
-        print_error "Directory does not exist: $TARGET_PROJECT"
+    if ! check_target_path "$CONFIG_TARGET_PATH"; then
+        ask_target_path  # Retry
         return
     fi
 
-    TARGET_PROJECT="$(cd "$TARGET_PROJECT" && pwd)"
+    print_success "Target path: $CONFIG_TARGET_PATH"
+}
 
-    # 2. Get/detect project name
-    local detected_name="$(basename "$TARGET_PROJECT")"
-    PROJECT_NAME=$(get_choice "Project name [$detected_name]:")
-    if [ -z "$PROJECT_NAME" ]; then
-        PROJECT_NAME="$detected_name"
+ask_flow_type() {
+    print_header "STEP 7/7: Project Flow"
+    echo ""
+    echo -e "  ${WHITE}What type of project setup?${NC}"
+    echo ""
+
+    print_option "1" "New Project       - Start from scratch with full discovery"
+    print_option "2" "Migration         - Existing project with documentation to migrate"
+    print_option "3" "Doc Audit Only    - Just audit existing documentation"
+    print_option "4" "Quick Start       - Skip discovery, ready to work"
+    echo ""
+
+    local choice
+    choice=$(get_choice "Select flow [1-4]" 4)
+    CONFIG_FLOW_TYPE="${FLOW_TYPES[$choice]}"
+
+    local flow_desc=""
+    case "$CONFIG_FLOW_TYPE" in
+        new_project)  flow_desc="Full discovery interview → PRD → Architecture" ;;
+        migration)    flow_desc="Doc audit → Quick discovery → Migration plan" ;;
+        doc_audit)    flow_desc="Documentation audit and quality report" ;;
+        quick_start)  flow_desc="Direct to Orchestrator, ready to code" ;;
+    esac
+
+    print_success "Flow: $CONFIG_FLOW_TYPE"
+    print_info "$flow_desc"
+}
+
+ask_project_description() {
+    print_header "PROJECT DESCRIPTION"
+    echo ""
+    echo -e "  ${WHITE}Describe your project (this helps agents understand context):${NC}"
+    echo ""
+
+    # Project description (always ask)
+    echo -e "${YELLOW}Brief project description (1-3 sentences):${NC}"
+    echo -e "${CYAN}Example: E-commerce platform for selling handmade products with user accounts and payments${NC}"
+    read -r CONFIG_PROJECT_DESC
+    CONFIG_PROJECT_DESC="${CONFIG_PROJECT_DESC%$'\r'}"
+    echo ""
+
+    # For migration/existing projects - ask what's done
+    if [[ "$CONFIG_FLOW_TYPE" == "migration" || "$CONFIG_FLOW_TYPE" == "doc_audit" ]]; then
+        echo -e "${YELLOW}What is already done/implemented? (features, modules, integrations):${NC}"
+        echo -e "${CYAN}Example: User auth with Firebase, product listing, basic cart - no checkout yet${NC}"
+        read -r CONFIG_DONE_STATUS
+        CONFIG_DONE_STATUS="${CONFIG_DONE_STATUS%$'\r'}"
+        echo ""
+
+        echo -e "${YELLOW}What are your uncertainties/concerns/problems?${NC}"
+        echo -e "${CYAN}Example: Not sure about payment integration approach, performance issues with large catalogs${NC}"
+        read -r CONFIG_UNCERTAINTIES
+        CONFIG_UNCERTAINTIES="${CONFIG_UNCERTAINTIES%$'\r'}"
+        echo ""
     fi
 
-    # 3. Detect/get language
-    local detected_lang=$(detect_language "$TARGET_PROJECT")
-    print_info "Detected language: $detected_lang"
+    # For new projects - ask about vision/uncertainties
+    if [[ "$CONFIG_FLOW_TYPE" == "new_project" ]]; then
+        echo -e "${YELLOW}What are your main uncertainties or questions?${NC}"
+        echo -e "${CYAN}Example: Should I use monorepo? Which auth provider? How to handle file uploads?${NC}"
+        read -r CONFIG_UNCERTAINTIES
+        CONFIG_UNCERTAINTIES="${CONFIG_UNCERTAINTIES%$'\r'}"
+        echo ""
+    fi
 
-    show_language_menu
-    local lang_choice=$(get_choice "Select language [1-9] (Enter to keep detected):")
-    if [ -n "$lang_choice" ]; then
-        PROJECT_LANG=$(get_language_from_selection "$lang_choice")
-    else
-        PROJECT_LANG="$detected_lang"
-        if [ "$PROJECT_LANG" = "unknown" ]; then
-            PROJECT_LANG="other"
+    print_success "Project context captured"
+}
+
+ask_advanced_mode() {
+    print_header "ADVANCED OPTIONS (Optional)"
+    echo ""
+
+    if ! confirm "Configure advanced options (CI/CD, Testing, Hosting)?"; then
+        CONFIG_ADVANCED_MODE=false
+        return
+    fi
+
+    CONFIG_ADVANCED_MODE=true
+
+    # CI/CD
+    echo ""
+    echo -e "  ${WHITE}CI/CD Platform:${NC}"
+    for i in "${!CI_CD_OPTIONS[@]}"; do
+        print_option "$i" "${CI_CD_OPTIONS[$i]}"
+    done
+    local choice
+    choice=$(get_choice "Select CI/CD [1-${#CI_CD_OPTIONS[@]}]" "${#CI_CD_OPTIONS[@]}")
+    CONFIG_CI_CD="${CI_CD_OPTIONS[$choice]}"
+
+    # Testing
+    echo ""
+    echo -e "  ${WHITE}Testing Framework:${NC}"
+    for i in "${!TESTING_OPTIONS[@]}"; do
+        print_option "$i" "${TESTING_OPTIONS[$i]}"
+    done
+    choice=$(get_choice "Select testing [1-${#TESTING_OPTIONS[@]}]" "${#TESTING_OPTIONS[@]}")
+    CONFIG_TESTING="${TESTING_OPTIONS[$choice]}"
+
+    # Hosting
+    echo ""
+    echo -e "  ${WHITE}Hosting Platform:${NC}"
+    for i in "${!HOSTING_OPTIONS[@]}"; do
+        print_option "$i" "${HOSTING_OPTIONS[$i]}"
+    done
+    choice=$(get_choice "Select hosting [1-${#HOSTING_OPTIONS[@]}]" "${#HOSTING_OPTIONS[@]}")
+    CONFIG_HOSTING="${HOSTING_OPTIONS[$choice]}"
+
+    print_success "Advanced options configured"
+}
+
+# ============================================================================
+# CONFIRMATION
+# ============================================================================
+
+show_summary() {
+    print_header "CONFIGURATION SUMMARY"
+    echo ""
+    echo -e "  ${WHITE}Communication:${NC}  $CONFIG_COMM_LANG"
+    echo -e "  ${WHITE}Project Name:${NC}   $CONFIG_PROJECT_NAME"
+    echo -e "  ${WHITE}Tech Stack:${NC}     $CONFIG_TECH_STACK"
+    echo -e "  ${WHITE}Frontend:${NC}       $CONFIG_FRONTEND"
+    echo -e "  ${WHITE}Database:${NC}       $CONFIG_DATABASE"
+    echo -e "  ${WHITE}Target Path:${NC}    $CONFIG_TARGET_PATH"
+    echo -e "  ${WHITE}Flow Type:${NC}      $CONFIG_FLOW_TYPE"
+
+    if [ -n "$CONFIG_PROJECT_DESC" ]; then
+        echo ""
+        echo -e "  ${WHITE}Description:${NC}"
+        echo -e "    $CONFIG_PROJECT_DESC"
+    fi
+
+    if [ -n "$CONFIG_DONE_STATUS" ]; then
+        echo ""
+        echo -e "  ${WHITE}Already Done:${NC}"
+        echo -e "    $CONFIG_DONE_STATUS"
+    fi
+
+    if [ -n "$CONFIG_UNCERTAINTIES" ]; then
+        echo ""
+        echo -e "  ${WHITE}Uncertainties:${NC}"
+        echo -e "    $CONFIG_UNCERTAINTIES"
+    fi
+
+    if [ "$CONFIG_ADVANCED_MODE" = true ]; then
+        echo ""
+        echo -e "  ${WHITE}Advanced:${NC}"
+        echo -e "    CI/CD:    $CONFIG_CI_CD"
+        echo -e "    Testing:  $CONFIG_TESTING"
+        echo -e "    Hosting:  $CONFIG_HOSTING"
+    fi
+
+    echo ""
+}
+
+# ============================================================================
+# FILE OPERATIONS
+# ============================================================================
+
+create_directory_structure() {
+    print_step "Creating directory structure..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    # Create main directories
+    mkdir -p "$target/.claude/agents/planning"
+    mkdir -p "$target/.claude/agents/development"
+    mkdir -p "$target/.claude/agents/quality"
+    mkdir -p "$target/.claude/workflows/definitions/product"
+    mkdir -p "$target/.claude/workflows/definitions/engineering"
+    mkdir -p "$target/.claude/workflows/documentation"
+    mkdir -p "$target/.claude/templates"
+    mkdir -p "$target/.claude/patterns"
+    mkdir -p "$target/.claude/checklists"
+    mkdir -p "$target/.claude/config"
+    mkdir -p "$target/.claude/state/memory-bank"
+    mkdir -p "$target/.claude/temp"
+    mkdir -p "$target/.claude/logs/workflows"
+    mkdir -p "$target/.claude/logs/sessions"
+    mkdir -p "$target/scripts"
+    mkdir -p "$target/docs/0-DISCOVERY"
+    mkdir -p "$target/docs/1-BASELINE/product"
+    mkdir -p "$target/docs/1-BASELINE/architecture"
+    mkdir -p "$target/docs/1-BASELINE/research"
+    mkdir -p "$target/docs/2-MANAGEMENT/epics"
+    mkdir -p "$target/docs/2-MANAGEMENT/sprints"
+    mkdir -p "$target/docs/3-DEVELOPMENT"
+    mkdir -p "$target/docs/reviews"
+
+    print_success "Directory structure created"
+}
+
+copy_agents() {
+    print_step "Copying agents..."
+
+    local target="$CONFIG_TARGET_PATH"
+    local count=0
+
+    # ORCHESTRATOR
+    if [ -f "$PACK_ROOT/.claude/agents/ORCHESTRATOR.md" ]; then
+        cp "$PACK_ROOT/.claude/agents/ORCHESTRATOR.md" "$target/.claude/agents/"
+        ((count++))
+    fi
+
+    # Planning agents
+    for agent in DISCOVERY-AGENT DOC-AUDITOR PM-AGENT ARCHITECT-AGENT PRODUCT-OWNER RESEARCH-AGENT SCRUM-MASTER UX-DESIGNER; do
+        if [ -f "$PACK_ROOT/.claude/agents/planning/$agent.md" ]; then
+            cp "$PACK_ROOT/.claude/agents/planning/$agent.md" "$target/.claude/agents/planning/"
+            ((count++))
+        fi
+    done
+
+    # Development agents
+    for agent in BACKEND-DEV FRONTEND-DEV SENIOR-DEV TEST-ENGINEER; do
+        if [ -f "$PACK_ROOT/.claude/agents/development/$agent.md" ]; then
+            cp "$PACK_ROOT/.claude/agents/development/$agent.md" "$target/.claude/agents/development/"
+            ((count++))
+        fi
+    done
+
+    # Quality agents
+    for agent in CODE-REVIEWER QA-AGENT TECH-WRITER; do
+        if [ -f "$PACK_ROOT/.claude/agents/quality/$agent.md" ]; then
+            cp "$PACK_ROOT/.claude/agents/quality/$agent.md" "$target/.claude/agents/quality/"
+            ((count++))
+        fi
+    done
+
+    print_success "Agents copied: $count files"
+}
+
+copy_workflows() {
+    print_step "Copying workflows..."
+
+    local target="$CONFIG_TARGET_PATH"
+    local count=0
+
+    # Workflow definitions (YAML)
+    if [ -d "$PACK_ROOT/.claude/workflows/definitions" ]; then
+        cp -r "$PACK_ROOT/.claude/workflows/definitions/"* "$target/.claude/workflows/definitions/" 2>/dev/null || true
+        count=$(find "$target/.claude/workflows/definitions" -name "*.yaml" 2>/dev/null | wc -l)
+    fi
+
+    # Workflow documentation (MD)
+    if [ -d "$PACK_ROOT/.claude/workflows/documentation" ]; then
+        cp -r "$PACK_ROOT/.claude/workflows/documentation/"* "$target/.claude/workflows/documentation/" 2>/dev/null || true
+    fi
+
+    print_success "Workflows copied: $count definitions"
+}
+
+copy_templates() {
+    print_step "Copying templates..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    if [ -d "$PACK_ROOT/.claude/templates" ]; then
+        cp -r "$PACK_ROOT/.claude/templates/"*.md "$target/.claude/templates/" 2>/dev/null || true
+    fi
+
+    local count=$(find "$target/.claude/templates" -name "*.md" 2>/dev/null | wc -l)
+    print_success "Templates copied: $count files"
+}
+
+copy_patterns() {
+    print_step "Copying patterns..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    if [ -d "$PACK_ROOT/.claude/patterns" ]; then
+        cp -r "$PACK_ROOT/.claude/patterns/"*.md "$target/.claude/patterns/" 2>/dev/null || true
+    fi
+
+    local count=$(find "$target/.claude/patterns" -name "*.md" 2>/dev/null | wc -l)
+    print_success "Patterns copied: $count files"
+}
+
+copy_checklists() {
+    print_step "Copying checklists..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    if [ -d "$PACK_ROOT/.claude/checklists" ]; then
+        cp -r "$PACK_ROOT/.claude/checklists/"*.md "$target/.claude/checklists/" 2>/dev/null || true
+    fi
+
+    local count=$(find "$target/.claude/checklists" -name "*.md" 2>/dev/null | wc -l)
+    print_success "Checklists copied: $count files"
+}
+
+copy_state_templates() {
+    print_step "Copying state templates..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    if [ -d "$PACK_ROOT/.claude/state" ]; then
+        # Copy state files
+        for file in AGENT-STATE.md DECISION-LOG.md TASK-QUEUE.md HANDOFFS.md AGENT-MEMORY.md DEPENDENCIES.md METRICS.md; do
+            if [ -f "$PACK_ROOT/.claude/state/$file" ]; then
+                cp "$PACK_ROOT/.claude/state/$file" "$target/.claude/state/"
+            fi
+        done
+
+        # Copy memory-bank templates
+        if [ -d "$PACK_ROOT/.claude/state/memory-bank" ]; then
+            cp -r "$PACK_ROOT/.claude/state/memory-bank/"* "$target/.claude/state/memory-bank/" 2>/dev/null || true
         fi
     fi
 
-    # 4. Confirm
-    echo ""
-    print_header "CONFIRM MIGRATION"
-    echo ""
-    echo -e "  Project Name: ${GREEN}$PROJECT_NAME${NC}"
-    echo -e "  Target Path:  ${GREEN}$TARGET_PROJECT${NC}"
-    echo -e "  Language:     ${GREEN}$PROJECT_LANG${NC}"
-    echo ""
+    print_success "State templates copied"
+}
 
-    local confirm=$(get_choice "Proceed with migration? (y/n):")
-    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-        print_warning "Migration cancelled"
-        return
+copy_monitoring_scripts() {
+    print_step "Copying monitoring scripts..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    # Copy monitoring scripts
+    if [ -f "$PACK_ROOT/scripts/session-logger.sh" ]; then
+        cp "$PACK_ROOT/scripts/session-logger.sh" "$target/scripts/"
+        chmod +x "$target/scripts/session-logger.sh"
     fi
 
-    # Migrate
-    copy_pack_to_target "$TARGET_PROJECT"
-    update_claude_md "$TARGET_PROJECT" "$PROJECT_NAME" "$PROJECT_LANG"
+    if [ -f "$PACK_ROOT/scripts/context-monitor.sh" ]; then
+        cp "$PACK_ROOT/scripts/context-monitor.sh" "$target/scripts/"
+        chmod +x "$target/scripts/context-monitor.sh"
+    fi
 
-    local startup_file
-    startup_file=$(create_startup_prompt "$TARGET_PROJECT" "migrate" "$PROJECT_NAME" "$PROJECT_LANG")
+    # Copy METRICS template
+    if [ -f "$PACK_ROOT/.claude/state/METRICS.md" ]; then
+        cp "$PACK_ROOT/.claude/state/METRICS.md" "$target/.claude/state/"
+    fi
 
-    print_success "Migration complete!"
-
-    echo ""
-    print_info "After setup is complete, you can delete the pack:"
-    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
-    echo ""
-
-    # Auto-launch Claude Code with DISCOVERY-FLOW
-    print_step "Launching Claude Code..."
-    cd "$TARGET_PROJECT"
-    claude "Read @.claude/STARTUP-PROMPT.md and start DISCOVERY-FLOW for this migrate project. Project name: $PROJECT_NAME, Language: $PROJECT_LANG"
+    print_success "Monitoring scripts copied"
 }
 
-# Show welcome banner
-show_welcome() {
-    clear
-    echo ""
-    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║       AGENT METHODOLOGY PACK - INTERACTIVE SETUP v2.0      ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    echo -e "${MAGENTA}Welcome to the Agent Methodology Pack Setup Wizard!${NC}"
-    echo ""
-    echo -e "Pack location: ${CYAN}$PACK_ROOT${NC}"
-    echo ""
-    echo -e "${YELLOW}This wizard will help you:${NC}"
-    echo -e "  • Set up a new project with the agent framework"
-    echo -e "  • Migrate an existing project to use agents"
-    echo -e "  • Configure project-specific settings"
-    echo ""
+copy_config() {
+    print_step "Copying configuration..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    # Routing rules
+    if [ -f "$PACK_ROOT/.claude/config/routing-rules.yaml" ]; then
+        cp "$PACK_ROOT/.claude/config/routing-rules.yaml" "$target/.claude/config/"
+    fi
+
+    print_success "Configuration copied"
 }
 
-# Main menu
-show_main_menu() {
-    print_header "What would you like to do?"
-    echo ""
-    print_menu_item "1" "Create NEW project"
-    print_menu_item "2" "Migrate EXISTING project"
-    print_menu_item "3" "Exit"
-    echo ""
+generate_settings_local() {
+    print_step "Generating settings.local.json (MAX autonomy)..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    cat > "$target/.claude/settings.local.json" << 'EOF'
+{
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_METRICS_EXPORTER": "console",
+    "OTEL_METRIC_EXPORT_INTERVAL": "30000"
+  },
+  "permissions": {
+    "allow": [
+      "// ===== CORE TOOLS =====",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "WebSearch",
+      "WebFetch",
+      "Task",
+      "Batch",
+      "TodoRead",
+      "TodoWrite",
+
+      "// ===== MCP TOOLS =====",
+      "mcp__*",
+
+      "// ===== FILE OPERATIONS =====",
+      "Bash(mkdir:*)",
+      "Bash(mkdir -p:*)",
+      "Bash(rmdir:*)",
+      "Bash(rm:*)",
+      "Bash(rm -r:*)",
+      "Bash(rm -rf:*)",
+      "Bash(cp:*)",
+      "Bash(cp -r:*)",
+      "Bash(mv:*)",
+      "Bash(chmod:*)",
+      "Bash(chown:*)",
+      "Bash(ln:*)",
+      "Bash(ln -s:*)",
+      "Bash(ls:*)",
+      "Bash(ls -la:*)",
+      "Bash(find:*)",
+      "Bash(touch:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(diff:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(cut:*)",
+      "Bash(tr:*)",
+      "Bash(xargs:*)",
+      "Bash(tee:*)",
+      "Bash(basename:*)",
+      "Bash(dirname:*)",
+      "Bash(realpath:*)",
+      "Bash(readlink:*)",
+
+      "// ===== SHELL BASICS =====",
+      "Bash(echo:*)",
+      "Bash(printf:*)",
+      "Bash(pwd)",
+      "Bash(cd:*)",
+      "Bash(pushd:*)",
+      "Bash(popd:*)",
+      "Bash(which:*)",
+      "Bash(where:*)",
+      "Bash(whereis:*)",
+      "Bash(type:*)",
+      "Bash(env:*)",
+      "Bash(export:*)",
+      "Bash(set:*)",
+      "Bash(unset:*)",
+      "Bash(source:*)",
+      "Bash(.:*)",
+      "Bash(eval:*)",
+      "Bash(exec:*)",
+      "Bash(test:*)",
+      "Bash([:*)",
+      "Bash([[:*)",
+      "Bash(true)",
+      "Bash(false)",
+      "Bash(exit:*)",
+      "Bash(return:*)",
+      "Bash(sleep:*)",
+      "Bash(date:*)",
+      "Bash(time:*)",
+      "Bash(timeout:*)",
+
+      "// ===== GIT - ALL COMMANDS =====",
+      "Bash(git:*)",
+      "Bash(git init:*)",
+      "Bash(git clone:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git branch:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git stash:*)",
+      "Bash(git tag:*)",
+      "Bash(git remote:*)",
+      "Bash(git reset:*)",
+      "Bash(git revert:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git bisect:*)",
+      "Bash(git blame:*)",
+      "Bash(git reflog:*)",
+      "Bash(git config:*)",
+      "Bash(git clean:*)",
+      "Bash(git gc:*)",
+      "Bash(git fsck:*)",
+      "Bash(git archive:*)",
+      "Bash(git submodule:*)",
+      "Bash(git worktree:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git shortlog:*)",
+      "Bash(git describe:*)",
+
+      "// ===== GITHUB CLI =====",
+      "Bash(gh:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh release:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh run:*)",
+      "Bash(gh gist:*)",
+      "Bash(gh api:*)",
+      "Bash(gh browse:*)",
+      "Bash(gh codespace:*)",
+      "Bash(gh secret:*)",
+      "Bash(gh variable:*)",
+
+      "// ===== NODE.JS ECOSYSTEM =====",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm start:*)",
+      "Bash(npm build:*)",
+      "Bash(npm publish:*)",
+      "Bash(npm link:*)",
+      "Bash(npm unlink:*)",
+      "Bash(npm update:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm cache:*)",
+      "Bash(npm exec:*)",
+      "Bash(npm pkg:*)",
+      "Bash(npx:*)",
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(bun:*)",
+      "Bash(deno:*)",
+      "Bash(ts-node:*)",
+      "Bash(tsx:*)",
+
+      "// ===== TYPESCRIPT & LINTING =====",
+      "Bash(tsc:*)",
+      "Bash(eslint:*)",
+      "Bash(prettier:*)",
+      "Bash(biome:*)",
+      "Bash(oxlint:*)",
+      "Bash(stylelint:*)",
+      "Bash(lint-staged:*)",
+      "Bash(husky:*)",
+
+      "// ===== TESTING FRAMEWORKS =====",
+      "Bash(jest:*)",
+      "Bash(vitest:*)",
+      "Bash(mocha:*)",
+      "Bash(jasmine:*)",
+      "Bash(ava:*)",
+      "Bash(tap:*)",
+      "Bash(playwright:*)",
+      "Bash(cypress:*)",
+      "Bash(puppeteer:*)",
+      "Bash(storybook:*)",
+
+      "// ===== PYTHON ECOSYSTEM =====",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+      "Bash(pipx:*)",
+      "Bash(poetry:*)",
+      "Bash(pdm:*)",
+      "Bash(uv:*)",
+      "Bash(rye:*)",
+      "Bash(hatch:*)",
+      "Bash(pipenv:*)",
+      "Bash(virtualenv:*)",
+      "Bash(venv:*)",
+      "Bash(conda:*)",
+      "Bash(mamba:*)",
+      "Bash(pytest:*)",
+      "Bash(unittest:*)",
+      "Bash(nose:*)",
+      "Bash(tox:*)",
+      "Bash(nox:*)",
+      "Bash(black:*)",
+      "Bash(ruff:*)",
+      "Bash(isort:*)",
+      "Bash(mypy:*)",
+      "Bash(pyright:*)",
+      "Bash(pylint:*)",
+      "Bash(flake8:*)",
+      "Bash(bandit:*)",
+      "Bash(safety:*)",
+      "Bash(pre-commit:*)",
+      "Bash(mkdocs:*)",
+      "Bash(sphinx:*)",
+      "Bash(pdoc:*)",
+      "Bash(fastapi:*)",
+      "Bash(uvicorn:*)",
+      "Bash(gunicorn:*)",
+      "Bash(django-admin:*)",
+      "Bash(flask:*)",
+      "Bash(celery:*)",
+      "Bash(alembic:*)",
+      "Bash(jupyter:*)",
+      "Bash(ipython:*)",
+
+      "// ===== GO ECOSYSTEM =====",
+      "Bash(go:*)",
+      "Bash(go build:*)",
+      "Bash(go run:*)",
+      "Bash(go test:*)",
+      "Bash(go mod:*)",
+      "Bash(go get:*)",
+      "Bash(go install:*)",
+      "Bash(go fmt:*)",
+      "Bash(go vet:*)",
+      "Bash(go generate:*)",
+      "Bash(go work:*)",
+      "Bash(gofmt:*)",
+      "Bash(golint:*)",
+      "Bash(golangci-lint:*)",
+      "Bash(staticcheck:*)",
+      "Bash(air:*)",
+
+      "// ===== RUST ECOSYSTEM =====",
+      "Bash(cargo:*)",
+      "Bash(cargo build:*)",
+      "Bash(cargo run:*)",
+      "Bash(cargo test:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo clippy:*)",
+      "Bash(cargo fmt:*)",
+      "Bash(cargo doc:*)",
+      "Bash(cargo publish:*)",
+      "Bash(cargo add:*)",
+      "Bash(cargo remove:*)",
+      "Bash(cargo update:*)",
+      "Bash(cargo audit:*)",
+      "Bash(cargo deny:*)",
+      "Bash(rustc:*)",
+      "Bash(rustfmt:*)",
+      "Bash(rustup:*)",
+
+      "// ===== JAVA/JVM ECOSYSTEM =====",
+      "Bash(java:*)",
+      "Bash(javac:*)",
+      "Bash(jar:*)",
+      "Bash(mvn:*)",
+      "Bash(gradle:*)",
+      "Bash(gradlew:*)",
+      "Bash(./gradlew:*)",
+      "Bash(ant:*)",
+      "Bash(kotlin:*)",
+      "Bash(kotlinc:*)",
+      "Bash(scala:*)",
+      "Bash(sbt:*)",
+      "Bash(groovy:*)",
+      "Bash(clojure:*)",
+      "Bash(lein:*)",
+
+      "// ===== .NET ECOSYSTEM =====",
+      "Bash(dotnet:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet publish:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet remove:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet watch:*)",
+      "Bash(dotnet ef:*)",
+      "Bash(dotnet format:*)",
+      "Bash(nuget:*)",
+      "Bash(csc:*)",
+      "Bash(msbuild:*)",
+
+      "// ===== DART/FLUTTER =====",
+      "Bash(dart:*)",
+      "Bash(dart pub:*)",
+      "Bash(dart run:*)",
+      "Bash(dart test:*)",
+      "Bash(dart compile:*)",
+      "Bash(dart analyze:*)",
+      "Bash(dart format:*)",
+      "Bash(dart fix:*)",
+      "Bash(flutter:*)",
+      "Bash(flutter create:*)",
+      "Bash(flutter run:*)",
+      "Bash(flutter build:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter pub:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter analyze:*)",
+
+      "// ===== PHP ECOSYSTEM =====",
+      "Bash(php:*)",
+      "Bash(composer:*)",
+      "Bash(artisan:*)",
+      "Bash(php artisan:*)",
+      "Bash(phpunit:*)",
+      "Bash(pest:*)",
+      "Bash(phpstan:*)",
+      "Bash(psalm:*)",
+      "Bash(pint:*)",
+      "Bash(php-cs-fixer:*)",
+      "Bash(rector:*)",
+      "Bash(laravel:*)",
+      "Bash(symfony:*)",
+
+      "// ===== RUBY ECOSYSTEM =====",
+      "Bash(ruby:*)",
+      "Bash(gem:*)",
+      "Bash(bundle:*)",
+      "Bash(bundler:*)",
+      "Bash(rails:*)",
+      "Bash(rake:*)",
+      "Bash(rspec:*)",
+      "Bash(rubocop:*)",
+      "Bash(erb:*)",
+      "Bash(irb:*)",
+      "Bash(pry:*)",
+
+      "// ===== BUILD TOOLS =====",
+      "Bash(make:*)",
+      "Bash(cmake:*)",
+      "Bash(ninja:*)",
+      "Bash(meson:*)",
+      "Bash(bazel:*)",
+      "Bash(buck:*)",
+      "Bash(pants:*)",
+      "Bash(just:*)",
+      "Bash(task:*)",
+      "Bash(invoke:*)",
+      "Bash(nuke:*)",
+      "Bash(turbo:*)",
+      "Bash(nx:*)",
+      "Bash(lerna:*)",
+      "Bash(rush:*)",
+
+      "// ===== BUNDLERS & COMPILERS =====",
+      "Bash(webpack:*)",
+      "Bash(vite:*)",
+      "Bash(esbuild:*)",
+      "Bash(swc:*)",
+      "Bash(rollup:*)",
+      "Bash(parcel:*)",
+      "Bash(babel:*)",
+      "Bash(postcss:*)",
+      "Bash(sass:*)",
+      "Bash(less:*)",
+      "Bash(tailwindcss:*)",
+
+      "// ===== NETWORK & HTTP =====",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(http:*)",
+      "Bash(httpie:*)",
+      "Bash(nc:*)",
+      "Bash(netcat:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+      "Bash(ping:*)",
+      "Bash(traceroute:*)",
+      "Bash(dig:*)",
+      "Bash(nslookup:*)",
+      "Bash(host:*)",
+      "Bash(openssl:*)",
+
+      "// ===== ARCHIVE & COMPRESSION =====",
+      "Bash(tar:*)",
+      "Bash(zip:*)",
+      "Bash(unzip:*)",
+      "Bash(gzip:*)",
+      "Bash(gunzip:*)",
+      "Bash(bzip2:*)",
+      "Bash(xz:*)",
+      "Bash(7z:*)",
+      "Bash(rar:*)",
+      "Bash(unrar:*)",
+
+      "// ===== TEXT PROCESSING =====",
+      "Bash(jq:*)",
+      "Bash(yq:*)",
+      "Bash(xq:*)",
+      "Bash(fx:*)",
+      "Bash(gron:*)",
+      "Bash(jo:*)",
+      "Bash(csvtool:*)",
+      "Bash(miller:*)",
+      "Bash(pandoc:*)",
+      "Bash(iconv:*)",
+      "Bash(base64:*)",
+      "Bash(md5sum:*)",
+      "Bash(sha256sum:*)",
+      "Bash(xxd:*)",
+      "Bash(od:*)",
+      "Bash(hexdump:*)",
+
+      "// ===== SCRIPTS =====",
+      "Bash(bash:*)",
+      "Bash(sh:*)",
+      "Bash(zsh:*)",
+      "Bash(bash scripts/*)",
+      "Bash(sh scripts/*)",
+      "Bash(./scripts/*)",
+      "Bash(./bin/*)",
+      "Bash(./*.sh)",
+
+      "// ===== MISC UTILITIES =====",
+      "Bash(tree:*)",
+      "Bash(watch:*)",
+      "Bash(entr:*)",
+      "Bash(ag:*)",
+      "Bash(rg:*)",
+      "Bash(fd:*)",
+      "Bash(fzf:*)",
+      "Bash(bat:*)",
+      "Bash(exa:*)",
+      "Bash(lsd:*)",
+      "Bash(dust:*)",
+      "Bash(duf:*)",
+      "Bash(htop:*)",
+      "Bash(btop:*)",
+      "Bash(procs:*)",
+      "Bash(ps:*)",
+      "Bash(top:*)",
+      "Bash(free:*)",
+      "Bash(df:*)",
+      "Bash(du:*)",
+      "Bash(stat:*)",
+      "Bash(file:*)",
+      "Bash(lsof:*)",
+      "Bash(strace:*)",
+      "Bash(ltrace:*)",
+      "Bash(nproc:*)",
+      "Bash(uname:*)",
+      "Bash(hostname:*)",
+      "Bash(whoami:*)",
+      "Bash(id:*)",
+      "Bash(uptime:*)",
+      "Bash(cal:*)",
+      "Bash(bc:*)",
+      "Bash(expr:*)",
+      "Bash(seq:*)",
+      "Bash(yes:*)",
+      "Bash(clear:*)",
+      "Bash(reset:*)",
+      "Bash(tput:*)",
+      "Bash(stty:*)",
+
+      "// ===== DATABASE CLIENTS =====",
+      "Bash(psql:*)",
+      "Bash(mysql:*)",
+      "Bash(mongosh:*)",
+      "Bash(mongo:*)",
+      "Bash(redis-cli:*)",
+      "Bash(sqlite3:*)",
+      "Bash(sqlcmd:*)",
+      "Bash(bcp:*)",
+      "Bash(pgcli:*)",
+      "Bash(mycli:*)",
+      "Bash(litecli:*)",
+      "Bash(usql:*)",
+
+      "// ===== CLOUD CLI =====",
+      "Bash(aws:*)",
+      "Bash(gcloud:*)",
+      "Bash(az:*)",
+      "Bash(doctl:*)",
+      "Bash(linode-cli:*)",
+      "Bash(heroku:*)",
+      "Bash(vercel:*)",
+      "Bash(netlify:*)",
+      "Bash(flyctl:*)",
+      "Bash(railway:*)",
+      "Bash(render:*)",
+      "Bash(wrangler:*)",
+      "Bash(supabase:*)",
+      "Bash(firebase:*)",
+      "Bash(amplify:*)",
+      "Bash(sst:*)",
+      "Bash(pulumi:*)",
+      "Bash(terraform:*)",
+      "Bash(terragrunt:*)",
+      "Bash(cdktf:*)",
+      "Bash(cdk:*)",
+      "Bash(sam:*)",
+      "Bash(serverless:*)",
+      "Bash(sls:*)",
+
+      "// ===== CONTAINERS & ORCHESTRATION =====",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker compose:*)",
+      "Bash(podman:*)",
+      "Bash(buildah:*)",
+      "Bash(skopeo:*)",
+      "Bash(kubectl:*)",
+      "Bash(k9s:*)",
+      "Bash(helm:*)",
+      "Bash(helmfile:*)",
+      "Bash(kustomize:*)",
+      "Bash(minikube:*)",
+      "Bash(kind:*)",
+      "Bash(k3s:*)",
+      "Bash(k3d:*)",
+      "Bash(microk8s:*)",
+      "Bash(oc:*)",
+      "Bash(istioctl:*)",
+      "Bash(linkerd:*)",
+      "Bash(argocd:*)",
+      "Bash(flux:*)",
+      "Bash(skaffold:*)",
+      "Bash(tilt:*)",
+      "Bash(devspace:*)",
+      "Bash(garden:*)",
+      "Bash(okteto:*)",
+
+      "// ===== PACKAGE MANAGERS (local install) =====",
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm remove:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn remove:*)",
+      "Bash(yarn install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm install:*)",
+      "Bash(bun add:*)",
+      "Bash(bun remove:*)",
+      "Bash(bun install:*)",
+      "Bash(pip install:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(pip3 install:*)",
+      "Bash(poetry add:*)",
+      "Bash(poetry remove:*)",
+      "Bash(poetry install:*)",
+      "Bash(pdm add:*)",
+      "Bash(pdm remove:*)",
+      "Bash(pdm install:*)",
+      "Bash(uv pip install:*)",
+      "Bash(uv add:*)",
+      "Bash(cargo add:*)",
+      "Bash(cargo remove:*)",
+      "Bash(go get:*)",
+      "Bash(go mod tidy:*)",
+      "Bash(composer require:*)",
+      "Bash(composer remove:*)",
+      "Bash(composer install:*)",
+      "Bash(bundle add:*)",
+      "Bash(bundle install:*)",
+      "Bash(gem install:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet remove:*)",
+      "Bash(flutter pub add:*)",
+      "Bash(dart pub add:*)",
+
+      "// ===== VERSION MANAGERS =====",
+      "Bash(nvm:*)",
+      "Bash(fnm:*)",
+      "Bash(volta:*)",
+      "Bash(n:*)",
+      "Bash(pyenv:*)",
+      "Bash(rbenv:*)",
+      "Bash(goenv:*)",
+      "Bash(rustup:*)",
+      "Bash(sdkman:*)",
+      "Bash(jabba:*)",
+      "Bash(asdf:*)",
+      "Bash(mise:*)",
+      "Bash(rtx:*)"
+    ],
+    "deny": [
+      "// ===== DANGEROUS SYSTEM COMMANDS =====",
+      "Bash(sudo:*)",
+      "Bash(su:*)",
+      "Bash(doas:*)",
+      "Bash(pkexec:*)",
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(rm -rf /*:*)",
+      "Bash(rm -rf $HOME:*)",
+      "Bash(rm -rf %USERPROFILE%:*)",
+      "Bash(chmod 777 /:*)",
+      "Bash(chmod -R 777 /:*)",
+      "Bash(chown -R:*:* /:*)",
+      "Bash(:(){ :|:& };:)",
+      "Bash(mkfs:*)",
+      "Bash(dd if=/dev/zero:*)",
+      "Bash(dd if=/dev/random:*)",
+      "Bash(dd if=/dev/urandom:*)",
+      "Bash(dd of=/dev/:*)",
+      "Bash(wipefs:*)",
+      "Bash(shred:*)",
+      "Bash(shutdown:*)",
+      "Bash(poweroff:*)",
+      "Bash(reboot:*)",
+      "Bash(halt:*)",
+      "Bash(init 0)",
+      "Bash(init 6)",
+      "Bash(kill -9 1)",
+      "Bash(kill -9 -1)",
+      "Bash(killall -9:*)",
+      "Bash(pkill -9:*)",
+      "Bash(format:*)",
+      "Bash(fdisk:*)",
+      "Bash(parted:*)",
+      "Bash(cfdisk:*)",
+      "Bash(sfdisk:*)",
+      "Bash(gdisk:*)",
+      "Bash(lvremove:*)",
+      "Bash(vgremove:*)",
+      "Bash(pvremove:*)",
+      "Bash(cryptsetup:*)",
+      "Bash(mount:*)",
+      "Bash(umount:*)",
+      "Bash(modprobe:*)",
+      "Bash(insmod:*)",
+      "Bash(rmmod:*)",
+      "Bash(systemctl:*)",
+      "Bash(service:*)",
+      "Bash(journalctl:*)",
+      "Bash(iptables:*)",
+      "Bash(nft:*)",
+      "Bash(firewall-cmd:*)",
+      "Bash(ufw:*)",
+      "Bash(passwd:*)",
+      "Bash(useradd:*)",
+      "Bash(userdel:*)",
+      "Bash(usermod:*)",
+      "Bash(groupadd:*)",
+      "Bash(groupdel:*)",
+      "Bash(visudo:*)",
+      "Bash(crontab -r:*)",
+      "Bash(at:*)",
+      "Bash(batch:*)"
+    ],
+    "ask": [
+      "// ===== ONLY TRULY CRITICAL - ASK ONCE =====",
+      "// Force push can destroy remote history",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin --force:*)",
+      "Bash(git push origin -f:*)",
+
+      "// System-wide package managers (require admin)",
+      "Bash(apt install:*)",
+      "Bash(apt-get install:*)",
+      "Bash(apt remove:*)",
+      "Bash(apt purge:*)",
+      "Bash(dpkg -i:*)",
+      "Bash(yum install:*)",
+      "Bash(dnf install:*)",
+      "Bash(pacman -S:*)",
+      "Bash(pacman -R:*)",
+      "Bash(zypper install:*)",
+      "Bash(apk add:*)",
+      "Bash(brew install:*)",
+      "Bash(brew uninstall:*)",
+      "Bash(choco install:*)",
+      "Bash(choco uninstall:*)",
+      "Bash(scoop install:*)",
+      "Bash(winget install:*)",
+      "Bash(snap install:*)",
+      "Bash(flatpak install:*)"
+    ]
+  }
+}
+EOF
+
+    print_success "settings.local.json generated (MAX autonomy)"
 }
 
-# Main function
-main() {
-    # CLI MODE
-    if [ -n "$CLI_MODE" ]; then
-        case "$CLI_MODE" in
-            new)
-                new_project_flow_cli
-                ;;
-            existing|migrate)
-                migrate_project_flow_cli
-                ;;
-            *)
-                print_error "Invalid mode: $CLI_MODE"
-                print_info "Valid modes: new, existing, migrate"
-                exit 1
-                ;;
-        esac
+generate_project_config() {
+    print_step "Generating project-config.json..."
+
+    local target="$CONFIG_TARGET_PATH"
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # Escape special characters for JSON
+    local desc_escaped=$(echo "$CONFIG_PROJECT_DESC" | sed 's/"/\\"/g' | sed 's/$/\\n/' | tr -d '\n' | sed 's/\\n$//')
+    local done_escaped=$(echo "$CONFIG_DONE_STATUS" | sed 's/"/\\"/g' | sed 's/$/\\n/' | tr -d '\n' | sed 's/\\n$//')
+    local uncert_escaped=$(echo "$CONFIG_UNCERTAINTIES" | sed 's/"/\\"/g' | sed 's/$/\\n/' | tr -d '\n' | sed 's/\\n$//')
+
+    cat > "$target/.claude/project-config.json" << EOF
+{
+  "version": "3.0",
+  "created_at": "$timestamp",
+  "communication_language": "$CONFIG_COMM_LANG",
+  "project": {
+    "name": "$CONFIG_PROJECT_NAME",
+    "description": "$desc_escaped",
+    "tech_stack": "$CONFIG_TECH_STACK",
+    "frontend": "$CONFIG_FRONTEND",
+    "database": "$CONFIG_DATABASE"
+  },
+  "context": {
+    "done_status": "$done_escaped",
+    "uncertainties": "$uncert_escaped"
+  },
+  "flow": {
+    "type": "$CONFIG_FLOW_TYPE",
+    "status": "initialized"
+  },
+  "advanced": {
+    "enabled": $CONFIG_ADVANCED_MODE,
+    "ci_cd": "${CONFIG_CI_CD:-None}",
+    "testing": "${CONFIG_TESTING:-None}",
+    "hosting": "${CONFIG_HOSTING:-None}"
+  },
+  "paths": {
+    "target": "$CONFIG_TARGET_PATH",
+    "pack_source": "$PACK_ROOT"
+  }
+}
+EOF
+
+    print_success "project-config.json generated"
+}
+
+generate_claude_md() {
+    print_step "Generating CLAUDE.md..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    # Determine backend based on tech stack
+    local backend=""
+    case "$CONFIG_TECH_STACK" in
+        typescript) backend="Node.js + Express/Fastify" ;;
+        javascript) backend="Node.js + Express" ;;
+        python)     backend="Python + FastAPI/Django" ;;
+        go)         backend="Go + Gin/Echo" ;;
+        rust)       backend="Rust + Actix/Axum" ;;
+        java)       backend="Java + Spring Boot" ;;
+        csharp)     backend="C# + ASP.NET Core" ;;
+        dart)       backend="Dart + Shelf/Serverpod" ;;
+        php)        backend="PHP + Laravel" ;;
+        ruby)       backend="Ruby + Rails" ;;
+        *)          backend="$CONFIG_TECH_STACK" ;;
+    esac
+
+    # Build description section
+    local desc_section=""
+    if [ -n "$CONFIG_PROJECT_DESC" ]; then
+        desc_section="$CONFIG_PROJECT_DESC"
+    else
+        desc_section="{Brief project description - fill this in after discovery}"
+    fi
+
+    # Build status section for migrations
+    local status_section=""
+    if [ -n "$CONFIG_DONE_STATUS" ]; then
+        status_section="
+## Current Status
+**Already implemented:**
+$CONFIG_DONE_STATUS
+"
+    fi
+
+    # Build uncertainties section
+    local uncert_section=""
+    if [ -n "$CONFIG_UNCERTAINTIES" ]; then
+        uncert_section="
+## Open Questions / Uncertainties
+$CONFIG_UNCERTAINTIES
+"
+    fi
+
+    cat > "$target/CLAUDE.md" << EOF
+# CLAUDE.md
+
+## Project: $CONFIG_PROJECT_NAME
+
+## Quick Context
+$desc_section
+$status_section
+$uncert_section
+## Tech Stack
+- **Backend:** $backend
+- **Frontend:** $CONFIG_FRONTEND
+- **Database:** $CONFIG_DATABASE
+- **Language:** $CONFIG_TECH_STACK
+
+## Communication
+- **Respond in:** $CONFIG_COMM_LANG
+
+## Agent System
+This project uses the Agent Methodology Pack v3.0.
+Entry point: \`.claude/agents/ORCHESTRATOR.md\`
+
+## Quick Commands
+- Start planning: \`@.claude/agents/ORCHESTRATOR.md\`
+- View project state: \`@PROJECT-STATE.md\`
+- View config: \`@.claude/project-config.json\`
+
+## Conventions
+- {Add your coding conventions}
+- {Add your naming conventions}
+- {Add your file organization rules}
+
+## Current Sprint
+See \`PROJECT-STATE.md\` for current sprint status.
+
+---
+*Generated by init-interactive.sh v3.0*
+EOF
+
+    print_success "CLAUDE.md generated"
+}
+
+generate_project_state() {
+    print_step "Generating PROJECT-STATE.md..."
+
+    local target="$CONFIG_TARGET_PATH"
+    local date=$(date +%Y-%m-%d)
+
+    # Build description
+    local project_desc=""
+    if [ -n "$CONFIG_PROJECT_DESC" ]; then
+        project_desc="$CONFIG_PROJECT_DESC"
+    else
+        project_desc="*To be defined during discovery*"
+    fi
+
+    # Build done status section
+    local done_section=""
+    if [ -n "$CONFIG_DONE_STATUS" ]; then
+        done_section="
+## Already Implemented
+$CONFIG_DONE_STATUS
+"
+    fi
+
+    # Build uncertainties section
+    local uncert_section=""
+    if [ -n "$CONFIG_UNCERTAINTIES" ]; then
+        uncert_section="
+## Open Questions / Uncertainties
+$CONFIG_UNCERTAINTIES
+"
+    fi
+
+    cat > "$target/PROJECT-STATE.md" << EOF
+# PROJECT-STATE.md
+
+## Project: $CONFIG_PROJECT_NAME
+**Last Updated:** $date
+**Status:** Initialized
+**Flow Type:** $CONFIG_FLOW_TYPE
+
+## Description
+$project_desc
+$done_section
+$uncert_section
+## Current Phase
+- [ ] Discovery
+- [ ] Planning (PRD)
+- [ ] Architecture
+- [ ] Development
+- [ ] Testing
+- [ ] Release
+
+## Active Sprint
+*No sprint started yet*
+
+## Blockers
+*None*
+
+## Recent Decisions
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| $date | Project initialized | Using Agent Methodology Pack v3.0 |
+
+## Next Actions
+1. Run initial flow based on project type: \`$CONFIG_FLOW_TYPE\`
+2. Complete discovery interview
+3. Generate PRD and architecture
+
+---
+*Auto-generated - will be updated by agents*
+EOF
+
+    print_success "PROJECT-STATE.md generated"
+}
+
+# ============================================================================
+# LAUNCH CLAUDE
+# ============================================================================
+
+generate_startup_prompt() {
+    local flow="$1"
+    local prompt=""
+
+    # Build context sections
+    local desc_context=""
+    if [ -n "$CONFIG_PROJECT_DESC" ]; then
+        desc_context="
+## Project Description
+$CONFIG_PROJECT_DESC"
+    fi
+
+    local done_context=""
+    if [ -n "$CONFIG_DONE_STATUS" ]; then
+        done_context="
+## Already Implemented
+$CONFIG_DONE_STATUS"
+    fi
+
+    local uncert_context=""
+    if [ -n "$CONFIG_UNCERTAINTIES" ]; then
+        uncert_context="
+## User's Uncertainties / Questions
+$CONFIG_UNCERTAINTIES"
+    fi
+
+    case "$flow" in
+        new_project)
+            prompt="@.claude/agents/planning/DISCOVERY-AGENT.md
+
+Start NEW PROJECT discovery interview.
+
+## Project Configuration
+- Name: $CONFIG_PROJECT_NAME
+- Language: $CONFIG_TECH_STACK
+- Frontend: $CONFIG_FRONTEND
+- Database: $CONFIG_DATABASE
+- Communication: $CONFIG_COMM_LANG
+$desc_context
+$uncert_context
+
+## Interview Settings
+- Type: new_project
+- Depth: deep
+- Target clarity: 85%+
+
+## Instructions
+1. Read @CLAUDE.md and @PROJECT-STATE.md for full context
+2. Note the user's uncertainties above - address them during discovery
+3. Conduct structured interview (7 questions per round)
+4. Show clarity score after each round
+5. Stop at 85%+ clarity or when user is satisfied
+
+IMPORTANT: Respond in $CONFIG_COMM_LANG.
+
+After discovery complete (clarity >= 80%), handoff to PM-AGENT for PRD creation."
+            ;;
+
+        migration)
+            prompt="@.claude/agents/planning/DOC-AUDITOR.md
+
+Perform MIGRATION AUDIT for existing project.
+
+## Project Configuration
+- Name: $CONFIG_PROJECT_NAME
+- Path: $CONFIG_TARGET_PATH
+- Language: $CONFIG_TECH_STACK
+- Frontend: $CONFIG_FRONTEND
+- Database: $CONFIG_DATABASE
+- Communication: $CONFIG_COMM_LANG
+$desc_context
+$done_context
+$uncert_context
+
+## Audit Settings
+- Type: gap_analysis
+- Depth: deep
+
+## Instructions
+1. Read @CLAUDE.md and @PROJECT-STATE.md for context
+2. Note what is ALREADY IMPLEMENTED above
+3. Note user's UNCERTAINTIES - these are priority areas
+4. Scan project structure
+5. Identify existing documentation
+6. Flag large files (>500 lines) for sharding
+7. Create MIGRATION-PLAN.md with priorities
+
+IMPORTANT: Respond in $CONFIG_COMM_LANG.
+
+After audit, trigger DISCOVERY-AGENT (depth=quick) to fill gaps."
+            ;;
+
+        doc_audit)
+            prompt="@.claude/agents/planning/DOC-AUDITOR.md
+
+Perform FULL DOCUMENTATION AUDIT.
+
+## Project Configuration
+- Name: $CONFIG_PROJECT_NAME
+- Path: $CONFIG_TARGET_PATH
+- Communication: $CONFIG_COMM_LANG
+$desc_context
+$done_context
+$uncert_context
+
+## Audit Settings
+- Type: full_audit
+- Depth: exhaustive
+
+## Instructions
+1. Read @CLAUDE.md and @PROJECT-STATE.md for context
+2. Inventory all documentation files
+3. Apply DEEP DIVE protocol to each
+4. Cross-reference between documents
+5. Generate quality score
+6. Address user's uncertainties if related to docs
+7. Create AUDIT-REPORT.md
+
+IMPORTANT: Respond in $CONFIG_COMM_LANG.
+
+Generate comprehensive audit report with quality score and recommendations."
+            ;;
+
+        quick_start)
+            prompt="@.claude/agents/ORCHESTRATOR.md
+
+QUICK START mode - project already configured.
+
+## Project Configuration
+- Name: $CONFIG_PROJECT_NAME
+- Language: $CONFIG_TECH_STACK
+- Frontend: $CONFIG_FRONTEND
+- Database: $CONFIG_DATABASE
+- Communication: $CONFIG_COMM_LANG
+$desc_context
+$done_context
+$uncert_context
+
+## Mode
+Skip discovery phase - ready to work.
+
+## Instructions
+1. Read @CLAUDE.md and @PROJECT-STATE.md for context
+2. Note what is already implemented (if any)
+3. Note user's uncertainties - can help with these
+4. Ask user what they want to work on
+
+IMPORTANT: Respond in $CONFIG_COMM_LANG.
+
+Ask the user what they want to build or what task to start with."
+            ;;
+    esac
+
+    echo "$prompt"
+}
+
+launch_claude() {
+    print_header "LAUNCHING CLAUDE"
+    echo ""
+
+    local prompt
+    prompt=$(generate_startup_prompt "$CONFIG_FLOW_TYPE")
+
+    # Save startup prompt for reference
+    echo "$prompt" > "$CONFIG_TARGET_PATH/.claude/STARTUP-PROMPT.md"
+
+    print_info "Startup prompt saved to: .claude/STARTUP-PROMPT.md"
+    echo ""
+
+    # Change to target directory
+    cd "$CONFIG_TARGET_PATH"
+
+    print_step "Starting Claude with $CONFIG_FLOW_TYPE flow..."
+    echo ""
+
+    # Launch Claude
+    claude "$prompt"
+}
+
+# ============================================================================
+# MAIN EXECUTION
+# ============================================================================
+
+run_interactive() {
+    print_banner
+
+    # Pre-flight check
+    if ! check_claude_cli; then
+        exit 1
+    fi
+
+    echo ""
+    print_info "Press Enter to start the setup wizard..."
+    read -r
+
+    # Collect configuration
+    ask_language
+    ask_project_name
+    ask_tech_stack
+    ask_frontend
+    ask_database
+    ask_target_path
+    ask_flow_type
+    ask_project_description
+    ask_advanced_mode
+
+    # Show summary and confirm
+    show_summary
+
+    if ! confirm "Proceed with this configuration?"; then
+        print_warning "Setup cancelled"
         exit 0
     fi
 
-    # INTERACTIVE MODE
-    show_welcome
+    # Execute setup
+    print_header "SETTING UP PROJECT"
+    echo ""
 
-    while true; do
-        show_main_menu
+    create_directory_structure
+    copy_agents
+    copy_workflows
+    copy_templates
+    copy_patterns
+    copy_checklists
+    copy_state_templates
+    copy_config
+    copy_monitoring_scripts
+    generate_settings_local
+    generate_project_config
+    generate_claude_md
+    generate_project_state
 
-        local choice
-        choice=$(get_choice "Select option [1-3]:")
+    # Summary
+    print_header "SETUP COMPLETE"
+    echo ""
+    echo -e "  ${WHITE}Project created at:${NC} ${GREEN}$CONFIG_TARGET_PATH${NC}"
+    echo ""
+    echo -e "  ${WHITE}Files copied:${NC}"
+    echo -e "    Agents:     $(find "$CONFIG_TARGET_PATH/.claude/agents" -name "*.md" 2>/dev/null | wc -l)"
+    echo -e "    Workflows:  $(find "$CONFIG_TARGET_PATH/.claude/workflows" -name "*.yaml" -o -name "*.md" 2>/dev/null | wc -l)"
+    echo -e "    Templates:  $(find "$CONFIG_TARGET_PATH/.claude/templates" -name "*.md" 2>/dev/null | wc -l)"
+    echo -e "    Patterns:   $(find "$CONFIG_TARGET_PATH/.claude/patterns" -name "*.md" 2>/dev/null | wc -l)"
+    echo -e "    Checklists: $(find "$CONFIG_TARGET_PATH/.claude/checklists" -name "*.md" 2>/dev/null | wc -l)"
+    echo -e "    Scripts:    $(find "$CONFIG_TARGET_PATH/scripts" -name "*.sh" 2>/dev/null | wc -l)"
+    echo ""
+    echo -e "  ${WHITE}Monitoring:${NC}"
+    echo -e "    - session-logger.sh  (session metrics)"
+    echo -e "    - context-monitor.sh (context budget)"
+    echo ""
 
-        case "$choice" in
-            1)
-                new_project_flow_interactive
-                ;;
-            2)
-                migrate_project_flow_interactive
-                ;;
-            3)
-                echo ""
-                print_info "Thank you for using Agent Methodology Pack!"
-                echo ""
-                exit 0
-                ;;
-            *)
-                print_error "Invalid option. Please select 1-3."
-                sleep 1
-                ;;
-        esac
+    print_info "You can delete the pack after verification:"
+    echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
+    echo ""
 
-        echo ""
-        echo -e "${YELLOW}Press Enter to return to main menu...${NC}"
-        read -r
-        clear
-        show_welcome
-    done
+    if confirm "Launch Claude now?"; then
+        launch_claude
+    else
+        print_info "To start later, run:"
+        echo -e "     ${CYAN}cd $CONFIG_TARGET_PATH && claude \"@.claude/STARTUP-PROMPT.md\"${NC}"
+    fi
 }
 
-# Run main
-main
+show_help() {
+    echo "Agent Methodology Pack - Interactive Setup Wizard v3.0"
+    echo ""
+    echo "Usage:"
+    echo "  $0                    Interactive mode (recommended)"
+    echo "  $0 --help             Show this help"
+    echo ""
+    echo "Interactive mode guides you through:"
+    echo "  1. Communication language selection"
+    echo "  2. Project name"
+    echo "  3. Tech stack (TypeScript, Python, Go, etc.)"
+    echo "  4. Frontend framework"
+    echo "  5. Database selection"
+    echo "  6. Target path"
+    echo "  7. Flow type (New/Migration/Audit/QuickStart)"
+    echo "  8. Advanced options (CI/CD, Testing, Hosting)"
+    echo ""
+    echo "After configuration, the wizard will:"
+    echo "  - Create directory structure"
+    echo "  - Copy all agents, workflows, templates"
+    echo "  - Generate project configuration"
+    echo "  - Launch Claude with appropriate agent"
+    echo ""
+    echo "Pack location: $PACK_ROOT"
+    exit 0
+}
+
+# Parse arguments
+case "${1:-}" in
+    -h|--help)
+        show_help
+        ;;
+    *)
+        run_interactive
+        ;;
+esac

@@ -175,6 +175,11 @@ User Request
     │       └─► workflow: product/new_project.yaml
     │           discovery → pm-agent → architect-agent → dev cycle
     │
+    ├─► Add feature (1-4 hours, clear scope)?
+    │       └─► workflow: engineering/feature.yaml  ← NEW
+    │           Phase check → clarify? → UX? → TDD → QA → doc sync
+    │           Auto-updates PRD + Architecture
+    │
     ├─► Story from existing Epic?
     │       └─► workflow: engineering/story_delivery.yaml
     │           test-engineer → dev-agent → code-reviewer → qa-agent
@@ -183,8 +188,34 @@ User Request
     │       └─► workflow: engineering/quick_fix.yaml
     │           dev-agent → test-engineer → code-reviewer
     │
+    ├─► CI/CD / Deployment / Infrastructure?
+    │       └─► devops-agent direct
+    │           Or workflow: engineering/deployment.yaml
+    │
+    ├─► Ad-hoc task (research, docs, refactor)?
+    │       └─► Direct to appropriate agent:
+    │           research-agent | tech-writer | senior-dev
+    │
     └─► Requirements unclear?
             └─► discovery-agent first
+```
+
+### Phase-Aware Routing
+
+**CRITICAL:** Before starting any feature work, check PROJECT-STATE.md for current phase.
+
+```
+Feature Request
+    │
+    ├─► Check PROJECT-STATE.md current phase
+    │
+    ├─► Feature phase == Current phase?
+    │       └─► YES: Proceed with workflow
+    │
+    └─► Feature phase > Current phase?
+            └─► WARN user: "MVP not complete. Options:"
+                [1] Add to {phase} backlog
+                [2] Override with reason
 ```
 
 ---
@@ -217,6 +248,11 @@ User Request
 | code-reviewer | after implementation | Review code quality |
 | qa-agent | after review | Manual testing |
 | tech-writer | after QA | Documentation |
+
+### Operations Agents
+| Agent | Trigger | Purpose |
+|-------|---------|---------|
+| devops-agent | CI/CD, deployment, infra | Pipeline, containers, deployment |
 
 ---
 

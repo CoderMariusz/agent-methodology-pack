@@ -182,12 +182,33 @@ This workflow is MANDATORY before:
 
 ## Trigger Points
 
-| Trigger | Source | Entry Phase | Notes |
-|---------|--------|-------------|-------|
-| New project | init-interactive.sh | Phase 1 | Full discovery required |
-| Migration | migrate-docs.sh | Phase 2 | Skip scan, start interview |
-| New Epic | ORCHESTRATOR | Phase 3 | Project known, focus on domain |
-| Unclear requirements | Any agent | Phase 4 | Fast-track to gaps |
+| Trigger | Source | Entry Phase | Depth | Notes |
+|---------|--------|-------------|-------|-------|
+| New project | init-interactive.sh | Phase 1 | deep | Full discovery required |
+| Migration | migrate-docs.sh | Phase 1 | quick | Quick context, then migrate |
+| New Epic | ORCHESTRATOR | Phase 2 | standard | Project known, focus on epic |
+| Unclear requirements | Any agent | Phase 4 | quick | Fast-track to gaps |
+
+### Depth Selection Logic
+
+```
+IF new_project AND greenfield:
+    depth = deep
+    clarity_target = 85%
+
+ELIF migration:
+    depth = quick
+    clarity_target = 50%
+    skip_if: scan found complete docs
+
+ELIF new_epic:
+    depth = standard
+    clarity_target = 70%
+
+ELIF clarification:
+    depth = quick (targeted)
+    clarity_target = 90% (for specific topic)
+```
 
 ## Phase Details
 

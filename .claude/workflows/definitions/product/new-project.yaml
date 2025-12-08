@@ -15,6 +15,7 @@ steps:
   - id: discovery
     agent: discovery-agent
     type: new_project
+    depth: deep                  # Full discovery for new projects
     description: "Gather requirements through structured interview"
     input:
       context_refs:
@@ -22,7 +23,7 @@ steps:
         - "@docs/1-BASELINE/product/project-brief.md"
     output:
       deliverable: "docs/0-DISCOVERY/PROJECT-UNDERSTANDING.md"
-      min_clarity: 60
+      min_clarity: 60            # Min to proceed, but agent targets 85%
     checkpoint:
       - "Business context documented"
       - "User personas identified"
