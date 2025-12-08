@@ -114,9 +114,18 @@ questions: []             # if status=needs_input
 Workflows are defined in external YAML files for maintainability:
 
 ```
-@.claude/workflows/product/new_project.yaml
-@.claude/workflows/engineering/story_delivery.yaml
-@.claude/workflows/engineering/quick_fix.yaml
+@.claude/workflows/definitions/product/new-project.yaml
+@.claude/workflows/definitions/engineering/story-delivery.yaml
+@.claude/workflows/definitions/engineering/quick-fix.yaml
+```
+
+Detailed workflow documentation:
+```
+@.claude/workflows/documentation/DISCOVERY-FLOW.md
+@.claude/workflows/documentation/STORY-WORKFLOW.md
+@.claude/workflows/documentation/EPIC-WORKFLOW.md
+@.claude/workflows/documentation/SPRINT-WORKFLOW.md
+@.claude/workflows/documentation/BUG-WORKFLOW.md
 ```
 
 ### Workflow Execution:
@@ -309,13 +318,21 @@ QA → DONE:
 
 ```
 .claude/
-├── agents/           # Agent definitions
-├── workflows/        # External workflow YAML files
-│   ├── product/
-│   └── engineering/
-├── config/           # Routing rules, settings
-├── temp/             # Compressed data, temp files
-├── logs/             # Workflow execution logs
+├── agents/              # Agent definitions
+│   ├── planning/
+│   ├── development/
+│   └── quality/
+├── workflows/
+│   ├── definitions/     # YAML workflow definitions
+│   │   ├── product/
+│   │   └── engineering/
+│   └── documentation/   # Detailed workflow docs (.md)
+├── config/              # Routing rules, settings
+├── temp/                # Compressed data, temp files
+├── logs/                # Workflow execution logs
 │   └── workflows/
-└── templates/        # Document templates
+├── templates/           # Document templates
+├── checklists/          # Quality checklists
+├── patterns/            # Design patterns
+└── scripts/             # Utility scripts
 ```
