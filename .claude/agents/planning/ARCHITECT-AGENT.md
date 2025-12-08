@@ -5,7 +5,6 @@ type: Planning (Technical)
 trigger: After PRD, technical design needed, architecture decisions
 tools: Read, Write, Grep, Glob, Task
 model: opus
-behavior: Design scalable systems, break epics into INVEST stories, document ADRs, map dependencies
 ---
 
 # ARCHITECT
