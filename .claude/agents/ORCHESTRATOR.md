@@ -372,3 +372,249 @@ QA → DONE:
 ├── patterns/            # Design patterns
 └── scripts/             # Utility scripts
 ```
+
+---
+
+## QUICK REFERENCE
+
+### Task Types (auto-detected)
+| User Says | Detected As | Action |
+|-----------|-------------|--------|
+| "new project", "start from scratch" | new_project | Discovery → Research → PM → Architect |
+| "add feature", "implement X" | feature | Check scope → TDD flow |
+| "fix bug", "issue #123" | bug_fix | Quick fix workflow |
+| "research X", "compare Y vs Z" | research | RESEARCH-AGENT (ask depth) |
+| "continue", "what's next" | continue | Load PROJECT-STATE, resume |
+
+### Research Quick Options
+```
+/research light     → 4 parallel, 3-5 sources each
+/research deep      → 4 parallel, 15-25 sources each
+/research tech deep → Single category, comprehensive
+```
+
+### Autonomy Quick Set
+```
+/autonomy 1  → Guided (1 story, ask often)
+/autonomy 2  → Semi-Auto (2-5 stories, report per batch)
+/autonomy 3  → Full Auto (entire Epic, report at end)
+```
+
+---
+
+## AUTONOMY LEVELS
+
+### Level 1: Guided
+```
+Batch size: 1 story
+Report: after each story/phase
+Ask: before major actions
+Parallel agents: 1
+```
+
+### Level 2: Semi-Auto (Recommended)
+```
+Batch size: 2-5 stories (by complexity)
+Report: after each batch
+Ask: only blockers/critical
+Parallel agents: up to 3 (if no conflicts)
+Flow: story → review → QA → next story
+```
+
+**Batch sizing:**
+- Simple stories (< 1h): 5 per batch
+- Medium stories (1-3h): 3 per batch
+- Complex stories (> 3h): 2 per batch
+
+### Level 3: Full Auto
+```
+Batch size: entire Epic
+Report: only at Epic end + errors
+Ask: never (handle errors autonomously)
+Parallel agents: up to 3
+Flow: story₁ → review → QA → story₂ → ... → Epic Done
+```
+
+**Full Auto behavior:**
+1. Load Epic with all stories
+2. Process stories sequentially (full flow each)
+3. If error → log, try recover, continue
+4. Report only at Epic completion:
+   - Stories completed: X/Y
+   - Errors encountered: [list]
+   - Time taken: Xh Xmin
+
+---
+
+## AUTO-FLOW: Implementation → Review → QA
+
+### Without Waiting Pattern
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     PARALLEL AUTO-FLOW                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Story A: Impl ────► Review ────► QA ────► ✅ DONE          │
+│                 ↓                                            │
+│  Story B:      Impl ────► Review ────► QA ────► ✅ DONE     │
+│                      ↓                                       │
+│  Story C:           Impl ────► Review ────► QA ───► ✅ DONE │
+│                                                              │
+│  ► When Story A finishes Impl, immediately start Review     │
+│  ► Don't wait for Story B or C to finish Impl               │
+│  ► Each story flows independently                           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Auto-Transition Rules
+
+```yaml
+auto_flow:
+  enabled: true
+
+  transitions:
+    - from: implementation_complete
+      to: code_review
+      condition: tests_pass
+
+    - from: code_review_approved
+      to: qa_testing
+      condition: auto
+
+    - from: qa_passed
+      to: done
+      condition: auto
+
+  parallel_rules:
+    - independent_stories: allow_parallel
+    - same_file_edits: sequential_only
+    - cross_dependencies: wait_for_dependency
+
+  reporting:
+    - individual_completion: silent
+    - phase_completion: brief_summary
+    - workflow_completion: full_summary
+```
+
+### Implementation
+
+```
+When agent completes:
+    │
+    ├─► Check: Is next phase blocked by other agents?
+    │       │
+    │       ├─► NO: Immediately start next phase
+    │       │
+    │       └─► YES: Queue, start when unblocked
+    │
+    └─► Check: Are there parallel tasks waiting?
+            │
+            ├─► YES: Start them now (if resources available)
+            │
+            └─► NO: Continue with current task
+```
+
+---
+
+## SMART SUMMARIES
+
+### Summary Timing
+
+| Autonomy | When to Summarize |
+|----------|-------------------|
+| Guided | After each agent, each step |
+| Semi-Auto | After each phase, on blockers |
+| Full Auto | Only at workflow end |
+
+### Summary Format (End of Workflow)
+
+```markdown
+## Workflow Complete: {workflow_name}
+
+### Phases Completed
+- [x] Discovery (45 min)
+- [x] Research (12 min parallel)
+- [x] Planning (30 min)
+- [x] Implementation (2h 15min)
+- [x] Review (20 min)
+- [x] QA (15 min)
+
+### Deliverables
+| Type | File | Status |
+|------|------|--------|
+| PRD | docs/1-BASELINE/product/prd.md | ✅ |
+| Architecture | docs/3-ARCHITECTURE/system-design.md | ✅ |
+| Code | src/features/auth/* | ✅ |
+| Tests | tests/auth/* | ✅ (12 tests, 100% pass) |
+
+### Agents Used
+- DISCOVERY-AGENT: 3 rounds, 85% clarity
+- RESEARCH-AGENT: 4 parallel (TECH, COMP, USER, MARKET)
+- PM-AGENT: PRD v1.2
+- ARCHITECT-AGENT: System design
+- TEST-ENGINEER: 12 tests
+- BACKEND-DEV: Auth implementation
+- CODE-REVIEWER: APPROVED
+- QA-AGENT: PASS
+
+### Issues Resolved
+- [x] Unclear auth flow → Clarified with discovery
+- [x] Firebase vs Supabase → Research recommended Supabase
+
+### Next Steps
+1. Deploy to staging
+2. User acceptance testing
+3. Documentation review
+```
+
+---
+
+## QUICK COMMANDS
+
+For power users, support quick command syntax:
+
+```
+/research tech,comp light     → Light research on Tech + Competition
+/research all deep            → Deep research on all 6 categories
+/feature "Add auth" auto      → Full auto feature workflow
+/fix #123                     → Quick fix for issue #123
+/sprint plan                  → Sprint planning workflow
+/status                       → Show PROJECT-STATE summary
+/autonomy 3                   → Set to Full Auto
+```
+
+---
+
+## FLOW PRIORITY RULES
+
+When multiple tasks compete:
+
+```
+Priority Order:
+1. Blocker resolution (unblock other agents)
+2. Currently running phase completion
+3. Quality gates (review, QA)
+4. New phase start
+5. Research expansion
+6. Documentation updates
+```
+
+### Resource Allocation
+
+```yaml
+max_parallel_agents: 4
+
+allocation:
+  implementation: 3 agents max (if no file conflicts)
+  research: 4 agents max (all categories parallel)
+  review: 1 agent (sequential per story)
+  qa: 1 agent (sequential per story)
+
+conflict_check:
+  before_parallel_impl:
+    - no shared files
+    - no shared dependencies
+    - different modules/features
+```

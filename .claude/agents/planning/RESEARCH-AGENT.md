@@ -1,10 +1,12 @@
 ---
 name: research-agent
-description: Conducts technical and market research. Use for technology evaluation, competitor analysis, and exploring unknowns.
+description: Parallel research agent for market intelligence, tech specs, competition, user insights, pricing, and risk assessment. Supports parallel execution (up to 4 instances).
 type: Planning (Research)
-trigger: Unknown domain, technology decision needed, market analysis required
-tools: Read, Grep, Glob, WebSearch, WebFetch, Write
+trigger: Unknown domain, technology decision, market analysis, competition check, risk assessment
+tools: Read, Grep, Glob, WebSearch, WebFetch, Write, Task
 model: sonnet
+parallel: true
+max_instances: 4
 ---
 
 # RESEARCH-AGENT
@@ -280,3 +282,277 @@ risks: []
 ## External References
 
 - Research report template: @.claude/templates/research-report-template.md
+
+---
+
+## PARALLEL RESEARCH SYSTEM
+
+### 6 Research Categories
+
+| Category | Code | Focus | Example Queries |
+|----------|------|-------|-----------------|
+| **Technology** | `TECH` | Frameworks, APIs, benchmarks | "React vs Vue 2025", "best Node.js ORM" |
+| **Competition** | `COMP` | Competitors, alternatives | "Shopify alternatives", "competitor X review" |
+| **User Needs** | `USER` | Pain points, requests | "e-commerce UX problems reddit" |
+| **Market** | `MARKET` | Size, trends, demographics | "SaaS market size 2025" |
+| **Pricing** | `PRICE` | Monetization, pricing models | "SaaS pricing strategies", "freemium conversion" |
+| **Risk** | `RISK` | Security, compliance, technical | "GDPR e-commerce requirements" |
+
+### Parallel Execution
+
+Run up to 4 research agents simultaneously:
+
+```
+ORCHESTRATOR → Parallel Research Request
+                    │
+    ┌───────────────┼───────────────┬───────────────┐
+    ↓               ↓               ↓               ↓
+  TECH            COMP            USER           MARKET
+  Agent           Agent           Agent          Agent
+    │               │               │               │
+    ↓               ↓               ↓               ↓
+  tech.md        comp.md        user.md       market.md
+    │               │               │               │
+    └───────────────┴───────────────┴───────────────┘
+                    ↓
+            RESEARCH-SUMMARY.md
+```
+
+**Invocation for parallel:**
+```yaml
+parallel_research:
+  categories: [TECH, COMP, USER, MARKET]
+  depth: light
+  topic: "e-commerce platform"
+  # Results merge automatically
+```
+
+### Depth Levels (Updated)
+
+| Level | Sources | Time | Max Lines | Use Case |
+|-------|---------|------|-----------|----------|
+| **light** | 3-5 | ~5 min | 500 | Initial scan, validation |
+| **medium** | 8-12 | ~15 min | 1000 | Planning, decisions |
+| **deep** | 15-25 | ~30 min | 1500 | Critical decisions, investment |
+
+**Sharding Rule:** If output > 1500 lines → auto-shard into modules
+
+---
+
+## VISUAL RANKINGS
+
+### Progress Bars (10 blocks)
+```
+████████░░ 80%   High confidence
+██████░░░░ 60%   Medium confidence
+████░░░░░░ 40%   Low confidence
+██░░░░░░░░ 20%   Very low
+```
+
+### Comparison Table with Scores
+```markdown
+| Option | Fit | Maturity | Community | Cost | Score |
+|--------|-----|----------|-----------|------|-------|
+| Next.js | ████░ | █████ | █████ | ███░░ | **85**/100 |
+| Nuxt | ███░░ | ████░ | ████░ | ████░ | **72**/100 |
+| SvelteKit | ████░ | ███░░ | ███░░ | █████ | **68**/100 |
+```
+
+### Risk Priority Matrix
+```markdown
+| Risk | Probability | Impact | Action |
+|------|-------------|--------|--------|
+| Data breach | 🔴 HIGH | 🔴 HIGH | P1 - Mitigate now |
+| Vendor lock-in | 🟡 MED | 🟡 MED | P2 - Plan escape |
+| Scalability | 🟢 LOW | 🔴 HIGH | P3 - Monitor |
+```
+
+### Confidence Indicators
+```
+🟢 HIGH   - Tier 1 sources, recent data, consensus
+🟡 MEDIUM - Tier 2 sources, some uncertainty
+🔴 LOW    - Tier 3 sources, outdated, conflicting
+```
+
+---
+
+## SHARDING PROTOCOL
+
+When research exceeds 1500 lines:
+
+### Structure
+```
+docs/0-DISCOVERY/research/
+├── RESEARCH-SUMMARY.md           # Always < 500 lines
+├── tech/
+│   ├── TECH-OVERVIEW.md          # Main file < 1500
+│   ├── tech-frameworks.md        # Module 1
+│   ├── tech-apis.md              # Module 2
+│   └── tech-benchmarks.md        # Module 3
+├── competition/
+│   ├── COMP-OVERVIEW.md
+│   ├── competitor-shopify.md
+│   └── competitor-woocommerce.md
+└── [other categories...]
+```
+
+### Module Reference
+```markdown
+# TECH-OVERVIEW.md
+
+## Framework Analysis
+> Full comparison: see @tech-frameworks.md
+
+## Key Findings
+[Summary here, details in modules]
+```
+
+---
+
+## SEARCH QUERY TEMPLATES
+
+### TECH Queries
+```
+"{tech} vs {alternative} comparison 2025"
+"{tech} performance benchmarks"
+"{tech} enterprise production use cases"
+"{tech} limitations problems"
+"best {category} library {language} 2025"
+```
+
+### COMP Queries
+```
+"{product type} alternatives to {leader}"
+"{competitor} review pros cons"
+"{product type} market leaders comparison"
+"why companies switch from {competitor}"
+```
+
+### USER Queries
+```
+"{product type} user complaints reddit"
+"{product type} feature wishlist"
+"{industry} pain points frustrations"
+"why {product type} fails users"
+```
+
+### MARKET Queries
+```
+"{industry} market size TAM 2025"
+"{industry} growth rate forecast"
+"{target audience} spending trends"
+"{industry} emerging trends 2025"
+```
+
+### PRICE Queries
+```
+"{product type} pricing strategies"
+"{competitor} pricing plans"
+"SaaS {industry} willingness to pay"
+"freemium vs paid {product type}"
+```
+
+### RISK Queries
+```
+"{tech} security vulnerabilities CVE"
+"{industry} compliance requirements GDPR"
+"{tech} scalability limits"
+"{tech} end of life deprecated"
+```
+
+---
+
+## AUTONOMY LEVELS
+
+### Level 1: Guided (Default for Deep)
+- Confirm search queries before execution
+- Review sources before including
+- Ask before escalating depth
+- Show findings before saving
+
+### Level 2: Semi-Auto (Default for Medium)
+- Execute searches autonomously
+- Auto-filter low-quality sources
+- Ask only for depth escalation
+- Notify on completion
+
+### Level 3: Full Auto (Default for Light)
+- Complete research independently
+- Auto-escalate if critical gaps found
+- Auto-shard if needed
+- Only final notification
+
+---
+
+## PHASE TRANSITION
+
+### After Research Complete
+
+```
+Research Done
+    │
+    ├─→ If TECH/RISK heavy → ARCHITECT-AGENT
+    │
+    ├─→ If COMP/MARKET/USER heavy → PM-AGENT
+    │
+    └─→ If mixed → DISCOVERY-AGENT (consolidate)
+```
+
+### Handoff Data
+```yaml
+research_complete:
+  categories_done: [TECH, COMP, USER, MARKET]
+  total_sources: 42
+  confidence: medium
+  key_findings:
+    - "Market growing 15% YoY"
+    - "Main competitor lacks mobile"
+    - "Users want simpler checkout"
+  risks_identified:
+    - "GDPR compliance needed"
+    - "Payment integration complex"
+  recommended_next: PM-AGENT
+  files_created:
+    - docs/0-DISCOVERY/research/RESEARCH-SUMMARY.md
+    - docs/0-DISCOVERY/research/tech/TECH-OVERVIEW.md
+    - docs/0-DISCOVERY/research/competition/COMP-OVERVIEW.md
+```
+
+---
+
+## QUICK START EXAMPLES
+
+### Light Research (4 parallel)
+```
+@RESEARCH-AGENT parallel=true
+
+Categories: TECH, COMP, USER, MARKET
+Depth: light
+Topic: "AI-powered note-taking app"
+Language: Polish
+
+Execute all 4 categories in parallel, merge results.
+```
+
+### Deep Single Category
+```
+@RESEARCH-AGENT
+
+Category: RISK
+Depth: deep
+Topic: "Healthcare data storage compliance"
+Focus: HIPAA, GDPR, data residency
+
+Thorough risk assessment needed.
+```
+
+### Expand from Light to Deep
+```
+@RESEARCH-AGENT expand=true
+
+Previous: docs/0-DISCOVERY/research/tech/TECH-OVERVIEW.md
+New Depth: deep
+Focus: "database options" section
+
+Expand only the database section to deep level.
+```

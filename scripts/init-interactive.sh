@@ -201,12 +201,12 @@ get_input() {
     local result
 
     if [ -n "$default" ]; then
-        echo -n -e "${YELLOW}$prompt ${WHITE}[$default]${NC}: "
+        echo -n -e "${YELLOW}$prompt ${WHITE}[$default]${NC}: " >&2
     else
-        echo -n -e "${YELLOW}$prompt${NC}: "
+        echo -n -e "${YELLOW}$prompt${NC}: " >&2
     fi
 
-    read -r result
+    read -r result </dev/tty
     result="${result%$'\r'}"
     result="${result#"${result%%[![:space:]]*}"}"
     result="${result%"${result##*[![:space:]]}"}"
@@ -229,7 +229,7 @@ get_choice() {
             echo "$choice"
             return 0
         fi
-        print_error "Please enter a number between 1 and $max"
+        echo -e "${RED}✗ Please enter a number between 1 and $max${NC}" >&2
     done
 }
 
@@ -451,7 +451,7 @@ ask_project_description() {
     # Project description (always ask)
     echo -e "${YELLOW}Brief project description (1-3 sentences):${NC}"
     echo -e "${CYAN}Example: E-commerce platform for selling handmade products with user accounts and payments${NC}"
-    read -r CONFIG_PROJECT_DESC
+    read -r CONFIG_PROJECT_DESC </dev/tty
     CONFIG_PROJECT_DESC="${CONFIG_PROJECT_DESC%$'\r'}"
     echo ""
 
@@ -459,13 +459,13 @@ ask_project_description() {
     if [[ "$CONFIG_FLOW_TYPE" == "migration" || "$CONFIG_FLOW_TYPE" == "doc_audit" ]]; then
         echo -e "${YELLOW}What is already done/implemented? (features, modules, integrations):${NC}"
         echo -e "${CYAN}Example: User auth with Firebase, product listing, basic cart - no checkout yet${NC}"
-        read -r CONFIG_DONE_STATUS
+        read -r CONFIG_DONE_STATUS </dev/tty
         CONFIG_DONE_STATUS="${CONFIG_DONE_STATUS%$'\r'}"
         echo ""
 
         echo -e "${YELLOW}What are your uncertainties/concerns/problems?${NC}"
         echo -e "${CYAN}Example: Not sure about payment integration approach, performance issues with large catalogs${NC}"
-        read -r CONFIG_UNCERTAINTIES
+        read -r CONFIG_UNCERTAINTIES </dev/tty
         CONFIG_UNCERTAINTIES="${CONFIG_UNCERTAINTIES%$'\r'}"
         echo ""
     fi
@@ -474,7 +474,7 @@ ask_project_description() {
     if [[ "$CONFIG_FLOW_TYPE" == "new_project" ]]; then
         echo -e "${YELLOW}What are your main uncertainties or questions?${NC}"
         echo -e "${CYAN}Example: Should I use monorepo? Which auth provider? How to handle file uploads?${NC}"
-        read -r CONFIG_UNCERTAINTIES
+        read -r CONFIG_UNCERTAINTIES </dev/tty
         CONFIG_UNCERTAINTIES="${CONFIG_UNCERTAINTIES%$'\r'}"
         echo ""
     fi
@@ -593,13 +593,22 @@ create_directory_structure() {
     mkdir -p "$target/.claude/logs/workflows"
     mkdir -p "$target/.claude/logs/sessions"
     mkdir -p "$target/scripts"
-    mkdir -p "$target/docs/0-DISCOVERY"
+    mkdir -p "$target/docs/0-DISCOVERY/research/tech"
+    mkdir -p "$target/docs/0-DISCOVERY/research/competition"
+    mkdir -p "$target/docs/0-DISCOVERY/research/user-needs"
+    mkdir -p "$target/docs/0-DISCOVERY/research/market"
+    mkdir -p "$target/docs/0-DISCOVERY/research/pricing"
+    mkdir -p "$target/docs/0-DISCOVERY/research/risk"
     mkdir -p "$target/docs/1-BASELINE/product"
-    mkdir -p "$target/docs/1-BASELINE/architecture"
+    mkdir -p "$target/docs/1-BASELINE/architecture/decisions"
     mkdir -p "$target/docs/1-BASELINE/research"
-    mkdir -p "$target/docs/2-MANAGEMENT/epics"
+    mkdir -p "$target/docs/2-MANAGEMENT/epics/current"
+    mkdir -p "$target/docs/2-MANAGEMENT/epics/completed"
     mkdir -p "$target/docs/2-MANAGEMENT/sprints"
-    mkdir -p "$target/docs/3-DEVELOPMENT"
+    mkdir -p "$target/docs/3-ARCHITECTURE/ux/wireframes"
+    mkdir -p "$target/docs/3-ARCHITECTURE/ux/flows"
+    mkdir -p "$target/docs/4-DEVELOPMENT"
+    mkdir -p "$target/docs/5-ARCHIVE"
     mkdir -p "$target/docs/reviews"
 
     print_success "Directory structure created"
@@ -725,28 +734,85 @@ copy_state_templates() {
     print_success "State templates copied"
 }
 
-copy_monitoring_scripts() {
-    print_step "Copying monitoring scripts..."
+copy_audit_templates() {
+    print_step "Copying audit templates..."
+
+    local target="$CONFIG_TARGET_PATH"
+    mkdir -p "$target/.claude/audit"
+
+    if [ -d "$PACK_ROOT/.claude/audit" ]; then
+        # Copy only .md files (skip .tmp files)
+        for file in "$PACK_ROOT/.claude/audit/"*.md; do
+            if [ -f "$file" ]; then
+                cp "$file" "$target/.claude/audit/"
+            fi
+        done
+    fi
+
+    print_success "Audit templates copied"
+}
+
+copy_migration_templates() {
+    print_step "Copying migration templates..."
+
+    local target="$CONFIG_TARGET_PATH"
+    mkdir -p "$target/.claude/migration"
+
+    if [ -d "$PACK_ROOT/.claude/migration" ]; then
+        cp -r "$PACK_ROOT/.claude/migration/"*.md "$target/.claude/migration/" 2>/dev/null || true
+    fi
+
+    print_success "Migration templates copied"
+}
+
+copy_claude_scripts() {
+    print_step "Copying .claude/scripts..."
+
+    local target="$CONFIG_TARGET_PATH"
+    mkdir -p "$target/.claude/scripts"
+
+    if [ -d "$PACK_ROOT/.claude/scripts" ]; then
+        cp -r "$PACK_ROOT/.claude/scripts/"* "$target/.claude/scripts/" 2>/dev/null || true
+        chmod +x "$target/.claude/scripts/"*.sh 2>/dev/null || true
+    fi
+
+    print_success ".claude/scripts copied"
+}
+
+copy_all_scripts() {
+    print_step "Copying all scripts..."
 
     local target="$CONFIG_TARGET_PATH"
 
-    # Copy monitoring scripts
-    if [ -f "$PACK_ROOT/scripts/session-logger.sh" ]; then
-        cp "$PACK_ROOT/scripts/session-logger.sh" "$target/scripts/"
-        chmod +x "$target/scripts/session-logger.sh"
+    if [ -d "$PACK_ROOT/scripts" ]; then
+        # Copy all .sh scripts
+        for script in "$PACK_ROOT/scripts/"*.sh; do
+            if [ -f "$script" ]; then
+                cp "$script" "$target/scripts/"
+                chmod +x "$target/scripts/$(basename "$script")"
+            fi
+        done
     fi
 
-    if [ -f "$PACK_ROOT/scripts/context-monitor.sh" ]; then
-        cp "$PACK_ROOT/scripts/context-monitor.sh" "$target/scripts/"
-        chmod +x "$target/scripts/context-monitor.sh"
+    local count=$(find "$target/scripts" -name "*.sh" 2>/dev/null | wc -l)
+    print_success "Scripts copied: $count files"
+}
+
+copy_docs_structure() {
+    print_step "Copying docs structure..."
+
+    local target="$CONFIG_TARGET_PATH"
+
+    if [ -d "$PACK_ROOT/docs" ]; then
+        # Copy entire docs structure
+        cp -r "$PACK_ROOT/docs" "$target/"
+
+        # Remove migration docs from target (keep in pack only)
+        # rm -rf "$target/docs/migration" 2>/dev/null || true
     fi
 
-    # Copy METRICS template
-    if [ -f "$PACK_ROOT/.claude/state/METRICS.md" ]; then
-        cp "$PACK_ROOT/.claude/state/METRICS.md" "$target/.claude/state/"
-    fi
-
-    print_success "Monitoring scripts copied"
+    local count=$(find "$target/docs" -name "*.md" 2>/dev/null | wc -l)
+    print_success "Docs structure copied: $count files"
 }
 
 copy_config() {
@@ -1866,14 +1932,20 @@ launch_claude() {
     print_info "Startup prompt saved to: .claude/STARTUP-PROMPT.md"
     echo ""
 
-    # Change to target directory
-    cd "$CONFIG_TARGET_PATH"
-
     print_step "Starting Claude with $CONFIG_FLOW_TYPE flow..."
     echo ""
 
-    # Launch Claude
-    claude "$prompt"
+    # Change to target directory
+    cd "$CONFIG_TARGET_PATH" || exit 1
+
+    print_success "Project ready at: $CONFIG_TARGET_PATH"
+    echo ""
+    print_info "Launching Claude interactive session..."
+    echo ""
+
+    # Launch Claude with the startup prompt (interactive mode)
+    # Using @ syntax to include the prompt file content
+    exec claude "Execute the instructions in @.claude/STARTUP-PROMPT.md - start immediately"
 }
 
 # ============================================================================
@@ -1890,7 +1962,7 @@ run_interactive() {
 
     echo ""
     print_info "Press Enter to start the setup wizard..."
-    read -r
+    read -r </dev/tty
 
     # Collect configuration
     ask_language
@@ -1922,8 +1994,12 @@ run_interactive() {
     copy_patterns
     copy_checklists
     copy_state_templates
+    copy_audit_templates
+    copy_migration_templates
+    copy_claude_scripts
+    copy_all_scripts
+    copy_docs_structure
     copy_config
-    copy_monitoring_scripts
     generate_settings_local
     generate_project_config
     generate_claude_md
@@ -1934,29 +2010,32 @@ run_interactive() {
     echo ""
     echo -e "  ${WHITE}Project created at:${NC} ${GREEN}$CONFIG_TARGET_PATH${NC}"
     echo ""
-    echo -e "  ${WHITE}Files copied:${NC}"
-    echo -e "    Agents:     $(find "$CONFIG_TARGET_PATH/.claude/agents" -name "*.md" 2>/dev/null | wc -l)"
-    echo -e "    Workflows:  $(find "$CONFIG_TARGET_PATH/.claude/workflows" -name "*.yaml" -o -name "*.md" 2>/dev/null | wc -l)"
-    echo -e "    Templates:  $(find "$CONFIG_TARGET_PATH/.claude/templates" -name "*.md" 2>/dev/null | wc -l)"
-    echo -e "    Patterns:   $(find "$CONFIG_TARGET_PATH/.claude/patterns" -name "*.md" 2>/dev/null | wc -l)"
-    echo -e "    Checklists: $(find "$CONFIG_TARGET_PATH/.claude/checklists" -name "*.md" 2>/dev/null | wc -l)"
-    echo -e "    Scripts:    $(find "$CONFIG_TARGET_PATH/scripts" -name "*.sh" 2>/dev/null | wc -l)"
+    echo -e "  ${WHITE}.claude/ contents:${NC}"
+    echo -e "    agents/      $(find "$CONFIG_TARGET_PATH/.claude/agents" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    workflows/   $(find "$CONFIG_TARGET_PATH/.claude/workflows" -name "*.yaml" -o -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    templates/   $(find "$CONFIG_TARGET_PATH/.claude/templates" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    patterns/    $(find "$CONFIG_TARGET_PATH/.claude/patterns" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    checklists/  $(find "$CONFIG_TARGET_PATH/.claude/checklists" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    audit/       $(find "$CONFIG_TARGET_PATH/.claude/audit" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    migration/   $(find "$CONFIG_TARGET_PATH/.claude/migration" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    state/       $(find "$CONFIG_TARGET_PATH/.claude/state" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    scripts/     $(find "$CONFIG_TARGET_PATH/.claude/scripts" -name "*.sh" 2>/dev/null | wc -l) files"
     echo ""
-    echo -e "  ${WHITE}Monitoring:${NC}"
-    echo -e "    - session-logger.sh  (session metrics)"
-    echo -e "    - context-monitor.sh (context budget)"
+    echo -e "  ${WHITE}Other directories:${NC}"
+    echo -e "    scripts/     $(find "$CONFIG_TARGET_PATH/scripts" -name "*.sh" 2>/dev/null | wc -l) files"
+    echo -e "    docs/        $(find "$CONFIG_TARGET_PATH/docs" -name "*.md" 2>/dev/null | wc -l) files"
     echo ""
 
     print_info "You can delete the pack after verification:"
     echo -e "     ${YELLOW}rm -rf $PACK_ROOT${NC}"
     echo ""
 
-    if confirm "Launch Claude now?"; then
-        launch_claude
-    else
-        print_info "To start later, run:"
-        echo -e "     ${CYAN}cd $CONFIG_TARGET_PATH && claude \"@.claude/STARTUP-PROMPT.md\"${NC}"
-    fi
+    print_info "To restart later, run:"
+    echo -e "     ${CYAN}cd $CONFIG_TARGET_PATH && claude \"@.claude/STARTUP-PROMPT.md\"${NC}"
+    echo ""
+
+    # Auto-launch Claude
+    launch_claude
 }
 
 show_help() {
