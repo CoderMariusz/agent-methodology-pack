@@ -17,6 +17,10 @@ This workflow is MANDATORY before:
 
 **IMPORTANT:** Discovery is NOT optional. Skipping discovery leads to wrong assumptions, wasted effort, and costly rework. This workflow ensures we always ask questions and understand the project before acting.
 
+> **NOTE: UX Design is NOT part of Discovery.** Discovery gathers basic UI/UX context (platforms, accessibility needs, UI preference) but actual UX Design happens LATER in the Planning flow, AFTER Architecture is defined. UX Design requires technical context from Architecture to make informed decisions.
+>
+> **Correct flow sequence:** Discovery -> PRD -> Architecture -> UX Design -> Epic Breakdown -> Stories -> Sprint
+
 ## ASCII Flow Diagram
 
 ```
@@ -304,6 +308,16 @@ Recovery: Re-run scan with expanded scope
 1. Is this a new project or replacing something?
 2. Are there existing systems to integrate with?
 3. Who are the stakeholders?
+
+### UI/UX Context (Basic - NOT full UX design)
+1. Does this project need a user interface?
+2. What platforms are required? (web, mobile, desktop)
+3. Are there accessibility requirements? (WCAG level)
+4. Any existing brand guidelines or design system to follow?
+5. Preference for UI approach? (minimalist, feature-rich, etc.)
+
+> Note: These questions gather CONTEXT only. Full UX Design happens
+> after Architecture is defined in the Planning flow.
 ```
 
 #### Output
@@ -334,6 +348,11 @@ Recovery: Schedule follow-up interview session
 **Agents:** ARCHITECT-AGENT, PM-AGENT, RESEARCH-AGENT (parallel)
 **Models:** Opus (Architect), Sonnet (PM, Research)
 **Duration:** 10-20 minutes
+
+> **Note:** UX-DESIGNER is intentionally NOT included in Discovery parallel agents.
+> UX Design requires technical context from Architecture decisions (tech stack, platform constraints,
+> performance budgets) to make informed design choices. UX Design phase occurs AFTER Architecture
+> in the Planning flow.
 
 #### Why This Phase Matters
 | Aspect | Description |
@@ -663,6 +682,29 @@ Outputs passed to PLANNING-FLOW:
         |
         v
 PLANNING-FLOW begins
+        |
+        v
+    +-------+
+    |  PRD  |  (Product Requirements Document)
+    +---+---+
+        |
+        v
++-------------+
+| ARCHITECTURE |  (Technical decisions, constraints)
++------+------+
+        |
+        v
++-------------+
+|  UX DESIGN  |  <-- UX Design happens HERE, AFTER Architecture
++------+------+    (needs tech context: platform, performance, constraints)
+        |
+        v
++--------------+
+| EPIC BREAKDOWN|
++------+-------+
+        |
+        v
+   STORIES -> SPRINT
 ```
 
 ### DISCOVERY-FLOW -> EPIC-WORKFLOW

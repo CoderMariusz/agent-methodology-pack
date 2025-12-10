@@ -548,6 +548,11 @@ EOF
     echo -e "   - Planning: .claude/workflows/PLANNING-FLOW.md"
     echo -e "   - Development: .claude/workflows/DEVELOPMENT-FLOW.md"
     echo ""
+    echo -e "${YELLOW}5. State & Commit sync (auto-runs after each phase):${NC}"
+    echo -e "   - bash scripts/sync-state.sh              # Just sync state"
+    echo -e "   - bash scripts/sync-state.sh --commit     # Sync + commit"
+    echo -e "   - bash scripts/sync-state.sh --phase discovery --commit"
+    echo ""
 
     echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${BLUE}║                HAPPY BUILDING WITH AGENTS! 🤖              ║${NC}"

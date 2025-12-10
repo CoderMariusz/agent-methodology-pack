@@ -76,7 +76,8 @@ What becomes easier/harder?
 ## Story Format
 
 ```markdown
-### Story {Epic}.{Id}: {Title}
+### Story {XX}.{N}: {Title}
+**File:** {XX}.{N}.{story-slug}.md
 **Complexity:** S | M | L
 **Type:** Backend | Frontend | Full-stack
 
@@ -87,7 +88,7 @@ Given {precondition}
 When {action}
 Then {result}
 
-**Dependencies:** None | Story {X}.{Y}
+**Dependencies:** None | Story {XX}.{N}
 **Risks:** None | {description}
 ```
 
@@ -95,8 +96,8 @@ Then {result}
 
 ```
 ## Story Dependencies
-Story 1.1 → Story 1.2 (blocks)
-Story 2.1 → Story 1.3 (blocks)
+Story 01.1 → Story 01.2 (blocks)
+Story 02.1 → Story 01.3 (blocks)
 
 ## External Dependencies
 - Payment Gateway (Stripe)
@@ -105,10 +106,45 @@ Story 2.1 → Story 1.3 (blocks)
 
 ## Output
 
+### Naming Convention
+
+Pattern: `{XX}.{N}.{M}.{slug}`
+- XX = Epic number (2 digits, zero-padded): 01, 02, 03
+- N = Story number: 1, 2, 3
+- M = Subtask number (optional): 1, 2, 3
+- slug = kebab-case description
+- XX.0.* = Epic-level documents
+
+### Epic Outputs
+
 ```
-docs/2-MANAGEMENT/epics/epic-{N}-{name}.md
+docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/
+  {XX}.0.epic-overview.md
+  {XX}.0.clarifications.md
+```
+
+### Story Outputs
+
+```
+docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/
+  {XX}.{N}.{story-slug}.md
+  {XX}.{N}.{M}.{subtask-slug}.md  (subtasks)
+```
+
+### Architecture Outputs
+
+```
 docs/3-ARCHITECTURE/decisions/ADR-{NNN}-{topic}.md
 docs/3-ARCHITECTURE/system-overview.md
+```
+
+### Examples
+
+```
+docs/2-MANAGEMENT/epics/01-user-auth/01.0.epic-overview.md
+docs/2-MANAGEMENT/epics/01-user-auth/01.1.db-schema-setup.md
+docs/2-MANAGEMENT/epics/01-user-auth/01.2.login-endpoint.md
+docs/2-MANAGEMENT/epics/01-user-auth/01.2.1.input-validation.md (subtask)
 ```
 
 ## Quality Gates
@@ -124,7 +160,8 @@ Before delivery:
 ## Handoff to PRODUCT-OWNER
 
 ```yaml
-epic: docs/2-MANAGEMENT/epics/epic-{N}-{name}.md
+epic_folder: docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/
+epic_overview: {XX}.0.epic-overview.md
 adrs: [docs/3-ARCHITECTURE/decisions/ADR-{NNN}.md]
 stories_count: {N}
 dependencies_mapped: true
@@ -134,8 +171,9 @@ risks: []
 ## Handoff to DEV Agents
 
 ```yaml
-story: {N}.{M}
-epic_ref: docs/2-MANAGEMENT/epics/epic-{N}.md
+story: "{XX}.{N}.{story-slug}"
+story_file: docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/{XX}.{N}.{story-slug}.md
+epic_folder: docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/
 adrs: [relevant ADRs]
 technical_notes: "{implementation hints}"
 dependencies: []

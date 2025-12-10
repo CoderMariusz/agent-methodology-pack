@@ -237,18 +237,6 @@ phases:
           - "What assumptions are we making?"
           - "What could invalidate our approach? (risks, dependencies, external factors)"
 
-      - id: ux_discovery
-        agent: UX-DESIGNER
-        model: sonnet
-        optional: true
-        condition: "UI requirements present"
-        description: "User experience discovery"
-        questions:
-          - "What is the expected user journey?"
-          - "Are there accessibility requirements?"
-          - "What devices/platforms must be supported?"
-          - "Are there design system constraints?"
-
     output:
       deliverable: "docs/0-DISCOVERY/PROJECT-UNDERSTANDING.md"
       update_mode: "merge domain sections"

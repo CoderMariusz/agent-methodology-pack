@@ -97,6 +97,15 @@ phases:
         - TASK-QUEUE.md: [status]
         - PROJECT-STATE.md: [status]
 
+      # AUTO STATE UPDATE + COMMIT
+      on_complete:
+        state_update:
+          update_root: true
+          script: "bash scripts/sync-state.sh --phase sprint --commit"
+        commit:
+          enabled: true
+          message: "Start Sprint {sprint_number}: {sprint_goal}"
+
     # Gate after doc sync check
     doc_sync_gate:
       id: DOC_SYNC_COMPLETE
@@ -404,6 +413,17 @@ phases:
       - "Archive sprint folder"
       - "Update velocity metrics"
       - "Transition to next sprint or release"
+
+    # AUTO STATE UPDATE + COMMIT (MAJOR CHECKPOINT)
+    on_complete:
+      state_update:
+        phase: "reset_development"  # Reset dev phases for next sprint
+        update_root: true
+        script: "bash scripts/sync-state.sh --phase reset_development --commit"
+      commit:
+        enabled: true
+        message: "Complete Sprint {sprint_number} - velocity {actual_velocity}/{planned_velocity}"
+
     next_workflow:
       options:
         - workflow: "engineering/sprint-workflow.yaml"

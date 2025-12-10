@@ -50,12 +50,25 @@
 
 ---
 
-### Development Phase
-- [ ] Planning
-- [ ] Design
+### Project Phases
+<!-- Updated automatically by workflows via: bash scripts/sync-state.sh --phase <name> -->
+
+#### Planning Phases
+- [ ] Discovery
+- [ ] PRD (Requirements)
+- [ ] Architecture
+- [ ] UX Design
+- [ ] Epic Breakdown
+- [ ] Story Breakdown
+- [ ] Scope Validation
+- [ ] Sprint Planning
+
+#### Development Phases
 - [ ] Development
 - [ ] Testing
+- [ ] Code Review
 - [ ] Deployment
+- [ ] Release
 
 ### Active Sprint
 **Sprint:** {number}

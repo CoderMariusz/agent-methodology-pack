@@ -243,6 +243,15 @@ steps:
       - "Mark story as Done"
       - "Notify scrum-master"
 
+    # AUTO STATE UPDATE + COMMIT
+    on_complete:
+      state_update:
+        update_root: true
+        script: "bash scripts/sync-state.sh --commit"
+      commit:
+        enabled: true
+        message: "Complete story {story_id}: {story_title}"
+
 # TDD Phase enforcement
 tdd_rules:
   - "RED must complete before GREEN"

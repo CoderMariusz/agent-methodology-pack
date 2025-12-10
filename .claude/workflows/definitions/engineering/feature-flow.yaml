@@ -322,6 +322,15 @@ phases:
       - "Update PROJECT-STATE.md"
       - "Notify user of completion"
 
+    # AUTO STATE UPDATE + COMMIT
+    on_complete:
+      state_update:
+        update_root: true
+        script: "bash scripts/sync-state.sh --commit"
+      commit:
+        enabled: true
+        message: "Complete feature: {feature_name}"
+
 # =============================================================================
 # QUALITY GATES SUMMARY
 # =============================================================================

@@ -345,6 +345,15 @@ phases:
       - "Archive to completed/"
       - "Update METRICS.md"
 
+    # AUTO STATE UPDATE + COMMIT
+    on_complete:
+      state_update:
+        update_root: true
+        script: "bash scripts/sync-state.sh --commit"
+      commit:
+        enabled: true
+        message: "Complete epic {epic_id}: {epic_name}"
+
 # Quality Gates Summary
 quality_gates:
   discovery_to_design:
