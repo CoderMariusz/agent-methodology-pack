@@ -2,10 +2,11 @@
 # Auto-maintained by SKILL-CREATOR and SKILL-VALIDATOR agents
 
 metadata:
-  version: 1.0.0
-  total_skills: 35
+  version: 1.1.0
+  total_skills: 42
   last_full_audit: 2025-01-10
   next_scheduled_review: 2025-01-24
+  max_skills_per_task: 3
 
 # Skill status values:
 #   active       - Production ready, validated
@@ -323,6 +324,68 @@ generic:
     status: active
     tags: [configuration, environment, security]
 
+  # ---------------------------------------------------------------------------
+  # UX & SECURITY (3 skills)
+  # ---------------------------------------------------------------------------
+  accessibility-checklist:
+    version: 1.0.0
+    file: generic/accessibility-checklist.md
+    tokens: 450
+    confidence: high
+    status: active
+    tags: [accessibility, a11y, frontend, ux]
+
+  security-backend-checklist:
+    version: 1.0.0
+    file: generic/security-backend-checklist.md
+    tokens: 500
+    confidence: high
+    status: active
+    tags: [security, backend, api, owasp]
+
+  ui-ux-patterns:
+    version: 1.0.0
+    file: generic/ui-ux-patterns.md
+    tokens: 550
+    confidence: high
+    status: active
+    tags: [ui, ux, design, frontend]
+
+  # ---------------------------------------------------------------------------
+  # PLANNING & PROCESS (4 skills)
+  # ---------------------------------------------------------------------------
+  invest-stories:
+    version: 1.0.0
+    file: generic/invest-stories.md
+    tokens: 400
+    confidence: high
+    status: active
+    tags: [agile, stories, planning, product]
+
+  discovery-interview-patterns:
+    version: 1.0.0
+    file: generic/discovery-interview-patterns.md
+    tokens: 450
+    confidence: high
+    status: active
+    tags: [discovery, requirements, interview, planning]
+
+  prd-structure:
+    version: 1.0.0
+    file: generic/prd-structure.md
+    tokens: 400
+    confidence: high
+    status: active
+    tags: [product, prd, requirements, planning]
+
+  architecture-adr:
+    version: 1.0.0
+    file: generic/architecture-adr.md
+    tokens: 400
+    confidence: high
+    status: active
+    tags: [architecture, adr, decisions, documentation]
+
 # =============================================================================
 # DOMAIN SKILLS (Industry/domain specific patterns)
 # =============================================================================
@@ -398,3 +461,14 @@ skill_index:
   ci-github-actions: "GitHub Actions CI/CD workflows"
   docker-basics: "Dockerfile and docker-compose patterns"
   env-configuration: "Environment variable management"
+
+  # UX & Security
+  accessibility-checklist: "A11y checklist for keyboard, screen reader, contrast"
+  security-backend-checklist: "OWASP security patterns for backend APIs"
+  ui-ux-patterns: "UI patterns for layouts, forms, feedback, states"
+
+  # Planning & Process
+  invest-stories: "INVEST criteria for user stories"
+  discovery-interview-patterns: "Requirements gathering interview patterns"
+  prd-structure: "PRD structure with MoSCoW and requirements"
+  architecture-adr: "Architecture Decision Record format"
