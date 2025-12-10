@@ -2,8 +2,8 @@
 # Auto-maintained by SKILL-CREATOR and SKILL-VALIDATOR agents
 
 metadata:
-  version: 1.1.0
-  total_skills: 42
+  version: 1.2.0
+  total_skills: 45
   last_full_audit: 2025-01-10
   next_scheduled_review: 2025-01-24
   max_skills_per_task: 3
@@ -386,6 +386,33 @@ generic:
     status: active
     tags: [architecture, adr, decisions, documentation]
 
+  # ---------------------------------------------------------------------------
+  # SKILLS META (3 skills) - For SKILL-CREATOR and SKILL-VALIDATOR
+  # ---------------------------------------------------------------------------
+  research-source-evaluation:
+    version: 1.0.0
+    file: generic/research-source-evaluation.md
+    tokens: 400
+    confidence: high
+    status: active
+    tags: [research, sources, validation, skills]
+
+  version-changelog-patterns:
+    version: 1.0.0
+    file: generic/version-changelog-patterns.md
+    tokens: 350
+    confidence: high
+    status: active
+    tags: [versioning, changelog, updates, skills]
+
+  skill-quality-standards:
+    version: 1.0.0
+    file: generic/skill-quality-standards.md
+    tokens: 400
+    confidence: high
+    status: active
+    tags: [skills, quality, standards, meta]
+
 # =============================================================================
 # DOMAIN SKILLS (Industry/domain specific patterns)
 # =============================================================================
@@ -472,3 +499,8 @@ skill_index:
   discovery-interview-patterns: "Requirements gathering interview patterns"
   prd-structure: "PRD structure with MoSCoW and requirements"
   architecture-adr: "Architecture Decision Record format"
+
+  # Skills Meta
+  research-source-evaluation: "How to find and verify authoritative sources"
+  version-changelog-patterns: "How to check versions and detect breaking changes"
+  skill-quality-standards: "Quality standards for creating/validating skills"
