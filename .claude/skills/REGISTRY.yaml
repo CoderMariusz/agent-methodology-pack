@@ -3,9 +3,9 @@
 
 metadata:
   version: 1.0.0
-  total_skills: 0
-  last_full_audit: null
-  next_scheduled_review: null
+  total_skills: 35
+  last_full_audit: 2025-01-10
+  next_scheduled_review: 2025-01-24
 
 # Skill status values:
 #   active       - Production ready, validated
@@ -22,17 +22,15 @@ metadata:
 # GENERIC SKILLS (Technology-agnostic, reusable across projects)
 # =============================================================================
 generic:
-  # Supabase
+  # ---------------------------------------------------------------------------
+  # SUPABASE (6 skills)
+  # ---------------------------------------------------------------------------
   supabase-rls:
     version: 1.0.0
     file: generic/supabase-rls.md
     tokens: 650
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://supabase.com/docs/guides/auth/row-level-security
+    status: active
     tags: [supabase, security, database]
 
   supabase-queries:
@@ -40,115 +38,290 @@ generic:
     file: generic/supabase-queries.md
     tokens: 700
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://supabase.com/docs/reference/javascript/select
+    status: active
     tags: [supabase, database, queries]
 
-  # TypeScript
+  supabase-realtime:
+    version: 1.0.0
+    file: generic/supabase-realtime.md
+    tokens: 600
+    confidence: high
+    status: active
+    tags: [supabase, realtime, websocket]
+
+  supabase-auth:
+    version: 1.0.0
+    file: generic/supabase-auth.md
+    tokens: 700
+    confidence: high
+    status: active
+    tags: [supabase, auth, security]
+
+  supabase-storage:
+    version: 1.0.0
+    file: generic/supabase-storage.md
+    tokens: 550
+    confidence: high
+    status: active
+    tags: [supabase, storage, files]
+
+  supabase-edge-functions:
+    version: 1.0.0
+    file: generic/supabase-edge-functions.md
+    tokens: 600
+    confidence: high
+    status: active
+    tags: [supabase, serverless, deno]
+
+  # ---------------------------------------------------------------------------
+  # REACT & FRONTEND (8 skills)
+  # ---------------------------------------------------------------------------
+  react-hooks:
+    version: 1.0.0
+    file: generic/react-hooks.md
+    tokens: 750
+    confidence: high
+    status: active
+    tags: [react, hooks, frontend]
+
+  react-performance:
+    version: 1.0.0
+    file: generic/react-performance.md
+    tokens: 750
+    confidence: high
+    status: active
+    tags: [react, performance, optimization]
+
+  react-forms:
+    version: 1.0.0
+    file: generic/react-forms.md
+    tokens: 700
+    confidence: high
+    status: active
+    tags: [react, forms, validation]
+
+  react-state-management:
+    version: 1.0.0
+    file: generic/react-state-management.md
+    tokens: 750
+    confidence: high
+    status: active
+    tags: [react, state, zustand, tanstack-query]
+
+  nextjs-app-router:
+    version: 1.0.0
+    file: generic/nextjs-app-router.md
+    tokens: 850
+    confidence: high
+    status: active
+    tags: [nextjs, routing, frontend]
+
+  nextjs-data-fetching:
+    version: 1.0.0
+    file: generic/nextjs-data-fetching.md
+    tokens: 700
+    confidence: high
+    status: active
+    tags: [nextjs, data-fetching, caching]
+
+  nextjs-api-routes:
+    version: 1.0.0
+    file: generic/nextjs-api-routes.md
+    tokens: 650
+    confidence: high
+    status: active
+    tags: [nextjs, api, backend]
+
+  tailwind-patterns:
+    version: 1.0.0
+    file: generic/tailwind-patterns.md
+    tokens: 650
+    confidence: high
+    status: active
+    tags: [tailwind, css, styling]
+
+  # ---------------------------------------------------------------------------
+  # TYPESCRIPT (4 skills)
+  # ---------------------------------------------------------------------------
   typescript-patterns:
     version: 1.0.0
     file: generic/typescript-patterns.md
     tokens: 800
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://www.typescriptlang.org/docs/handbook/
-    tags: [typescript, patterns]
+    status: active
+    tags: [typescript, patterns, types]
+
+  typescript-generics:
+    version: 1.0.0
+    file: generic/typescript-generics.md
+    tokens: 650
+    confidence: high
+    status: active
+    tags: [typescript, generics, types]
 
   typescript-zod:
     version: 1.0.0
     file: generic/typescript-zod.md
     tokens: 650
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://zod.dev/
+    status: active
     tags: [typescript, validation, zod]
 
-  # Testing
+  typescript-api-types:
+    version: 1.0.0
+    file: generic/typescript-api-types.md
+    tokens: 600
+    confidence: high
+    status: active
+    tags: [typescript, api, types]
+
+  # ---------------------------------------------------------------------------
+  # TESTING (5 skills)
+  # ---------------------------------------------------------------------------
   testing-tdd-workflow:
     version: 1.0.0
     file: generic/testing-tdd-workflow.md
     tokens: 600
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://martinfowler.com/bliki/TestDrivenDevelopment.html
+    status: active
     tags: [testing, tdd, workflow]
 
-  # React
-  react-hooks:
+  testing-jest:
     version: 1.0.0
-    file: generic/react-hooks.md
-    tokens: 750
+    file: generic/testing-jest.md
+    tokens: 650
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://react.dev/reference/react/hooks
-    tags: [react, hooks, frontend]
+    status: active
+    tags: [testing, jest, unit-tests]
 
-  # Next.js
-  nextjs-app-router:
+  testing-react-testing-lib:
     version: 1.0.0
-    file: generic/nextjs-app-router.md
-    tokens: 850
+    file: generic/testing-react-testing-lib.md
+    tokens: 650
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://nextjs.org/docs/app
-    tags: [nextjs, routing, frontend]
+    status: active
+    tags: [testing, react, testing-library]
 
-  # API
+  testing-playwright:
+    version: 1.0.0
+    file: generic/testing-playwright.md
+    tokens: 650
+    confidence: high
+    status: active
+    tags: [testing, e2e, playwright]
+
+  testing-msw:
+    version: 1.0.0
+    file: generic/testing-msw.md
+    tokens: 600
+    confidence: high
+    status: active
+    tags: [testing, msw, mocking]
+
+  # ---------------------------------------------------------------------------
+  # API & BACKEND (4 skills)
+  # ---------------------------------------------------------------------------
   api-rest-design:
     version: 1.0.0
     file: generic/api-rest-design.md
     tokens: 700
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://restfulapi.net/
+    status: active
     tags: [api, rest, backend]
 
-  # Quality
+  api-error-handling:
+    version: 1.0.0
+    file: generic/api-error-handling.md
+    tokens: 650
+    confidence: high
+    status: active
+    tags: [api, error-handling, backend]
+
+  api-validation:
+    version: 1.0.0
+    file: generic/api-validation.md
+    tokens: 600
+    confidence: high
+    status: active
+    tags: [api, validation, zod]
+
+  api-authentication:
+    version: 1.0.0
+    file: generic/api-authentication.md
+    tokens: 700
+    confidence: high
+    status: active
+    tags: [api, authentication, jwt]
+
+  # ---------------------------------------------------------------------------
+  # CODE QUALITY (5 skills)
+  # ---------------------------------------------------------------------------
   code-review-checklist:
     version: 1.0.0
     file: generic/code-review-checklist.md
     tokens: 500
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://google.github.io/eng-practices/review/
+    status: active
     tags: [quality, review, checklist]
 
-  # Git
+  git-workflow:
+    version: 1.0.0
+    file: generic/git-workflow.md
+    tokens: 550
+    confidence: high
+    status: active
+    tags: [git, workflow, branching]
+
   git-conventional-commits:
     version: 1.0.0
     file: generic/git-conventional-commits.md
     tokens: 400
     confidence: high
-    status: draft
-    last_validated: null
-    next_review: null
-    sources:
-      - https://www.conventionalcommits.org/
+    status: active
     tags: [git, commits, conventions]
+
+  documentation-patterns:
+    version: 1.0.0
+    file: generic/documentation-patterns.md
+    tokens: 550
+    confidence: high
+    status: active
+    tags: [documentation, jsdoc, readme]
+
+  refactoring-patterns:
+    version: 1.0.0
+    file: generic/refactoring-patterns.md
+    tokens: 650
+    confidence: high
+    status: active
+    tags: [refactoring, code-quality, patterns]
+
+  # ---------------------------------------------------------------------------
+  # DEVOPS & TOOLING (3 skills)
+  # ---------------------------------------------------------------------------
+  ci-github-actions:
+    version: 1.0.0
+    file: generic/ci-github-actions.md
+    tokens: 700
+    confidence: high
+    status: active
+    tags: [ci, github-actions, automation]
+
+  docker-basics:
+    version: 1.0.0
+    file: generic/docker-basics.md
+    tokens: 650
+    confidence: high
+    status: active
+    tags: [docker, containers, devops]
+
+  env-configuration:
+    version: 1.0.0
+    file: generic/env-configuration.md
+    tokens: 550
+    confidence: high
+    status: active
+    tags: [configuration, environment, security]
 
 # =============================================================================
 # DOMAIN SKILLS (Industry/domain specific patterns)
@@ -177,13 +350,51 @@ review_queue: []
 # =============================================================================
 # This section is auto-generated for ORCHESTRATOR context loading
 skill_index:
+  # Supabase
   supabase-rls: "Row Level Security patterns for Supabase"
   supabase-queries: "Supabase query patterns and best practices"
-  typescript-patterns: "TypeScript idioms and type patterns"
-  typescript-zod: "Zod schema validation patterns"
-  testing-tdd-workflow: "TDD red-green-refactor workflow"
+  supabase-realtime: "Real-time subscriptions and presence"
+  supabase-auth: "Authentication flows and session management"
+  supabase-storage: "File upload and storage patterns"
+  supabase-edge-functions: "Serverless edge functions in Deno"
+
+  # React & Frontend
   react-hooks: "React hooks patterns and rules"
+  react-performance: "Performance optimization and memoization"
+  react-forms: "Form handling with react-hook-form and Zod"
+  react-state-management: "State management with Zustand and TanStack Query"
   nextjs-app-router: "Next.js App Router patterns"
+  nextjs-data-fetching: "Server-side data fetching and caching"
+  nextjs-api-routes: "API route handlers in Next.js"
+  tailwind-patterns: "Tailwind CSS utility patterns"
+
+  # TypeScript
+  typescript-patterns: "TypeScript idioms and type patterns"
+  typescript-generics: "Generic types and constraints"
+  typescript-zod: "Zod schema validation patterns"
+  typescript-api-types: "API request/response type patterns"
+
+  # Testing
+  testing-tdd-workflow: "TDD red-green-refactor workflow"
+  testing-jest: "Jest testing patterns and mocking"
+  testing-react-testing-lib: "React Testing Library patterns"
+  testing-playwright: "E2E testing with Playwright"
+  testing-msw: "API mocking with MSW"
+
+  # API & Backend
   api-rest-design: "RESTful API design principles"
+  api-error-handling: "Consistent error response patterns"
+  api-validation: "Request validation with Zod"
+  api-authentication: "JWT and auth middleware patterns"
+
+  # Code Quality
   code-review-checklist: "Code review best practices"
+  git-workflow: "Git branching and PR workflow"
   git-conventional-commits: "Conventional commits format"
+  documentation-patterns: "JSDoc and README patterns"
+  refactoring-patterns: "Common refactoring techniques"
+
+  # DevOps
+  ci-github-actions: "GitHub Actions CI/CD workflows"
+  docker-basics: "Dockerfile and docker-compose patterns"
+  env-configuration: "Environment variable management"
