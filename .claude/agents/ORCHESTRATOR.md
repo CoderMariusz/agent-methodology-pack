@@ -72,7 +72,7 @@ User: "napraw bug w auth"
 |---------------------|---------|-----------|
 | "napisz/implement/create" + "backend/API" | `backend-dev` | implementation |
 | "napisz/implement/create" + "frontend/UI" | `frontend-dev` | implementation |
-| "napisz/implement" + "test/spec" | `test-engineer` | testing |
+| "napisz/implement" + "test/spec" | `test-engineer` → `test-writer` | testing |
 | "napraw/fix/debug" | `backend-dev` or `frontend-dev` | bugfix |
 | "refactor/optimize" | `senior-dev` | refactor |
 | "review/sprawdź kod" | `code-reviewer` | review |
@@ -84,6 +84,8 @@ User: "napraw bug w auth"
 | "research/zbadaj" | `research-agent` | research |
 | "nie wiem/unclear" | `discovery-agent` | discovery |
 | "sprint/planning" | `scrum-master` | process |
+| "nowy skill/create skill" | `skill-creator` | skills |
+| "sprawdź skill/validate skill" | `skill-validator` | skills |
 
 **Rule:** Can't decide in 5 seconds? → `discovery-agent`
 
@@ -105,7 +107,8 @@ User: "napraw bug w auth"
 ### Development Agents (TDD)
 | Agent | Phase | Purpose |
 |-------|-------|---------|
-| test-engineer | RED | Write failing tests first |
+| test-engineer | RED | Design test strategy |
+| test-writer | RED | Write failing tests |
 | backend-dev | GREEN | Implement backend |
 | frontend-dev | GREEN | Implement frontend |
 | senior-dev | REFACTOR | Complex tasks, refactoring |
@@ -117,6 +120,70 @@ User: "napraw bug w auth"
 | qa-agent | Manual testing |
 | tech-writer | Documentation |
 | devops-agent | CI/CD, deployment |
+
+### Skills Agents
+| Agent | Purpose |
+|-------|---------|
+| skill-creator | Create/update skills |
+| skill-validator | Validate skill accuracy |
+
+---
+
+## Skills Integration
+
+### How Skills Work
+
+Skills are context-efficient knowledge packs loaded ON DEMAND when agents are activated.
+
+```
+User request → ORCHESTRATOR routes → Agent activated
+                                        ↓
+                          Load agent's required skills
+                                        ↓
+                          Agent works with enriched context
+```
+
+### Agent Skill Declaration
+
+Each agent declares skills in frontmatter:
+```yaml
+skills:
+  required: [supabase-queries, api-rest-design]  # Always loaded
+  optional: [supabase-rls, typescript-zod]       # Loaded on demand
+```
+
+### Skills Registry
+
+Location: `@.claude/skills/REGISTRY.yaml`
+
+```yaml
+skill_index:
+  supabase-rls: "Row Level Security patterns"
+  supabase-queries: "Supabase query patterns"
+  typescript-patterns: "TypeScript idioms"
+  # ... ~200 tokens total
+```
+
+### Skill Loading Rules
+
+| Scenario | Action |
+|----------|--------|
+| Agent activated | Load `required` skills automatically |
+| Agent requests skill | Load from `optional` if declared |
+| Skill not in registry | Warn, suggest skill-creator |
+| Skill `needs_review` | Warn, still load |
+
+### MCP Profiles
+
+Location: `@.claude/mcp-profiles/`
+
+| Profile | Use When |
+|---------|----------|
+| `minimal.json` | Writing code (90% of tasks) |
+| `backend.json` | Executing DB operations |
+| `full.json` | Multiple external services |
+
+**Rule:** Use skill instead of MCP when WRITING code. Use MCP only when EXECUTING operations.
 
 ---
 

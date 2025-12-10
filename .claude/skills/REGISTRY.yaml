@@ -1,0 +1,189 @@
+# Skills Registry - Central Manifest
+# Auto-maintained by SKILL-CREATOR and SKILL-VALIDATOR agents
+
+metadata:
+  version: 1.0.0
+  total_skills: 0
+  last_full_audit: null
+  next_scheduled_review: null
+
+# Skill status values:
+#   active       - Production ready, validated
+#   needs_review - Source changes detected, requires validation
+#   draft        - New skill, not yet validated
+#   deprecated   - Scheduled for removal
+
+# Confidence levels:
+#   high   - Multiple authoritative sources, tested patterns
+#   medium - Single source or community patterns
+#   low    - Experimental or unverified
+
+# =============================================================================
+# GENERIC SKILLS (Technology-agnostic, reusable across projects)
+# =============================================================================
+generic:
+  # Supabase
+  supabase-rls:
+    version: 1.0.0
+    file: generic/supabase-rls.md
+    tokens: 650
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://supabase.com/docs/guides/auth/row-level-security
+    tags: [supabase, security, database]
+
+  supabase-queries:
+    version: 1.0.0
+    file: generic/supabase-queries.md
+    tokens: 700
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://supabase.com/docs/reference/javascript/select
+    tags: [supabase, database, queries]
+
+  # TypeScript
+  typescript-patterns:
+    version: 1.0.0
+    file: generic/typescript-patterns.md
+    tokens: 800
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://www.typescriptlang.org/docs/handbook/
+    tags: [typescript, patterns]
+
+  typescript-zod:
+    version: 1.0.0
+    file: generic/typescript-zod.md
+    tokens: 650
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://zod.dev/
+    tags: [typescript, validation, zod]
+
+  # Testing
+  testing-tdd-workflow:
+    version: 1.0.0
+    file: generic/testing-tdd-workflow.md
+    tokens: 600
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://martinfowler.com/bliki/TestDrivenDevelopment.html
+    tags: [testing, tdd, workflow]
+
+  # React
+  react-hooks:
+    version: 1.0.0
+    file: generic/react-hooks.md
+    tokens: 750
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://react.dev/reference/react/hooks
+    tags: [react, hooks, frontend]
+
+  # Next.js
+  nextjs-app-router:
+    version: 1.0.0
+    file: generic/nextjs-app-router.md
+    tokens: 850
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://nextjs.org/docs/app
+    tags: [nextjs, routing, frontend]
+
+  # API
+  api-rest-design:
+    version: 1.0.0
+    file: generic/api-rest-design.md
+    tokens: 700
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://restfulapi.net/
+    tags: [api, rest, backend]
+
+  # Quality
+  code-review-checklist:
+    version: 1.0.0
+    file: generic/code-review-checklist.md
+    tokens: 500
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://google.github.io/eng-practices/review/
+    tags: [quality, review, checklist]
+
+  # Git
+  git-conventional-commits:
+    version: 1.0.0
+    file: generic/git-conventional-commits.md
+    tokens: 400
+    confidence: high
+    status: draft
+    last_validated: null
+    next_review: null
+    sources:
+      - https://www.conventionalcommits.org/
+    tags: [git, commits, conventions]
+
+# =============================================================================
+# DOMAIN SKILLS (Industry/domain specific patterns)
+# =============================================================================
+domain: {}
+  # Example:
+  # food-industry:
+  #   version: 1.0.0
+  #   file: domain/food-industry.md
+  #   tokens: 800
+  #   confidence: medium
+  #   status: draft
+
+# =============================================================================
+# REVIEW QUEUE (Skills pending validation)
+# =============================================================================
+review_queue: []
+  # Example:
+  # - skill: supabase-rls
+  #   reason: "New Supabase v2.5 RLS syntax detected"
+  #   priority: high
+  #   detected: 2025-01-15
+
+# =============================================================================
+# SKILL INDEX (Quick reference for agents - ~200 tokens)
+# =============================================================================
+# This section is auto-generated for ORCHESTRATOR context loading
+skill_index:
+  supabase-rls: "Row Level Security patterns for Supabase"
+  supabase-queries: "Supabase query patterns and best practices"
+  typescript-patterns: "TypeScript idioms and type patterns"
+  typescript-zod: "Zod schema validation patterns"
+  testing-tdd-workflow: "TDD red-green-refactor workflow"
+  react-hooks: "React hooks patterns and rules"
+  nextjs-app-router: "Next.js App Router patterns"
+  api-rest-design: "RESTful API design principles"
+  code-review-checklist: "Code review best practices"
+  git-conventional-commits: "Conventional commits format"
