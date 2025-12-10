@@ -1,6 +1,6 @@
 # Migration Workflow
 
-> **Version:** 1.1
+> **Version:** 2.0
 > **Definition:** @.claude/workflows/definitions/engineering/migration-workflow.yaml
 > **Updated:** 2025-12-10
 
@@ -8,83 +8,270 @@
 
 ## Overview
 
-Complete workflow for migrating existing projects to the Agent Methodology Pack. Handles discovery, planning, execution, and verification phases.
+Complete 10-phase workflow for migrating existing projects to the Agent Methodology Pack. Handles discovery, planning, architecture assessment, epic/story breakdown, execution, and sprint planning.
 
 **Use when:**
 - Integrating methodology into existing project
 - Setting up new project with methodology
 - Re-migrating after major changes
 
-**Duration:** 4 hours (small) to 3 days (large)
+**Duration:** 1-3 days depending on project size
 
 ---
 
-## Flow Diagram
+## 10-Phase Flow
 
 ```
-                              MIGRATION WORKFLOW
-                                      │
-        ┌─────────────────────────────┼─────────────────────────────┐
-        │                             │                             │
-        ▼                             ▼                             ▼
-   ┌─────────┐                  ┌──────────┐                  ┌──────────┐
-   │  SMALL  │                  │  MEDIUM  │                  │  LARGE   │
-   │  AUTO   │                  │  HYBRID  │                  │  MANUAL  │
-   │ <50 files│                  │ 50-200   │                  │  >200    │
-   └────┬────┘                  └────┬─────┘                  └────┬─────┘
-        │                             │                             │
-        └─────────────────────────────┼─────────────────────────────┘
-                                      │
-                                      ▼
-+=====================================================================+
-│                    PHASE 1: DISCOVERY (30-45 min)                   │
-│                    @migration/MIGRATION-DISCOVERY.md                │
-│   - doc-auditor: Scan project, identify issues                      │
-│   - discovery-agent: Optional context interview                     │
-│   Output: AUDIT-REPORT.md                                           │
-+=====================================================================+
-                                      │
-                                      ▼
-+=====================================================================+
-│                    PHASE 2: PLANNING (1 hour)                       │
-│                    @migration/MIGRATION-PLANNING.md                 │
-│   - ORCHESTRATOR: Strategy selection                                │
-│   - scrum-master: Task breakdown                                    │
-│   Output: MIGRATION-PLAN.md                                         │
-+=====================================================================+
-                                      │
-                                      ▼
-+=====================================================================+
-│                    PHASE 3: EXECUTION (1-3 days)                    │
-│                    @migration/MIGRATION-EXECUTION.md                │
-│   3.1 Setup Structure     → .claude/, docs/                         │
-│   3.2 Create Core Files   → CLAUDE.md, PROJECT-STATE.md             │
-│   3.3 Migrate Docs        → standard documentation structure        │
-│   3.4 Shard Large Files   → <500 lines each                         │
-│   3.5 Generate Workspaces → Agent contexts                          │
-+=====================================================================+
-                                      │
-                                      ▼
-+=====================================================================+
-│                    PHASE 4: VERIFICATION (30 min)                   │
-│                    @migration/MIGRATION-VERIFICATION.md             │
-│   - Validation scripts                                              │
-│   - Agent loading tests                                             │
-│   - Workflow tests                                                  │
-│   Output: MIGRATION COMPLETE                                        │
-+=====================================================================+
+                         MIGRATION WORKFLOW v2.0
+                                  │
+        ┌─────────────────────────┼─────────────────────────┐
+        │                         │                         │
+        ▼                         ▼                         ▼
+   ┌─────────┐              ┌──────────┐              ┌──────────┐
+   │  SMALL  │              │  MEDIUM  │              │  LARGE   │
+   │  AUTO   │              │  HYBRID  │              │  MANUAL  │
+   │ <50 files│              │ 50-200   │              │  >200    │
+   └────┬────┘              └────┬─────┘              └────┬─────┘
+        │                         │                         │
+        └─────────────────────────┼─────────────────────────┘
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                  PHASE 1: AUDIT + DISCOVERY (30-60 min)              ║
+║  Agents: DOC-AUDITOR + DISCOVERY-AGENT                               ║
+║                                                                       ║
+║  1A. Project Scan (DOC-AUDITOR)                                      ║
+║      → Scan entire project, inventory files                          ║
+║      → Identify large files (>500 lines)                             ║
+║      → Detect tech stack, orphaned docs                              ║
+║                                                                       ║
+║  1B. Context Interview (DISCOVERY-AGENT)                             ║
+║      → Quick interview to fill context gaps                          ║
+║      → Migration goals, pain points, constraints                     ║
+║      → Business logic gaps                                           ║
+║                                                                       ║
+║  Output: AUDIT-REPORT.md, MIGRATION-CONTEXT.md                       ║
+║  Commit: 🔍 checkpoint: Complete migration audit and discovery       ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                  PHASE 2: PRD/BASELINE CREATION (1-2 hours)          ║
+║  Agent: PM-AGENT                                                     ║
+║                                                                       ║
+║  → Analyze existing documentation                                    ║
+║  → Verify understanding with user                                    ║
+║  → Define scope: stays/changes/new/removes                           ║
+║  → Document assumptions for validation                               ║
+║                                                                       ║
+║  Output: prd.md, prd-assumptions.md, migration-scope.md              ║
+║  Commit: 📋 checkpoint: Complete PRD for migration - scope defined   ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║              PHASE 3: ARCHITECTURE ASSESSMENT (1-2 hours)            ║
+║  Agent: ARCHITECT-AGENT                                              ║
+║                                                                       ║
+║  → Assess current architecture                                       ║
+║  → Document existing patterns                                        ║
+║  → Identify technical debt                                           ║
+║  → Map integration points                                            ║
+║  → Create ADRs for changes needed                                    ║
+║                                                                       ║
+║  Output: system-overview.md, adrs/*.md, tech-debt.md                 ║
+║  Commit: 🏗️ checkpoint: Complete architecture assessment            ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                PHASE 4: UX AUDIT (1-2 hours) [CONDITIONAL]           ║
+║  Agent: UX-DESIGNER                                                  ║
+║  Condition: project.has_ui_component == true                         ║
+║                                                                       ║
+║  → Audit existing UI/UX (skip if backend-only)                       ║
+║  → Document current user flows                                       ║
+║  → Identify UX debt/issues                                           ║
+║  → Propose improvements (if any)                                     ║
+║  → USER approval for UX changes                                      ║
+║                                                                       ║
+║  Output: ux-audit.md, user-flows-current.md, ux-improvements.md      ║
+║  Commit: 🎨 checkpoint: Complete UX audit                            ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                  PHASE 5: EPIC BREAKDOWN (2-3 hours)                 ║
+║  PARALLEL EXECUTION: ARCHITECT-AGENT ∥ TEST-ENGINEER                 ║
+║                                                                       ║
+║  5A. Epic Structure (ARCHITECT-AGENT)                                ║
+║      → Create migration epics with dependencies                      ║
+║      → Clarify business logic per epic                               ║
+║      → Output: epic-catalog.md, {XX}.0.epic-overview.md              ║
+║                                                                       ║
+║  5B. Test Strategy (TEST-ENGINEER)                                   ║
+║      → Audit existing tests                                          ║
+║      → Define test strategy per epic                                 ║
+║      → Output: {XX}.0.test-strategy.md                               ║
+║                                                                       ║
+║  Commit: 📦 checkpoint: Complete epic breakdown - {epic_count} epics ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                  PHASE 6: STORY BREAKDOWN (2-4 hours)                ║
+║  Agent: ARCHITECT-AGENT                                              ║
+║                                                                       ║
+║  → Break NOW epics into INVEST-compliant stories                     ║
+║  → Write AC in Given/When/Then format                                ║
+║  → Map test scenarios from strategy                                  ║
+║  → Follow hierarchical naming: {XX}.{N}.{story-slug}.md              ║
+║                                                                       ║
+║  Output: {XX}.{N}.{story-slug}.md per story                          ║
+║  Commit: 📝 checkpoint: Complete story breakdown - {story_count}     ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                  PHASE 7: SCOPE VALIDATION (30-60 min)               ║
+║  Agent: PRODUCT-OWNER                                                ║
+║                                                                       ║
+║  → Validate INVEST compliance                                        ║
+║  → Check for scope creep                                             ║
+║  → Verify AC testability                                             ║
+║  → Prioritize: P0 quick wins first                                   ║
+║                                                                       ║
+║  Output: scope-review-migration.md                                   ║
+║  Commit: ✅ checkpoint: Scope validated - stories ready              ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                    PHASE 8: EXECUTION (2-6 hours)                    ║
+║  Agents: TECH-WRITER + ARCHITECT-AGENT + DEVOPS-AGENT               ║
+║                                                                       ║
+║  8.1 Setup Structure (TECH-WRITER)                                   ║
+║      → Create .claude/ directory structure                           ║
+║      → Setup docs/ directory structure                               ║
+║                                                                       ║
+║  8.2 Create Core Files (TECH-WRITER)                                 ║
+║      → Generate CLAUDE.md (<70 lines)                                ║
+║      → Create PROJECT-STATE.md                                       ║
+║                                                                       ║
+║  8.3 Migrate Documentation (TECH-WRITER)                             ║
+║      → Map docs to standard structure                                ║
+║      → Update cross-references                                       ║
+║                                                                       ║
+║  8.4 Shard Large Files (TECH-WRITER)                                 ║
+║      → Split files >500 lines                                        ║
+║      → Create index files                                            ║
+║                                                                       ║
+║  8.5 Generate Workspaces (ARCHITECT-AGENT)                           ║
+║      → Create agent workspace definitions                            ║
+║                                                                       ║
+║  8.6 Infrastructure Setup (DEVOPS-AGENT) [CONDITIONAL]               ║
+║      → Migrate CI/CD pipeline                                        ║
+║      → Setup deployment configs                                      ║
+║                                                                       ║
+║  Commit: 🔧 checkpoint: Execute migration - structure ready          ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                   PHASE 9: VERIFICATION (30-60 min)                  ║
+║  Agent: DOC-AUDITOR + DEVOPS-AGENT                                   ║
+║                                                                       ║
+║  9.1 Validation Script                                               ║
+║      → bash scripts/validate-migration.sh                            ║
+║      → Check .claude/ directory exists                               ║
+║      → Verify CLAUDE.md < 70 lines                                   ║
+║      → Validate all @references                                      ║
+║      → Confirm no files > 500 lines                                  ║
+║                                                                       ║
+║  9.2 Test Agent Loading                                              ║
+║      → All agents can load                                           ║
+║      → @references resolve                                           ║
+║      → Context within budget                                         ║
+║                                                                       ║
+║  9.3 Deployment Validation (DEVOPS-AGENT) [CONDITIONAL]              ║
+║      → Validate CI/CD pipeline                                       ║
+║      → Test deployment configs                                       ║
+║                                                                       ║
+║  Commit: ✅ checkpoint: Verification passed                          ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+╔══════════════════════════════════════════════════════════════════════╗
+║                  PHASE 10: SPRINT PLANNING (1 hour)                  ║
+║  Agent: SCRUM-MASTER                                                 ║
+║                                                                       ║
+║  → Create Sprint 1 backlog                                           ║
+║  → Prioritize P0 quick wins first                                    ║
+║  → Plan capacity                                                     ║
+║  → Finalize rollback plan                                            ║
+║  → Define Definition of Done                                         ║
+║                                                                       ║
+║  Output: sprint-01-plan.md                                           ║
+║  Commit: 🏃 checkpoint: Sprint 1 planned - migration ready           ║
+╚══════════════════════════════════════════════════════════════════════╝
+                                  │
+                                  ▼
+                        MIGRATION COMPLETE ✅
 ```
 
 ---
 
-## Phase Documentation
+## Next Workflows
 
-| Phase | Document | Duration |
-|-------|----------|----------|
-| 1. Discovery | @.claude/workflows/documentation/migration/MIGRATION-DISCOVERY.md | 30-45 min |
-| 2. Planning | @.claude/workflows/documentation/migration/MIGRATION-PLANNING.md | 1 hour |
-| 3. Execution | @.claude/workflows/documentation/migration/MIGRATION-EXECUTION.md | 1-3 days |
-| 4. Verification | @.claude/workflows/documentation/migration/MIGRATION-VERIFICATION.md | 30 min |
+After migration completes, continue with these workflows:
+
+| Workflow | Purpose | When |
+|----------|---------|------|
+| **sprint-workflow.yaml** | Plan implementation: tracks, dependencies, roadmap | IMMEDIATELY after migration |
+| **story-delivery.yaml** | Implement each story using TDD (RED→GREEN→REFACTOR) | For each story in sprint backlog |
+| **epic-workflow.yaml** | Continue with next epic | When all stories in epic are done |
+
+**Flow:** migration → sprint-workflow → story-delivery
+
+---
+
+## Naming Conventions
+
+All documentation follows hierarchical naming pattern: **{XX}.{N}.{M}.{slug}**
+
+| Component | Description | Example |
+|-----------|-------------|---------|
+| **XX** | Epic number (2 digits) | 01, 02, 03 |
+| **N** | Story number | 1, 2, 3 |
+| **M** | Subtask number (optional) | 1, 2 |
+| **slug** | kebab-case description | setup-structure |
+
+### Examples
+
+**Epic Folder:**
+```
+docs/2-MANAGEMENT/epics/01-structure-setup/
+```
+
+**Epic Files:**
+```
+01.0.epic-overview.md       # Epic definition
+01.0.test-strategy.md       # Test strategy for epic
+01.0.clarifications.md      # Business logic clarifications
+```
+
+**Story Files:**
+```
+01.1.create-claude-dir.md
+01.2.migrate-docs.md
+02.1.create-claude-md.md
+```
+
+**Test Files:**
+```
+tests/01-structure-setup/01.1.create-claude-dir.test.ts
+tests/01-structure-setup/01.2.migrate-docs.test.ts
+```
 
 ---
 
@@ -98,6 +285,44 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
 
 ---
 
+## State Updates & Commits
+
+Each phase updates PROJECT-STATE.md and creates a commit:
+
+| Phase | State Update | Commit Message |
+|-------|--------------|----------------|
+| 1. Audit + Discovery | phase: "discovery" | 🔍 checkpoint: Complete migration audit and discovery |
+| 2. PRD/Baseline | phase: "prd" | 📋 checkpoint: Complete PRD for migration - scope defined |
+| 3. Architecture | phase: "architecture" | 🏗️ checkpoint: Complete architecture assessment |
+| 4. UX Audit | phase: "ux_design" | 🎨 checkpoint: Complete UX audit |
+| 5. Epic Breakdown | phase: "epic" | 📦 checkpoint: Complete epic breakdown - {epic_count} epics |
+| 6. Story Breakdown | phase: "stories" | 📝 checkpoint: Complete story breakdown - {story_count} stories |
+| 7. Scope Validation | phase: "scope_validation" | ✅ checkpoint: Scope validated - stories ready |
+| 8. Execution | phase: "development" | 🔧 checkpoint: Execute migration - structure ready |
+| 9. Verification | phase: "testing" | ✅ checkpoint: Verification passed |
+| 10. Sprint Planning | phase: "sprint_planning", set_active_sprint: 1 | 🏃 checkpoint: Sprint 1 planned - migration ready |
+
+All state updates sync to root PROJECT-STATE.md via `scripts/sync-state.sh`.
+
+---
+
+## Quality Gates
+
+| Gate ID | Phase | Enforcer | Key Criteria |
+|---------|-------|----------|--------------|
+| **DISCOVERY_COMPLETE** | 1. Audit + Discovery | DOC-AUDITOR + DISCOVERY-AGENT | All files scanned, context gaps addressed |
+| **PRD_APPROVED** | 2. PRD/Baseline | PM-AGENT + PRODUCT-OWNER + USER | PRD complete, assumptions validated |
+| **ARCHITECTURE_ASSESSED** | 3. Architecture | ARCHITECT-AGENT | Architecture documented, tech debt identified |
+| **UX_AUDITED** | 4. UX Audit | UX-DESIGNER + USER | UX audit complete OR backend-only skip |
+| **EPICS_DEFINED** | 5. Epic Breakdown | ARCHITECT + PRODUCT-OWNER + TEST-ENGINEER | Epics mapped, dependencies clear, test strategy defined |
+| **STORIES_CREATED** | 6. Story Breakdown | ARCHITECT-AGENT | Stories INVEST compliant, AC in Given/When/Then |
+| **STORIES_READY** | 7. Scope Validation | PRODUCT-OWNER | All stories validated, no scope creep |
+| **MIGRATION_EXECUTED** | 8. Execution | ORCHESTRATOR | .claude/ structure complete, docs migrated |
+| **VERIFICATION_PASSED** | 9. Verification | DOC-AUDITOR | All validation checks pass, agents load |
+| **SPRINT_PLANNED** | 10. Sprint Planning | SCRUM-MASTER | Sprint backlog defined, P0 items prioritized |
+
+---
+
 ## Quick Start Checklist
 
 ### Pre-Migration
@@ -106,41 +331,138 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
 - [ ] Review audit report
 - [ ] Approve migration plan
 
-### Phase 1: Discovery
-- [ ] Scan project complete
-- [ ] Audit report generated
-- [ ] Strategy recommended
+### Phase 1: Audit + Discovery
+- [ ] Project scan complete (DOC-AUDITOR)
+- [ ] Context interview done (DISCOVERY-AGENT)
+- [ ] AUDIT-REPORT.md generated
+- [ ] MIGRATION-CONTEXT.md created
+- [ ] State committed
 
-### Phase 2: Planning
-- [ ] Strategy chosen
-- [ ] Tasks broken down
-- [ ] Risks identified
-- [ ] Plan approved
+### Phase 2: PRD/Baseline
+- [ ] PRD created from existing docs
+- [ ] Current vs target state documented
+- [ ] Migration scope defined (stays/changes/new/removes)
+- [ ] Assumptions validated with user
+- [ ] State committed
 
-### Phase 3: Execution
+### Phase 3: Architecture Assessment
+- [ ] Current architecture documented
+- [ ] Tech debt inventoried
+- [ ] Integration points mapped
+- [ ] ADRs for major changes
+- [ ] State committed
+
+### Phase 4: UX Audit (conditional)
+- [ ] UX audit complete OR backend-only skip
+- [ ] User approved findings
+- [ ] State committed
+
+### Phase 5: Epic Breakdown
+- [ ] Migration work mapped to epics
+- [ ] Epic dependencies identified
+- [ ] Test strategy per epic
+- [ ] Business logic clarified
+- [ ] State committed
+
+### Phase 6: Story Breakdown
+- [ ] NOW epics broken into stories
+- [ ] Stories follow INVEST
+- [ ] AC in Given/When/Then
+- [ ] Hierarchical naming followed
+- [ ] State committed
+
+### Phase 7: Scope Validation
+- [ ] INVEST compliance validated
+- [ ] No scope creep
+- [ ] AC testable
+- [ ] Priority assigned
+- [ ] State committed
+
+### Phase 8: Execution
 - [ ] Structure setup complete
 - [ ] Core files created
 - [ ] CLAUDE.md < 70 lines
 - [ ] Docs migrated to docs/ structure
 - [ ] Large files sharded
 - [ ] Workspaces defined
+- [ ] Infrastructure setup (if needed)
+- [ ] State committed
 
-### Phase 4: Verification
-- [ ] Validation passes
+### Phase 9: Verification
+- [ ] Validation script passes
 - [ ] Agent loading works
 - [ ] @references valid
-- [ ] Team can use methodology
+- [ ] Deployment validated (if applicable)
+- [ ] State committed
+
+### Phase 10: Sprint Planning
+- [ ] Sprint 1 backlog created
+- [ ] P0 quick wins prioritized
+- [ ] Capacity allocated
+- [ ] Rollback plan ready
+- [ ] Definition of Done defined
+- [ ] State committed
 
 ---
 
-## Quality Gates
+## Artifacts by Phase
 
-| Gate | Checkpoint | Criteria |
-|------|------------|----------|
-| Discovery | Audit Complete | All files scanned, issues documented |
-| Planning | Plan Approved | Strategy clear, risks mitigated |
-| Execution | Structure Valid | All directories, files < 500 lines |
-| Verification | Migration Pass | All checks green |
+| Phase | Artifact | Path |
+|-------|----------|------|
+| 1. Audit + Discovery | Audit Report | `AUDIT-REPORT.md` |
+| 1. Audit + Discovery | Migration Context | `docs/0-DISCOVERY/MIGRATION-CONTEXT.md` |
+| 1. Audit + Discovery | Clarifications | `docs/0-DISCOVERY/CLARIFICATIONS.md` |
+| 2. PRD/Baseline | PRD | `docs/1-BASELINE/product/prd.md` |
+| 2. PRD/Baseline | PRD Assumptions | `docs/1-BASELINE/product/prd-assumptions.md` |
+| 2. PRD/Baseline | Migration Scope | `docs/1-BASELINE/product/migration-scope.md` |
+| 3. Architecture | System Overview | `docs/1-BASELINE/architecture/system-overview.md` |
+| 3. Architecture | ADRs | `docs/1-BASELINE/architecture/adrs/*.md` |
+| 3. Architecture | Tech Debt | `docs/1-BASELINE/architecture/tech-debt.md` |
+| 3. Architecture | Integration Map | `docs/1-BASELINE/architecture/integration-map.md` |
+| 4. UX Audit | UX Audit | `docs/3-ARCHITECTURE/ux/ux-audit.md` |
+| 4. UX Audit | User Flows | `docs/3-ARCHITECTURE/ux/user-flows-current.md` |
+| 4. UX Audit | UX Improvements | `docs/3-ARCHITECTURE/ux/ux-improvements.md` |
+| 5. Epic Breakdown | Epic Catalog | `docs/2-MANAGEMENT/epics/epic-catalog.md` |
+| 5. Epic Breakdown | Dependency Graph | `docs/2-MANAGEMENT/epics/dependency-graph.md` |
+| 5. Epic Breakdown | Epic Overview | `docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/{XX}.0.epic-overview.md` |
+| 5. Epic Breakdown | Epic Clarifications | `docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/{XX}.0.clarifications.md` |
+| 5. Epic Breakdown | Test Strategy | `docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/{XX}.0.test-strategy.md` |
+| 6. Story Breakdown | Story Files | `docs/2-MANAGEMENT/epics/{XX}-{epic-slug}/{XX}.{N}.{story-slug}.md` |
+| 7. Scope Validation | Scope Review | `docs/2-MANAGEMENT/reviews/scope-review-migration.md` |
+| 8. Execution | CLAUDE.md | `CLAUDE.md` |
+| 8. Execution | PROJECT-STATE.md | `PROJECT-STATE.md` |
+| 8. Execution | Workspaces | `.claude/agents/workspaces/` |
+| 10. Sprint Planning | Sprint Plan | `docs/2-MANAGEMENT/sprints/sprint-01-plan.md` |
+
+---
+
+## Rollback Procedures
+
+### Any Phase Failure
+
+1. **STOP** migration
+2. **Document** issue
+3. **Revert** to backup
+4. **Adjust** plan
+5. **Re-attempt**
+
+### Emergency Rollback
+
+```bash
+git checkout main
+rm -rf .claude/
+cp -r backup/. .
+```
+
+### Phase-Specific Rollback
+
+| Phase | Rollback Action |
+|-------|-----------------|
+| 1-2 | Delete generated docs, restart phase |
+| 3-7 | Return to previous phase gate |
+| 8 | Remove .claude/ structure, restore backup |
+| 9 | Fix validation failures, re-run verification |
+| 10 | Revise sprint plan |
 
 ---
 
@@ -152,44 +474,25 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
 | Broken @references | Fix paths, re-validate |
 | Large file not sharded | Re-split, update index |
 | Agent load failure | Check workspace, fix paths |
+| Validation script fails | Fix reported issues, re-run |
+| Epic dependencies unclear | Return to Phase 5, clarify |
+| Stories not INVEST | Return to Phase 6, rewrite |
 | Major failure | Rollback to backup, revise plan |
 
-**Full error recovery:** @migration/MIGRATION-VERIFICATION.md
+---
+
+## Related Documentation
+
+- **Workflow Definition:** @.claude/workflows/definitions/engineering/migration-workflow.yaml
+- **Sprint Planning:** @.claude/workflows/documentation/SPRINT-WORKFLOW.md
+- **Story Delivery:** @.claude/workflows/documentation/STORY-DELIVERY-WORKFLOW.md
+- **Epic Management:** @.claude/workflows/documentation/EPIC-WORKFLOW.md
+- **Orchestrator Agent:** @.claude/agents/ORCHESTRATOR.md
+- **Tech Writer Agent:** @.claude/agents/TECH-WRITER.md
+- **Doc Auditor Agent:** @.claude/agents/DOC-AUDITOR.md
 
 ---
 
-## Artifacts
-
-| Artifact | Path | Phase |
-|----------|------|-------|
-| Audit Report | `AUDIT-REPORT.md` | Discovery |
-| Migration Context | `docs/0-DISCOVERY/MIGRATION-CONTEXT.md` | Discovery |
-| Migration Plan | `MIGRATION-PLAN.md` | Planning |
-| CLAUDE.md | `CLAUDE.md` | Execution |
-| PROJECT-STATE.md | `PROJECT-STATE.md` | Execution |
-| Workspaces | `.claude/agents/workspaces/` | Execution |
-
----
-
-## Integration with Other Workflows
-
-| After Migration | Use Workflow |
-|-----------------|--------------|
-| Start first epic | EPIC-WORKFLOW.md |
-| Fix migration issues | BUG-WORKFLOW.md |
-| Define first sprint | SPRINT-WORKFLOW.md |
-| Implement first story | STORY-WORKFLOW.md |
-
----
-
-**Related:**
-- @.claude/workflows/documentation/EPIC-WORKFLOW.md
-- @.claude/workflows/documentation/SPRINT-WORKFLOW.md
-- @.claude/agents/ORCHESTRATOR.md
-- @.claude/agents/TECH-WRITER.md
-
----
-
-**Migration Workflow Version:** 1.1
+**Migration Workflow Version:** 2.0
 **Last Updated:** 2025-12-10
 **Maintained by:** Agent Methodology Pack Team
