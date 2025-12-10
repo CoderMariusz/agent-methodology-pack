@@ -1,6 +1,6 @@
 #!/bin/bash
 # Documentation Migration Script
-# Migrates existing documentation to BMAD structure
+# Migrates existing documentation to standard structure
 #
 # Usage: bash scripts/migrate-docs.sh [source-dir] [options]
 # Example: bash scripts/migrate-docs.sh ./old-docs --target docs/ --auto
@@ -52,7 +52,7 @@ while [[ $# -gt 0 ]]; do
             cat << EOF
 Usage: bash scripts/migrate-docs.sh [source-dir] [options]
 
-Migrates existing documentation to BMAD structure.
+Migrates existing documentation to standard structure.
 
 Arguments:
   source-dir      Source directory containing existing docs (required)
@@ -73,20 +73,24 @@ Examples:
   # Fully automated
   bash scripts/migrate-docs.sh ./old-docs --auto
 
-BMAD Structure:
+Documentation Structure:
   docs/
-  ├── 1-BASELINE/       Product requirements & architecture
-  ├── 2-MANAGEMENT/     Epics, stories, sprints
-  ├── 3-ARCHITECTURE/   Technical design & ADRs
-  ├── 4-DEVELOPMENT/    Implementation docs & APIs
-  └── 5-ARCHIVE/        Completed work
+  ├── product/          Product requirements & overview
+  ├── architecture/     Technical design & ADRs
+  ├── epics/            Epics and features
+  ├── stories/          User stories
+  ├── sprints/          Sprint planning & progress
+  ├── api/              API documentation
+  ├── implementation/   Implementation guides
+  ├── testing/          Test plans & documentation
+  └── archive/          Completed work
 
 Category Detection:
-  - "prd", "requirements", "product" → 1-BASELINE/product/
-  - "architecture", "design", "adr" → 1-BASELINE/architecture/
-  - "epic", "story", "sprint" → 2-MANAGEMENT/
-  - "api", "implementation" → 4-DEVELOPMENT/
-  - "research" → 1-BASELINE/research/
+  - "prd", "requirements", "product" → docs/product/
+  - "architecture", "design", "adr" → docs/architecture/
+  - "epic", "story", "sprint" → docs/{epics|stories|sprints}/
+  - "api", "implementation" → docs/{api|implementation}/
+  - "research" → docs/research/
 
 EOF
             exit 0
@@ -167,68 +171,68 @@ detect_category() {
     # Product & Requirements
     if [[ "$filename_lower" =~ (prd|requirements?|product|vision|roadmap) ]] ||
        echo "$content" | grep -qE "(product requirement|user need|business goal|product vision)"; then
-        echo "1-BASELINE/product"
+        echo "docs/product"
         return
     fi
 
     # Architecture
     if [[ "$filename_lower" =~ (architect|design|adr|system|technical) ]] ||
        echo "$content" | grep -qE "(architecture|system design|technical design|architecture decision)"; then
-        echo "1-BASELINE/architecture"
+        echo "docs/architecture"
         return
     fi
 
     # Research
     if [[ "$filename_lower" =~ research ]] ||
        echo "$content" | grep -qE "(research question|research finding|market research)"; then
-        echo "1-BASELINE/research"
+        echo "docs/research"
         return
     fi
 
     # Epic
     if [[ "$filename_lower" =~ epic ]] ||
        echo "$content" | grep -qE "^#+ epic [0-9]"; then
-        echo "2-MANAGEMENT/epics/archive"
+        echo "docs/epics"
         return
     fi
 
     # Story
     if [[ "$filename_lower" =~ story ]] ||
        echo "$content" | grep -qE "^#+ story [0-9]"; then
-        echo "2-MANAGEMENT/stories"
+        echo "docs/stories"
         return
     fi
 
     # Sprint
     if [[ "$filename_lower" =~ sprint ]] ||
        echo "$content" | grep -qE "^#+ sprint [0-9]"; then
-        echo "2-MANAGEMENT/sprints"
+        echo "docs/sprints"
         return
     fi
 
     # API
     if [[ "$filename_lower" =~ api ]] ||
        echo "$content" | grep -qE "(api endpoint|rest api|graphql)"; then
-        echo "4-DEVELOPMENT/api"
+        echo "docs/api"
         return
     fi
 
     # Implementation
     if [[ "$filename_lower" =~ (implement|code|dev) ]] ||
        echo "$content" | grep -qE "(implementation detail|code structure)"; then
-        echo "4-DEVELOPMENT/implementation"
+        echo "docs/implementation"
         return
     fi
 
     # Testing
     if [[ "$filename_lower" =~ test ]] ||
        echo "$content" | grep -qE "(test case|test plan|testing strategy)"; then
-        echo "4-DEVELOPMENT/testing"
+        echo "docs/testing"
         return
     fi
 
     # Default to archive
-    echo "5-ARCHIVE"
+    echo "docs/archive"
 }
 
 # Suggest filename based on content
@@ -242,22 +246,22 @@ suggest_filename() {
 
     # Add context based on category
     case "$category" in
-        "1-BASELINE/product")
+        "docs/product")
             if [[ ! "$suggested" =~ ^(prd|requirements) ]]; then
                 suggested="${suggested}"
             fi
             ;;
-        "1-BASELINE/architecture")
+        "docs/architecture")
             if [[ ! "$suggested" =~ ^(arch|design|adr) ]]; then
                 suggested="${suggested}"
             fi
             ;;
-        "2-MANAGEMENT/epics"*)
+        "docs/epics")
             if [[ ! "$suggested" =~ ^epic ]]; then
                 suggested="epic-${suggested}"
             fi
             ;;
-        "2-MANAGEMENT/sprints")
+        "docs/sprints")
             if [[ ! "$suggested" =~ ^sprint ]]; then
                 suggested="sprint-${suggested}"
             fi

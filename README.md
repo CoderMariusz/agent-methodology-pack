@@ -22,7 +22,7 @@ The Agent Methodology Pack is a structured framework for software development us
 - **State Persistence**: Maintain project state across sessions with clear documentation
 - **Quality Assurance**: Built-in code review, testing, and documentation agents
 - **Flexible Integration**: Works with any tech stack, adapts to your project
-- **Best Practices**: Incorporates BMAD documentation structure and agile methodologies
+- **Best Practices**: Incorporates organized documentation structure and agile methodologies
 
 ---
 
@@ -41,7 +41,7 @@ The Agent Methodology Pack is a structured framework for software development us
 - **Sprint Workflow**: Agile sprint planning, execution, and retrospectives
 
 ### Documentation Framework
-- **BMAD Structure**: Baseline, Management, Architecture, Development, Archive
+- **Organized Structure**: Baseline, Management, Architecture, Development, Archive
 - **Auto-generated Templates**: Consistent documentation across all artifacts
 - **Context Budget Management**: Keep CLAUDE.md under 70 lines for optimal performance
 - **Reference System**: `@file.md` syntax for dynamic file loading
@@ -265,7 +265,7 @@ project-root/
 │   ├── CONTEXT-BUDGET.md          # Token management
 │   └── MODEL-ROUTING.md           # Model selection guide
 │
-├── docs/                          # BMAD documentation structure
+├── docs/                          # Organized documentation structure
 │   ├── 00-START-HERE.md          # Documentation index
 │   │
 │   ├── 1-BASELINE/               # Foundation documents
@@ -603,7 +603,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Acknowledgments
 
 Built with insights from:
-- BMAD (Baseline, Management, Architecture, Development) documentation structure
+- Organized documentation structure
 - Agile/Scrum methodologies
 - Test-Driven Development (TDD) practices
 - Domain-Driven Design (DDD) principles

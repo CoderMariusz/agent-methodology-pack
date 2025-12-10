@@ -63,7 +63,7 @@ Checks:
   1. Required files exist (CLAUDE.md, PROJECT-STATE.md)
   2. CLAUDE.md < 70 lines
   3. All @references are valid
-  4. BMAD structure complete (all 5 folders)
+  4. Docs structure complete (all required folders)
   5. No orphan documentation
   6. Agent workspaces exist
   7. Memory bank initialized
@@ -241,16 +241,16 @@ main() {
     fi
 
     # ============================================================
-    # 2. CHECK BMAD STRUCTURE
+    # 2. CHECK DOCS STRUCTURE
     # ============================================================
 
-    # Check BMAD folders
-    bmad_complete=true
-    for folder in "1-BASELINE" "2-MANAGEMENT" "3-ARCHITECTURE" "4-DEVELOPMENT" "5-ARCHIVE"; do
+    # Check docs folders
+    docs_complete=true
+    for folder in "product" "architecture" "epics" "stories" "sprints" "api" "implementation" "testing" "archive"; do
         if [ -d "docs/$folder" ]; then
             : # Folder exists, do nothing
         else
-            bmad_complete=false
+            docs_complete=false
             if [ "$FIX_MODE" = true ]; then
                 mkdir -p "docs/$folder"
                 print_info "  Created: docs/$folder"
@@ -258,11 +258,11 @@ main() {
         fi
     done
 
-    if [ "$bmad_complete" = true ] || [ "$FIX_MODE" = true ]; then
-        check_pass "BMAD structure complete"
+    if [ "$docs_complete" = true ] || [ "$FIX_MODE" = true ]; then
+        check_pass "Docs structure complete"
     else
-        check_fail "BMAD structure incomplete"
-        add_recommendation "Create missing directories: mkdir -p docs/{1-BASELINE,2-MANAGEMENT,3-ARCHITECTURE,4-DEVELOPMENT,5-ARCHIVE}"
+        check_fail "Docs structure incomplete"
+        add_recommendation "Create missing directories: mkdir -p docs/{product,architecture,epics,stories,sprints,api,implementation,testing,archive}"
     fi
 
     # ============================================================

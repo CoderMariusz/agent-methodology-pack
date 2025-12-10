@@ -30,7 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - 14 specialized agents across Planning, Development, and Quality phases
 - ORCHESTRATOR for intelligent task routing
 - 4 comprehensive workflows (Epic, Story, Bug, Sprint)
-- BMAD documentation structure
+- Organized documentation structure
 - State management system (Task Queue, Handoffs, Metrics)
 - 6 development patterns
 - Automation scripts (init-project, validate-docs, token-counter, sprint-transition)
@@ -63,7 +63,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - SPRINT-WORKFLOW.md - Agile sprint management
 
 ### Documentation Structure
-- BMAD format (Baseline, Management, Architecture, Development, Archive)
+- Organized format (Baseline, Management, Architecture, Development, Archive)
 - Context budget management
 - @reference system for dynamic file loading
 

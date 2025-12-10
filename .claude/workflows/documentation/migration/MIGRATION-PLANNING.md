@@ -145,7 +145,7 @@ Planning phase reviews the audit report, chooses migration strategy, creates det
 ### Success Criteria
 - [ ] All core files created
 - [ ] CLAUDE.md < 70 lines
-- [ ] All docs in BMAD structure
+- [ ] All docs in standard documentation structure
 - [ ] No files > 500 lines (or sharded)
 - [ ] All @references work
 - [ ] Agent workspaces defined
@@ -160,7 +160,7 @@ Planning phase reviews the audit report, chooses migration strategy, creates det
 | Copy agent definitions | MUST | 30m | .claude/ exists |
 | Copy workflow files | MUST | 30m | .claude/ exists |
 | Create state files | MUST | 30m | .claude/ exists |
-| Setup docs/ BMAD | MUST | 15m | None |
+| Setup docs/ structure | MUST | 15m | None |
 
 ### Phase 3.2: Core Files (1 hour)
 | Task | Priority | Time | Dependencies |
@@ -172,7 +172,7 @@ Planning phase reviews the audit report, chooses migration strategy, creates det
 ### Phase 3.3: Migrate Docs (4-8 hours)
 | Task | Priority | Time | Dependencies |
 |------|----------|------|--------------|
-| Map docs to BMAD | MUST | 1h | Structure setup |
+| Map docs to documentation structure | MUST | 1h | Structure setup |
 | Move baseline docs | MUST | 2h | Mapping done |
 | Create missing docs | SHOULD | 2h | Baseline moved |
 | Update references | MUST | 2h | Docs moved |
@@ -233,7 +233,7 @@ If migration fails:
 | Plan Approval | Before Phase 3 | Strategy clear, timeline realistic |
 | Structure Complete | After 3.1 | All directories created |
 | Core Files Valid | After 3.2 | CLAUDE.md < 70 lines, valid syntax |
-| Docs Migrated | After 3.3 | All docs in BMAD structure |
+| Docs Migrated | After 3.3 | All docs in documentation structure |
 | Files Sharded | After 3.4 | No files > 500 lines |
 | Validation Pass | Phase 4 | All checks green |
 ```

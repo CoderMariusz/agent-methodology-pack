@@ -106,7 +106,7 @@ agent-methodology-pack/
 │   ├── patterns/              # Development patterns
 │   ├── state/                 # Runtime state management
 │   └── workflows/             # Process workflows
-├── docs/                      # Project documentation (BMAD structure)
+├── docs/                      # Project documentation
 │   ├── 1-BASELINE/           # Requirements & architecture
 │   ├── 2-MANAGEMENT/         # Epics, stories, sprints
 │   ├── 3-ARCHITECTURE/       # Technical design
@@ -317,7 +317,7 @@ EOF
 Add documentation directories if not present:
 
 ```bash
-# Create BMAD structure
+# Create documentation structure
 mkdir -p docs/{1-BASELINE,2-MANAGEMENT,3-ARCHITECTURE,4-DEVELOPMENT,5-ARCHIVE}
 mkdir -p docs/2-MANAGEMENT/{epics/current,sprints}
 ```

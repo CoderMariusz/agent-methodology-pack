@@ -24,7 +24,7 @@ Execution phase implements the migration plan: creates directory structure, core
 |   | 2. Copy agent definitions                                  |                   |
 |   | 3. Copy workflow files                                     |                   |
 |   | 4. Create state files                                      |                   |
-|   | 5. Setup docs/ BMAD structure                              |                   |
+|   | 5. Setup docs/ directory structure                         |                   |
 |   +------------------------------------------------------------+                   |
 |                            ↓                                                        |
 |   Step 3.2: CREATE CORE FILES (1 hour)                                             |
@@ -38,7 +38,7 @@ Execution phase implements the migration plan: creates directory structure, core
 |   Step 3.3: MIGRATE DOCUMENTATION (4-8 hours)                                      |
 |   +------------------------------------------------------------+                   |
 |   | tech-writer (sonnet)                                       |                   |
-|   | 1. Map existing docs to BMAD structure                     |                   |
+|   | 1. Map existing docs to documentation structure            |                   |
 |   | 2. Move/copy files to appropriate locations                |                   |
 |   | 3. Create missing baseline docs                            |                   |
 |   | 4. Update cross-references                                 |                   |
@@ -103,7 +103,7 @@ cp -r agent-methodology-pack/.claude/patterns/* .claude/patterns/
 touch .claude/state/{AGENT-STATE.md,TASK-QUEUE.md,DEPENDENCIES.md,HANDOFFS.md,METRICS.md}
 ```
 
-6. **Setup docs/ BMAD structure:**
+6. **Setup docs/ directory structure:**
 ```bash
 mkdir -p docs/{0-DISCOVERY,1-BASELINE,2-MANAGEMENT,3-IMPLEMENTATION,4-RELEASE}
 mkdir -p docs/1-BASELINE/{product,architecture,ux}
@@ -120,7 +120,7 @@ mkdir -p docs/2-MANAGEMENT/{epics/current,sprints,risks,reviews}
 - [ ] All workflow files copied
 - [ ] All pattern files copied
 - [ ] State files created
-- [ ] docs/ BMAD structure created
+- [ ] docs/ structure created
 - [ ] Directory permissions correct
 ```
 
@@ -254,12 +254,14 @@ Current Location → New Location
 - DEPLOYMENT.md → docs/4-RELEASE/deployment-guide.md
 ```
 
+*Documentation structure uses standard docs/ organization based on project phases*
+
 ### Checkpoint 3.3
 
 ```markdown
 ## Documentation Migration Verification
 
-- [ ] All docs mapped to BMAD structure
+- [ ] All docs mapped to documentation structure
 - [ ] Files moved to new locations
 - [ ] Missing baseline docs created
 - [ ] All cross-references updated

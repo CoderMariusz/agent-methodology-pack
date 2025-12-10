@@ -188,7 +188,7 @@ echo "API.md -> docs/4-DEVELOPMENT/api/README.md" >> MIGRATION-NOTES.md
 **Symptom:**
 "Where did the setup guide go?"
 
-**Cause:** New BMAD structure unfamiliar
+**Cause:** New documentation structure unfamiliar
 
 **Solution:**
 
@@ -210,11 +210,11 @@ cat > docs/WHERE-IS-EVERYTHING.md << 'EOF'
 
 1. Check @docs/00-START-HERE.md
 2. Search: `grep -r "keyword" docs/`
-3. Ask in #agent-methodology Slack
+3. Ask in #documentation Slack
 
 ## Documentation Structure
 
-See @docs/00-START-HERE.md for full BMAD structure explanation.
+See @docs/00-START-HERE.md for full structure explanation.
 EOF
 
 # Share with team

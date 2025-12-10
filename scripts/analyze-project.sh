@@ -396,7 +396,7 @@ EOF
 
 ---
 
-## Recommended BMAD Mapping
+## Recommended Documentation Mapping
 
 Based on your current structure, here's where files should go:
 
@@ -406,15 +406,15 @@ EOF
 
     # Recommend mappings based on common file names
     if [ -f "$PROJECT_PATH/README.md" ]; then
-        echo "| README.md | docs/1-BASELINE/product/overview.md | Product overview |" >> "$AUDIT_REPORT"
+        echo "| README.md | docs/product/overview.md | Product overview |" >> "$AUDIT_REPORT"
     fi
 
     if [ -f "$PROJECT_PATH/ARCHITECTURE.md" ] || [ -f "$PROJECT_PATH/docs/architecture.md" ]; then
-        echo "| ARCHITECTURE.md | docs/1-BASELINE/architecture/system-design.md | Architecture docs |" >> "$AUDIT_REPORT"
+        echo "| ARCHITECTURE.md | docs/architecture/system-design.md | Architecture docs |" >> "$AUDIT_REPORT"
     fi
 
     if [ -f "$PROJECT_PATH/API.md" ] || [ -f "$PROJECT_PATH/docs/api.md" ]; then
-        echo "| API.md | docs/1-BASELINE/architecture/api-specs.md | API documentation |" >> "$AUDIT_REPORT"
+        echo "| API.md | docs/api/api-specs.md | API documentation |" >> "$AUDIT_REPORT"
     fi
 
     echo "| *(Add more mappings based on your files)* | - | - |" >> "$AUDIT_REPORT"
@@ -430,11 +430,15 @@ Agent Methodology Pack requires these files:
 - [ ] CLAUDE.md - Main project context file
 - [ ] PROJECT-STATE.md - Current project state
 - [ ] .claude/ structure - Agent definitions and state
-- [ ] docs/1-BASELINE/ - Requirements and architecture
-- [ ] docs/2-MANAGEMENT/ - Epics and sprints
-- [ ] docs/3-ARCHITECTURE/ - Technical design
-- [ ] docs/4-DEVELOPMENT/ - Implementation docs
-- [ ] docs/5-ARCHIVE/ - Completed work
+- [ ] docs/product/ - Product requirements and overview
+- [ ] docs/architecture/ - Technical design and ADRs
+- [ ] docs/epics/ - Feature epics
+- [ ] docs/stories/ - User stories
+- [ ] docs/sprints/ - Sprint planning and progress
+- [ ] docs/api/ - API documentation
+- [ ] docs/implementation/ - Implementation guides
+- [ ] docs/testing/ - Test plans and documentation
+- [ ] docs/archive/ - Completed work
 
 ---
 
@@ -442,7 +446,7 @@ Agent Methodology Pack requires these files:
 
 ### 1. Review This Report
 - Examine large files that need splitting
-- Review recommended BMAD mappings
+- Review recommended documentation structure mappings
 - Identify files to keep, move, or archive
 
 ### 2. Create Core Files
@@ -466,7 +470,7 @@ bash agent-methodology-pack/scripts/generate-workspaces.sh
 \`\`\`
 
 ### 5. Migrate Documentation
-Manually move files according to BMAD mapping recommendations above.
+Manually move files according to documentation structure recommendations above.
 
 ### 6. Validate Setup
 \`\`\`bash

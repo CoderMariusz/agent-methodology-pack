@@ -30,6 +30,8 @@
 
 **Step 1: Create State Directory**
 
+This section describes how to set up agent workspace files for coordination.
+
 ```bash
 mkdir -p .claude/state
 cd .claude/state
@@ -68,7 +70,7 @@ All agents available:
 
 ## Notes
 
-Project migrated to Agent Methodology Pack on [Date].
+Documentation structure organized on [Date].
 Ready to begin agent-based development.
 
 ---
@@ -240,7 +242,7 @@ Project needs better organization and workflow management.
 Migrate to Agent Methodology Pack for multi-agent development.
 
 **Rationale:**
-- Structured documentation (BMAD)
+- Organized documentation structure
 - Clear agent workflows
 - Better state management
 - Token budget optimization
@@ -323,7 +325,7 @@ _To be populated as development begins_
 ### Migration Phase
 
 - Successfully migrated to Agent Methodology Pack
-- BMAD structure implemented
+- Documentation structure implemented
 - State files initialized
 
 ## Context Budget

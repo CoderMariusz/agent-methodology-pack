@@ -51,7 +51,7 @@ Verification phase validates the migration, tests agent loading, runs workflows,
 - [ ] .claude/agents/ subdirectories present
 - [ ] .claude/workflows/ files present
 - [ ] .claude/state/ files present
-- [ ] docs/ BMAD structure present
+- [ ] docs/ structure present
 
 ### File Checks
 - [ ] CLAUDE.md exists

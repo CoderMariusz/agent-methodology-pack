@@ -237,7 +237,6 @@ COMPLETION:
 | MAJOR | Phase 4 (Implementation Loop) gate has no enforcer specified |
 | MINOR | Error recovery paths defined but not linked to specific gates |
 
-
 ---
 
 ## 2. STORY-DELIVERY
@@ -1230,8 +1229,8 @@ PHASE 3: Execution
 |
 +-- Step 3.3: Migrate Documentation
 |   +-- Agent: TECH-WRITER (sonnet)
-|   +-- Tasks: Map to BMAD structure, Move files, Create missing docs
-|   +-- BMAD Mapping:
+|   +-- Tasks: Map to documentation structure, Move files, Create missing docs
+|   +-- Documentation Mapping:
 |       +-- 1-BASELINE: Requirements & Design
 |       +-- 2-MANAGEMENT: Epics & Sprints
 |       +-- 3-IMPLEMENTATION: Code & Tests

@@ -27,7 +27,7 @@ cd /path/to/your/project
 # This will:
 # - Create CLAUDE.md from template
 # - Create PROJECT-STATE.md from template
-# - Set up docs/ structure (BMAD format)
+# - Set up docs/ structure
 # - Initialize state files
 # - Configure agent access
 ```
@@ -77,7 +77,7 @@ your-project/
 │   │   └── CONTEXT-BUDGET.md    # Token management
 │   ├── templates/               # Project templates
 │   └── scripts/                 # Automation scripts
-└── docs/                        # BMAD documentation structure
+└── docs/                        # Organized documentation structure
     ├── 0-INBOX/                 # Raw inputs
     ├── 1-BASELINE/              # Requirements & design
     ├── 2-MANAGEMENT/            # Epics & sprints

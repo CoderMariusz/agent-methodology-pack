@@ -10,7 +10,7 @@
 
 Created two comprehensive migration scripts to complete the Agent Methodology Pack toolkit:
 
-1. **migrate-docs.sh** - Migrates existing documentation to BMAD structure
+1. **migrate-docs.sh** - Migrates existing documentation to standard structure
 2. **validate-migration.sh** - Validates completed migration
 
 ---
@@ -26,7 +26,7 @@ Created two comprehensive migration scripts to complete the Agent Methodology Pa
 #### Core Functionality
 - Scans source directory for markdown files
 - Auto-detects category based on filename and content
-- Suggests appropriate BMAD locations
+- Suggests appropriate documentation locations
 - Interactive or automatic mode
 - Dry-run capability
 - Updates @references in moved files
@@ -36,26 +36,26 @@ Created two comprehensive migration scripts to complete the Agent Methodology Pa
 
 ```bash
 # Product & Requirements
-prd|requirements|product|vision|roadmap → 1-BASELINE/product/
+prd|requirements|product|vision|roadmap → docs/product/
 
 # Architecture
-architect|design|adr|system|technical → 1-BASELINE/architecture/
+architect|design|adr|system|technical → docs/architecture/
 
 # Research
-research → 1-BASELINE/research/
+research → docs/research/
 
 # Management
-epic → 2-MANAGEMENT/epics/archive/
-story → 2-MANAGEMENT/stories/
-sprint → 2-MANAGEMENT/sprints/
+epic → docs/epics/
+story → docs/stories/
+sprint → docs/sprints/
 
-# Development
-api → 4-DEVELOPMENT/api/
-implementation → 4-DEVELOPMENT/implementation/
-test → 4-DEVELOPMENT/testing/
+# Documentation
+api → docs/api/
+implementation → docs/implementation/
+test → docs/testing/
 
 # Default
-other → 5-ARCHIVE/
+other → docs/archive/
 ```
 
 #### Detection Algorithm
@@ -210,7 +210,7 @@ Proceed? (y/n): _
 | 1 | Core files | CLAUDE.md, PROJECT-STATE.md exist | ❌ |
 | 2 | Line count | CLAUDE.md < 70 lines | ❌ |
 | 3 | @references | All references valid | ❌ |
-| 4 | BMAD structure | All 5 folders exist | ✅ |
+| 4 | Docs structure | All required folders exist | ✅ |
 | 5 | .claude structure | Agent folders exist | ✅ |
 | 6 | Agent workspaces | 14 agents defined | ❌ |
 | 7 | Memory bank | State files initialized | ❌ |
@@ -235,12 +235,16 @@ Proceed? (y/n): _
 
 **Structure Check:**
 ```bash
-# BMAD folders
-docs/1-BASELINE/
-docs/2-MANAGEMENT/
-docs/3-ARCHITECTURE/
-docs/4-DEVELOPMENT/
-docs/5-ARCHIVE/
+# Documentation folders
+docs/product/
+docs/architecture/
+docs/epics/
+docs/stories/
+docs/sprints/
+docs/api/
+docs/implementation/
+docs/testing/
+docs/archive/
 
 # .claude folders
 .claude/agents/{planning,development,quality}
@@ -330,7 +334,7 @@ bash scripts/validate-migration.sh /path/to/project
 
 [✅] CLAUDE.md exists (48 lines - OK)
 [✅] PROJECT-STATE.md exists
-[✅] BMAD structure complete
+[✅] Docs structure complete
 [✅] .claude/ structure complete
 [✅] 14 agent workspaces generated
 [✅] Memory bank initialized
@@ -384,7 +388,7 @@ bash scripts/validate-migration.sh /path/to/project
 ### Auto-Fix Capabilities
 
 **Can Fix:**
-- Missing directories (BMAD structure, .claude folders)
+- Missing directories (docs structure, .claude folders)
 - Non-executable scripts
 - Empty state files
 
@@ -409,7 +413,7 @@ bash scripts/validate-migration.sh /path/to/project
 2. migrate-docs.sh
    ├─> Reads FILE-MAP.md (optional)
    ├─> Auto-detects categories
-   ├─> Moves files to BMAD structure
+   ├─> Moves files to docs structure
    └─> Generates MIGRATION-REPORT.md
 
 3. validate-migration.sh
@@ -426,7 +430,7 @@ bash scripts/validate-migration.sh /path/to/project
 - `.claude/migration/FILE-MAP.md` (optional, from analyze-project.sh)
 
 **migrate-docs.sh writes:**
-- `docs/[BMAD]/*.md` (moved files)
+- `docs/**/*.md` (moved files)
 - `.claude/migration/MIGRATION-REPORT.md`
 - `.claude/migration/migration-plan.tmp` (temp)
 
@@ -747,7 +751,7 @@ See:
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `scripts/migrate-docs.sh` | ~550 | Migrate docs to BMAD |
+| `scripts/migrate-docs.sh` | ~550 | Migrate docs to standard structure |
 | `scripts/validate-migration.sh` | ~650 | Validate migration |
 | `scripts/FINAL-MIGRATION-SCRIPTS.md` | This file | Implementation summary |
 

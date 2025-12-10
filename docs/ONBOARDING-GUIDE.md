@@ -80,7 +80,7 @@ Result: **Structured, tested, documented, production-ready code.**
 | **CODE-REVIEWER** | Before merging | Reviews code quality and security |
 | **TECH-WRITER** | After completion | Documents features and APIs |
 
-### BMAD Documentation Structure
+### Documentation Structure
 
 All project files are organized in this structure:
 
@@ -94,7 +94,7 @@ project-root/
 │   ├── workflows/        # Process flows (Epic, Story, Bug, Sprint)
 │   └── state/            # Runtime state (Task queue, handoffs, metrics)
 │
-└── docs/                 # BMAD structure
+└── docs/                 # Organized structure
     ├── 1-BASELINE/       # Requirements, architecture, research
     ├── 2-MANAGEMENT/     # Epics, stories, sprints
     ├── 3-ARCHITECTURE/   # UX designs, technical specs

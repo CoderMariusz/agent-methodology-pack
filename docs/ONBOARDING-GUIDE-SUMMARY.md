@@ -9,7 +9,7 @@
 
 **Structure:**
 1. **Welcome** (What is Agent Methodology Pack, how it helps, what you'll learn)
-2. **Quick Overview** (5 min read - 14 agents, BMAD structure, key files)
+2. **Quick Overview** (5 min read - 14 agents, documentation structure, key files)
 3. **Your First Task** (30 min hands-on - fix a bug from start to finish)
 4. **Understanding Agents** (Deep dive into all 14 agents with examples)
 5. **Daily Workflow** (Morning routine, during work, end of day)
@@ -41,7 +41,7 @@
 
 ## [1.0.0] - 2025-12-05
 ### Added
-- Initial release with 14 agents, 4 workflows, BMAD structure
+- Initial release with 14 agents, 4 workflows, organized documentation structure
 ```
 
 ## Files Updated

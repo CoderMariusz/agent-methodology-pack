@@ -124,7 +124,7 @@ Analyze the audit report:
 **Decision points:**
 
 - Keep existing structure and add methodology pack?
-- Full restructure to BMAD?
+- Full restructure to organized documentation?
 - Hybrid approach?
 
 ### Phase 2: Planning
@@ -169,6 +169,7 @@ The methodology pack should generate `MIGRATION-PLAN.md`:
 - [ ] CLAUDE.md <70 lines
 - [ ] All @references valid
 - [ ] Validation script passes
+- [ ] Documentation structure organized
 - [ ] Team can use agents
 
 ## Rollback Plan
@@ -378,7 +379,7 @@ See: @docs/2-MANAGEMENT/sprints/sprint-08.md
 **Option A: Automatic Migration (Recommended)**
 
 ```bash
-# Use migrate-docs.sh to automatically move files to BMAD structure
+# Use migrate-docs.sh to automatically move files to standard structure
 # Based on FILE-MAP.md from analyze-project.sh
 
 # 1. Preview migration (dry run)
@@ -388,7 +389,7 @@ bash scripts/migrate-docs.sh /path/to/existing-docs --dry-run
 bash scripts/migrate-docs.sh /path/to/existing-docs --auto
 
 # This will:
-# - Create BMAD folder structure automatically
+# - Create organized folder structure automatically
 # - Move files to correct category (detects PRD, architecture, API, etc.)
 # - Update all @references in moved files
 # - Generate MIGRATION-REPORT.md with summary
@@ -397,7 +398,7 @@ bash scripts/migrate-docs.sh /path/to/existing-docs --auto
 **Option B: Manual Migration (If you prefer control)**
 
 ```bash
-# 1. Create BMAD structure
+# 1. Create standard documentation structure
 mkdir -p docs/{1-BASELINE/{product,architecture,research},2-MANAGEMENT/{epics/{current,completed},sprints},3-ARCHITECTURE/ux/{flows,wireframes,specs},4-DEVELOPMENT/{api,guides,notes},5-ARCHIVE}
 
 # 2. Move files manually
@@ -584,7 +585,7 @@ bash scripts/validate-migration.sh --fix
 # Expected output:
 # ✅ CLAUDE.md exists and <70 lines
 # ✅ PROJECT-STATE.md exists
-# ✅ BMAD structure complete
+# ✅ Documentation structure complete
 # ✅ All @references valid
 # ✅ No large files (>500 lines)
 # ✅ Agent workspaces initialized
@@ -688,7 +689,7 @@ Verify all @references work:
 
 ## What Changed?
 
-1. **New structure:** Documentation now follows BMAD format
+1. **New structure:** Documentation now follows an organized format
 2. **Agent system:** We use AI agents for development workflow
 3. **New files:** CLAUDE.md, PROJECT-STATE.md are our entry points
 

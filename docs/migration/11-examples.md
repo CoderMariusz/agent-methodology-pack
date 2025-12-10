@@ -130,7 +130,7 @@ cp -r .agent-pack/.claude ./
 cp -r .agent-pack/scripts ./
 cp -r .agent-pack/templates ./
 
-# 2. Create BMAD structure
+# 2. Create organized documentation structure
 mkdir -p docs/{1-BASELINE/{product,architecture},2-MANAGEMENT/{epics/{current,completed},sprints},3-ARCHITECTURE/ux,4-DEVELOPMENT/{api,guides},5-ARCHIVE}
 
 # 3. Create CLAUDE.md
@@ -307,7 +307,7 @@ cat > docs/00-START-HERE.md << 'EOF'
 3. **Quick tutorial?** See [QUICK-START.md](../QUICK-START.md)
 4. **Architecture?** See [1-BASELINE/architecture/overview.md](1-BASELINE/architecture/overview.md)
 
-## Documentation Structure (BMAD)
+## Documentation Structure
 
 ### 1-BASELINE - What & Why
 - **product/** - Product overview, features, requirements
@@ -421,7 +421,7 @@ cat > MIGRATION-NOTES.md << 'EOF'
 
 ## What Changed
 
-1. **New structure:** Documentation now uses BMAD format
+1. **New structure:** Documentation now uses an organized format
 2. **Entry point:** Start at @CLAUDE.md instead of README.md
 3. **AI agents:** We can now use specialized agents for development
 
@@ -502,7 +502,7 @@ find docs/ -name "*keyword*"
 
 ## Structure Overview
 
-See [docs/00-START-HERE.md](00-START-HERE.md) for full BMAD structure explanation.
+See [docs/00-START-HERE.md](00-START-HERE.md) for full documentation structure explanation.
 
 ---
 EOF
@@ -523,7 +523,7 @@ git tag migration-complete-20251205
 
 **Results:**
 - ✅ 842-line README → 5 focused files
-- ✅ BMAD structure implemented
+- ✅ Organized documentation structure implemented
 - ✅ All documentation organized
 - ✅ Agents functional
 - ✅ Team trained
@@ -671,7 +671,6 @@ acme-corp/
 ## Shared Resources
 
 - **Agents:** @.claude/agents/
-- **Patterns:** @.claude/patterns/
 - **Shared Docs:** @docs/
 
 ## Current State
@@ -708,21 +707,21 @@ React + TypeScript
 ---
 EOF
 
-# Migrate web-app docs to BMAD
+# Organize web-app docs to standard structure
 mkdir -p docs/{1-BASELINE,2-MANAGEMENT,3-ARCHITECTURE,4-DEVELOPMENT}
-# ... migrate web-app docs ...
+# ... organize web-app docs ...
 
 # Commit
 git add .
-git commit -m "web-app: Migrated to Agent Methodology Pack"
+git commit -m "web-app: Documentation organized"
 ```
 
 #### Week 2: Projects 2-5
 
-**Monday-Tuesday:** Migrate mobile-app
-**Wednesday:** Migrate api-gateway
-**Thursday:** Migrate auth-service
-**Friday:** Migrate analytics + final validation
+**Monday-Tuesday:** Organize mobile-app
+**Wednesday:** Organize api-gateway
+**Thursday:** Organize auth-service
+**Friday:** Organize analytics + final validation
 
 **Benefits of incremental approach:**
 - ✅ Teams learn gradually

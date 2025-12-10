@@ -4,7 +4,7 @@
 
 Migration is the process of adapting your existing project to use the Agent Methodology Pack's multi-agent development system. This involves:
 
-- Restructuring documentation to the BMAD format
+- Organizing documentation into a standard directory structure
 - Creating agent workspace files
 - Setting up state management
 - Breaking large files into manageable chunks

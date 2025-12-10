@@ -59,7 +59,7 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
 │                    @migration/MIGRATION-EXECUTION.md                │
 │   3.1 Setup Structure     → .claude/, docs/                         │
 │   3.2 Create Core Files   → CLAUDE.md, PROJECT-STATE.md             │
-│   3.3 Migrate Docs        → BMAD structure                          │
+│   3.3 Migrate Docs        → standard documentation structure        │
 │   3.4 Shard Large Files   → <500 lines each                         │
 │   3.5 Generate Workspaces → Agent contexts                          │
 +=====================================================================+
@@ -121,7 +121,7 @@ Complete workflow for migrating existing projects to the Agent Methodology Pack.
 - [ ] Structure setup complete
 - [ ] Core files created
 - [ ] CLAUDE.md < 70 lines
-- [ ] Docs migrated to BMAD
+- [ ] Docs migrated to docs/ structure
 - [ ] Large files sharded
 - [ ] Workspaces defined
 

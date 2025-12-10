@@ -95,12 +95,12 @@ The Migration Workflow implementation is **APPROVED**. All 4 phases are properly
 |------|-------|-------|---------|--------|
 | 3.1 setup_structure | tech-writer | sonnet | Create .claude/ and docs/ structure | CORRECT |
 | 3.2 create_core_files | tech-writer | sonnet | Generate CLAUDE.md, PROJECT-STATE.md | CORRECT |
-| 3.3 migrate_documentation | tech-writer | sonnet | Map to BMAD structure | CORRECT |
+| 3.3 migrate_documentation | tech-writer | sonnet | Map to documentation structure | CORRECT |
 | 3.4 shard_large_files | tech-writer | sonnet | Split files >500 lines | CORRECT |
 | 3.5 generate_workspaces | architect-agent | opus | Create agent workspace definitions | CORRECT |
 
 **Strengths:**
-- Clear BMAD mapping at lines 188-192
+- Clear documentation structure mapping at lines 254-258
 - Conditional sharding (only if large files exist)
 - For-each pattern for sharding multiple files
 - Proper checkpoints after each step

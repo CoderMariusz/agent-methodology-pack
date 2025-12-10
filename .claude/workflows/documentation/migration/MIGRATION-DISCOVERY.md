@@ -224,7 +224,7 @@ current-project/
 1. Setup core structure (CLAUDE.md, PROJECT-STATE.md)
 2. Migrate baseline documentation
 3. Shard large files
-4. Organize existing docs into BMAD
+4. Organize existing docs into documentation structure
 5. Generate agent workspaces
 
 ### Risk Assessment

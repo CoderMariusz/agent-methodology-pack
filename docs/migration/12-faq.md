@@ -8,7 +8,7 @@
 - Migrate incrementally (one component at a time)
 - Start with just core files and add the rest later
 - Use methodology pack for new work, keep old structure for legacy code
-- Hybrid approach: New epics use BMAD, old docs stay as-is
+- Hybrid approach: New epics use organized structure, old docs stay as-is
 
 **Q2: What if I don't use all the agents?**
 
@@ -19,9 +19,9 @@
 
 The pack is flexible - customize to your needs.
 
-**Q3: Can I customize the BMAD structure?**
+**Q3: Can I customize the documentation structure?**
 
-**A:** Yes, BMAD is a guideline, not a strict requirement:
+**A:** Yes, the standard structure is a guideline, not a strict requirement:
 - Keep the general structure (1-Baseline, 2-Management, etc.)
 - Add custom folders as needed (e.g., 6-OPERATIONS)
 - Rename to match your terminology (e.g., 1-REQUIREMENTS instead of 1-BASELINE)
@@ -62,7 +62,7 @@ Add more as needed.
 
 **A:**
 1. Export wiki to markdown
-2. Map pages to BMAD structure:
+2. Map pages to standard structure:
    - Overview pages → 1-BASELINE/product/
    - Technical specs → 1-BASELINE/architecture/
    - How-to guides → 4-DEVELOPMENT/guides/
@@ -78,9 +78,9 @@ Add more as needed.
   ```markdown
   ## External Documentation
   - Wiki: https://github.com/org/repo/wiki
-  - (See @docs/ for BMAD-structured docs)
+  - (See @docs/ for organized structured docs)
   ```
-- **Option 3:** Hybrid - key docs in BMAD, supplementary in wiki
+- **Option 3:** Hybrid - key docs in organized structure, supplementary in wiki
 
 **Q9: How do I handle generated documentation (JSDoc, Sphinx)?**
 
@@ -165,7 +165,7 @@ Add more as needed.
 3. Continue work using agents
 4. Retroactively add stories if needed
 
-**Q13: What if team resists the change?**
+**Q13: What if team has difficulty with the new structure?**
 
 **A:**
 - **Education:** Show benefits with examples
@@ -205,8 +205,8 @@ See scripts/README.md for automation examples.
 - Underestimated documentation size (run audit first!)
 - Many large files requiring sharding (>500 lines each)
 - Team coordination overhead (more people = more time)
-- Unfamiliar with BMAD structure (learning curve)
-- Discovered missing/outdated docs during migration
+- Unfamiliar with documentation structure (learning curve)
+- Discovered missing/outdated docs during organization
 
 **Prevention:**
 - Thorough audit before starting
@@ -237,13 +237,13 @@ cat -A CLAUDE.md | grep "@PROJECT-STATE"
 claude config  # Check project path setting
 ```
 
-**Q18: I broke something during migration. How do I rollback?**
+**Q18: I broke something during organization. How do I rollback?**
 
 **A:**
 ```bash
-# Option 1: Git reset to pre-migration tag
-git tag  # Find your pre-migration tag
-git reset --hard pre-migration-20251205
+# Option 1: Git reset to pre-organization tag
+git tag  # Find your pre-organization tag
+git reset --hard pre-organization-20251205
 
 # Option 2: Restore from backup
 rm -rf project/
@@ -283,7 +283,7 @@ git cherry-pick <good-commit-1> <good-commit-2>
 - **CLAUDE.md >70 lines:** Still too much inline content
   - Fix: More aggressive sharding, move everything to referenced files
 
-- **Missing directories:** BMAD structure incomplete
+- **Missing directories:** Documentation structure incomplete
   - Fix: `mkdir -p docs/{1-BASELINE,2-MANAGEMENT,3-ARCHITECTURE,4-DEVELOPMENT,5-ARCHIVE}`
 
 - **Wrong file permissions:** Scripts not executable
@@ -303,7 +303,7 @@ bash scripts/validate-docs.sh --verbose
 
 Migration to Agent Methodology Pack transforms your project structure for AI-powered development. Whether you choose quick migration (15 minutes) or full migration (1-3 days), the result is:
 
-- ✅ Organized documentation (BMAD structure)
+- ✅ Organized documentation structure
 - ✅ Clear agent workflows
 - ✅ Persistent state management
 - ✅ Token-optimized context files
@@ -314,7 +314,7 @@ Migration to Agent Methodology Pack transforms your project structure for AI-pow
 1. **Start small:** Use quick migration for <50 files, full migration for larger projects
 2. **Plan first:** Audit project, create file mapping, set priorities
 3. **Shard large files:** Keep docs <300 lines, CLAUDE.md <70 lines
-4. **Use BMAD wisely:** Map existing structure to Baseline/Management/Architecture/Development
+4. **Use structure wisely:** Map existing structure to Baseline/Management/Architecture/Development
 5. **Setup workspaces:** Initialize state files for agent coordination
 6. **Validate frequently:** Run validation script after each phase
 7. **Train your team:** Provide onboarding and finding guides

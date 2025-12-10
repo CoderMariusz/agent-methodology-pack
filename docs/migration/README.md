@@ -24,7 +24,6 @@ bash scripts/init-interactive.sh
 | [04-full-migration.md](04-full-migration.md) | Comprehensive phased approach | 1-3 days |
 | [05-migration-phases.md](05-migration-phases.md) | Detailed phase instructions | Reference |
 | [06-document-sharding.md](06-document-sharding.md) | How to split large files | Reference |
-| [07-bmad-structure.md](07-bmad-structure.md) | BMAD folder structure mapping | Reference |
 | [08-agent-workspaces.md](08-agent-workspaces.md) | Setting up agent state files | Reference |
 | [09-troubleshooting.md](09-troubleshooting.md) | Common issues and fixes | Reference |
 | [10-checklist.md](10-checklist.md) | Migration validation checklist | Reference |
@@ -37,7 +36,7 @@ bash scripts/init-interactive.sh
 |--------|---------|
 | `init-interactive.sh` | Interactive wizard (recommended) |
 | `analyze-project.sh` | Analyze existing project |
-| `migrate-docs.sh` | Auto-move docs to BMAD structure |
+| `migrate-docs.sh` | Auto-move docs to standard structure |
 | `validate-migration.sh` | Validate migration |
 
 ## Which Guide Do I Need?

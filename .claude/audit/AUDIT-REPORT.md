@@ -128,7 +128,7 @@ These files exceed 500 lines or 20KB and should be split:
 
 ---
 
-## Recommended BMAD Mapping
+## Recommended Documentation Structure Mapping
 
 Based on your current structure, here's where files should go:
 
@@ -148,9 +148,9 @@ Agent Methodology Pack requires these files:
 - [ ] .claude/ structure - Agent definitions and state
 - [ ] docs/1-BASELINE/ - Requirements and architecture
 - [ ] docs/2-MANAGEMENT/ - Epics and sprints
-- [ ] docs/3-ARCHITECTURE/ - Technical design
-- [ ] docs/4-DEVELOPMENT/ - Implementation docs
-- [ ] docs/5-ARCHIVE/ - Completed work
+- [ ] docs/3-IMPLEMENTATION/ - Implementation docs
+- [ ] docs/4-RELEASE/ - Deployment and release docs
+- [ ] docs/0-DISCOVERY/ - Discovery and research
 
 ---
 
@@ -158,7 +158,7 @@ Agent Methodology Pack requires these files:
 
 ### 1. Review This Report
 - Examine large files that need splitting
-- Review recommended BMAD mappings
+- Review recommended documentation structure mappings
 - Identify files to keep, move, or archive
 
 ### 2. Create Core Files
@@ -182,7 +182,7 @@ bash agent-methodology-pack/scripts/generate-workspaces.sh
 ```
 
 ### 5. Migrate Documentation
-Manually move files according to BMAD mapping recommendations above.
+Manually move files according to documentation structure mapping recommendations above.
 
 ### 6. Validate Setup
 ```bash

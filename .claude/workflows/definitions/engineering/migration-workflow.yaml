@@ -219,7 +219,7 @@ phases:
           - "Copy agent definitions"
           - "Copy workflow files"
           - "Create state files"
-          - "Setup docs/ BMAD structure"
+          - "Setup docs/ directory structure"
         checkpoint:
           - "All directories created"
           - "Agent files copied"
@@ -246,18 +246,18 @@ phases:
         model: sonnet
         duration: "4-8 hours"
         activities:
-          - "Map existing docs to BMAD structure"
+          - "Map existing docs to standard documentation structure"
           - "Move/copy files to appropriate locations"
           - "Create missing baseline docs"
           - "Update cross-references"
           - "Archive old docs"
-        bmad_mapping:
+        docs_mapping:
           "1-BASELINE": "Requirements & Design"
           "2-MANAGEMENT": "Epics & Sprints"
           "3-IMPLEMENTATION": "Code & Tests"
           "4-RELEASE": "Deployment & Docs"
         checkpoint:
-          - "All docs mapped to BMAD structure"
+          - "All docs mapped to documentation structure"
           - "Files moved to new locations"
           - "Missing baseline docs created"
           - "All cross-references updated"
@@ -352,7 +352,7 @@ phases:
       criteria:
         - ".claude/ directory structure complete"
         - "Core files created (CLAUDE.md, PROJECT-STATE.md)"
-        - "Documentation migrated to BMAD structure"
+        - "Documentation migrated to docs/ structure"
         - "Large files sharded (<500 lines each)"
         - "Agent workspaces defined"
         - "Infrastructure configured (if applicable)"
@@ -383,7 +383,7 @@ phases:
             - ".claude/agents/ subdirectories present"
             - ".claude/workflows/ files present"
             - ".claude/state/ files present"
-            - "docs/ BMAD structure present"
+            - "docs/ structure present"
           files:
             - "CLAUDE.md exists"
             - "CLAUDE.md < 70 lines"

@@ -2,7 +2,7 @@
 
 ## Welcome to the Agent Methodology Pack
 
-This documentation follows the BMAD structure for organized project management.
+This documentation follows an organized structure for project management.
 
 ## Documentation Structure
 

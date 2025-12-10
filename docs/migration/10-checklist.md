@@ -88,7 +88,7 @@
   - [ ] PROJECT-STATE.md
   - [ ] docs/00-START-HERE.md
 
-- [ ] **BMAD structure created**
+- [ ] **Documentation structure created**
   ```bash
   ls -la docs/{1-BASELINE,2-MANAGEMENT,3-ARCHITECTURE,4-DEVELOPMENT,5-ARCHIVE}
   ```
@@ -197,7 +197,7 @@
 **Final quality verification:**
 
 - [ ] **Structure**
-  - [ ] BMAD folders exist
+  - [ ] Documentation folders exist
   - [ ] Files in correct locations
   - [ ] Naming conventions followed
 

@@ -49,7 +49,7 @@ bash scripts/init-interactive.sh
 - Large file detection (>500 lines or >20KB)
 - Documentation audit
 - Token estimation
-- BMAD mapping recommendations
+- Documentation structure recommendations
 - Generates two reports: AUDIT-REPORT.md and FILE-MAP.md
 
 **Tech Stack Detection:**
@@ -68,7 +68,7 @@ bash scripts/init-interactive.sh
    - Tech stack details
    - Documentation inventory
    - Large files list
-   - BMAD mapping recommendations
+   - Documentation structure recommendations
    - Missing files checklist
    - Next steps guide
 

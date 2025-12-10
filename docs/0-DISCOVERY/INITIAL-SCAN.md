@@ -35,7 +35,7 @@ agent-methodology-pack/
 │   ├── state/                # Runtime state files
 │   └── audit/                # Audit reports
 │
-├── docs/                     # BMAD documentation structure
+├── docs/                     # Organized documentation structure
 │   ├── 00-START-HERE.md     # Documentation index
 │   ├── 1-BASELINE/          # Foundation documents
 │   ├── 2-MANAGEMENT/        # Project management
@@ -127,7 +127,7 @@ agent-methodology-pack/
 
 ### What This Project IS
 1. A comprehensive multi-agent framework for Claude AI
-2. A documentation methodology (BMAD structure)
+2. A documentation methodology (organized structure)
 3. A collection of specialized agent prompts
 4. A set of workflows for software development
 5. Automation scripts for project management

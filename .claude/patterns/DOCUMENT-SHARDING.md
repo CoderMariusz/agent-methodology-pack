@@ -31,7 +31,7 @@ AI assistants have context window limits. Loading irrelevant content wastes toke
 
 ### The 90% Token Savings Claim
 
-Research from BMAD Method demonstrates that strategic document sharding can reduce token consumption by up to 90%:
+Research on strategic document sharding demonstrates that it can reduce token consumption by up to 90%:
 
 | Scenario | Traditional | Sharded | Savings |
 |----------|-------------|---------|---------|

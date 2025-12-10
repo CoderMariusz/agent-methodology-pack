@@ -88,7 +88,7 @@ cat > PROJECT-STATE.md << 'EOF'
 - Created core files
 
 ## Next Steps
-1. Organize existing docs into BMAD structure
+1. Organize existing docs into standard structure
 2. Create initial epic for current work
 3. Run validation
 
@@ -156,7 +156,7 @@ bash scripts/migrate-docs.sh ./existing-docs --auto
 
 # This will:
 # - Auto-detect file categories (PRD, architecture, API, etc.)
-# - Create BMAD folder structure
+# - Create organized folder structure
 # - Move files to correct locations
 # - Update @references in all files
 # - Generate migration report
@@ -165,7 +165,7 @@ bash scripts/migrate-docs.sh ./existing-docs --auto
 **Option B: Manual Migration (If you prefer control)**
 
 ```bash
-# Create BMAD structure
+# Create standard documentation structure
 mkdir -p docs/{1-BASELINE,2-MANAGEMENT,3-ARCHITECTURE,4-DEVELOPMENT,5-ARCHIVE}
 mkdir -p docs/2-MANAGEMENT/{epics/current,sprints}
 mkdir -p docs/1-BASELINE/{product,architecture,research}
@@ -184,7 +184,7 @@ cat > docs/00-START-HERE.md << 'EOF'
 
 ## Project Documentation
 
-Migrated to BMAD structure on [Date]
+Organized on [Date]
 
 ## Structure
 - **1-BASELINE** - Requirements and architecture
@@ -226,7 +226,7 @@ After 15 minutes, you should have:
 ✅ Agent Methodology Pack integrated
 ✅ Core files created (CLAUDE.md, PROJECT-STATE.md)
 ✅ State management initialized
-✅ BMAD documentation structure
+✅ Organized documentation structure
 ✅ Basic validation passing
 
 ### Next Steps
@@ -235,6 +235,21 @@ After 15 minutes, you should have:
 2. **Create first epic** - Document current work as Epic 1
 3. **Start using agents** - Invoke ORCHESTRATOR for guidance
 4. **Iterate** - Improve structure as you use it
+
+---
+
+## Quick Reference: Documentation Structure
+
+After migration, your docs will follow this organized structure:
+
+```
+docs/
+├── 1-BASELINE/          # Requirements, architecture, research
+├── 2-MANAGEMENT/        # Epics, stories, sprints
+├── 3-ARCHITECTURE/      # UX designs, technical specs
+├── 4-DEVELOPMENT/       # Implementation docs, API docs
+└── 5-ARCHIVE/          # Completed work
+```
 
 ---
 

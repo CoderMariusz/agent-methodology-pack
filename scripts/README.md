@@ -251,8 +251,8 @@ bash scripts/analyze-project.sh . --output .claude/audit
    - Estimates total project tokens
    - Uses ~4 chars per token approximation
 
-6. **BMAD Mapping**
-   - Suggests where files should go in BMAD structure
+6. **Documentation Mapping**
+   - Suggests where files should go in documentation structure
    - Identifies missing core files
 
 **Generated Reports:**
@@ -262,7 +262,7 @@ bash scripts/analyze-project.sh . --output .claude/audit
    - Tech stack details
    - Documentation inventory
    - Large files list
-   - BMAD mapping recommendations
+   - Documentation structure recommendations
    - Missing files checklist
    - Next steps guide
 
@@ -761,7 +761,7 @@ This document has been sharded for better AI context management.
 ---
 
 ### 10. migrate-docs.sh
-**Purpose:** Migrates existing documentation to BMAD structure
+**Purpose:** Migrates existing documentation to standard structure
 
 **Usage:**
 ```bash
@@ -788,23 +788,23 @@ bash scripts/migrate-docs.sh ./old-docs --target documentation/
 **What it does:**
 1. Scans source directory for markdown files
 2. Detects category based on filename and content patterns
-3. Suggests appropriate BMAD location
+3. Suggests appropriate documentation location
 4. Interactive or automatic categorization
 5. Moves files to new locations
 6. Updates @references in moved files
 7. Generates detailed migration report
 
 **Category Detection:**
-- `prd|requirements|product` → `1-BASELINE/product/`
-- `architecture|design|adr` → `1-BASELINE/architecture/`
-- `research` → `1-BASELINE/research/`
-- `epic` → `2-MANAGEMENT/epics/archive/`
-- `story` → `2-MANAGEMENT/stories/`
-- `sprint` → `2-MANAGEMENT/sprints/`
-- `api` → `4-DEVELOPMENT/api/`
-- `implementation` → `4-DEVELOPMENT/implementation/`
-- `test` → `4-DEVELOPMENT/testing/`
-- Default → `5-ARCHIVE/`
+- `prd|requirements|product` → `docs/product/`
+- `architecture|design|adr` → `docs/architecture/`
+- `research` → `docs/research/`
+- `epic` → `docs/epics/`
+- `story` → `docs/stories/`
+- `sprint` → `docs/sprints/`
+- `api` → `docs/api/`
+- `implementation` → `docs/implementation/`
+- `test` → `docs/testing/`
+- Default → `docs/archive/`
 
 **Detection Algorithm:**
 - Checks filename patterns (case-insensitive)
@@ -909,7 +909,7 @@ bash scripts/validate-migration.sh --fix
 | 1 | Core files | CLAUDE.md, PROJECT-STATE.md exist | ❌ |
 | 2 | Line count | CLAUDE.md < 70 lines | ❌ |
 | 3 | @references | All references valid | ❌ |
-| 4 | BMAD structure | All 5 folders exist | ✅ |
+| 4 | Docs structure | All required folders exist | ✅ |
 | 5 | .claude structure | Agent folders exist | ✅ |
 | 6 | Agent workspaces | 14 agents defined | ❌ |
 | 7 | Memory bank | State files initialized | ❌ |
@@ -954,7 +954,7 @@ bash scripts/validate-migration.sh --fix
 
 [✅] CLAUDE.md exists (48 lines - OK)
 [✅] PROJECT-STATE.md exists
-[✅] BMAD structure complete
+[✅] Docs structure complete
 [✅] .claude/ structure complete
 [✅] 14 agent workspaces generated
 [✅] Memory bank initialized
@@ -1003,7 +1003,7 @@ bash scripts/validate-migration.sh --fix
 **Auto-Fix Mode:**
 
 Can fix:
-- Missing directories (BMAD structure, .claude folders)
+- Missing directories (docs structure, .claude folders)
 - Non-executable scripts
 - Empty state files
 
@@ -1041,7 +1041,7 @@ Cannot fix:
 | **init-interactive.sh** | Interactive setup wizard | First time setup, need guidance |
 | **init-project.sh** | Direct project initialization | Quick setup, automation scripts |
 | **analyze-project.sh** | Project audit and analysis | Existing projects, migration planning |
-| **migrate-docs.sh** | Migrate docs to BMAD structure | After analyze, before validation |
+| **migrate-docs.sh** | Migrate docs to standard structure | After analyze, before validation |
 | **validate-migration.sh** | Validate migration completion | After migration, pre-production |
 | **generate-workspaces.sh** | Create agent workspaces | After project setup, per-agent context |
 | **validate-docs.sh** | Structure validation | After changes, pre-commit checks |
