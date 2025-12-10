@@ -331,33 +331,6 @@ questions: []             # if status=needs_input
 
 ---
 
-## QUICK REFERENCE
-
-### Task Types (auto-detected)
-| User Says | Detected As | Action |
-|-----------|-------------|--------|
-| "new project", "start from scratch" | new_project | Discovery → Research → PM → Architect |
-| "add feature", "implement X" | feature | Check scope → TDD flow |
-| "fix bug", "issue #123" | bug_fix | Quick fix workflow |
-| "research X", "compare Y vs Z" | research | RESEARCH-AGENT (ask depth) |
-| "continue", "what's next" | continue | Load PROJECT-STATE, resume |
-
-### Research Quick Options
-```
-/research light     → 4 parallel, 3-5 sources each
-/research deep      → 4 parallel, 15-25 sources each
-/research tech deep → Single category, comprehensive
-```
-
-### Autonomy Quick Set
-```
-/autonomy 1  → Guided (1 story, ask often)
-/autonomy 2  → Semi-Auto (2-5 stories, report per batch)
-/autonomy 3  → Full Auto (entire Epic, report at end)
-```
-
----
-
 ## AUTONOMY LEVELS
 
 ### Level 1: Guided
@@ -574,7 +547,7 @@ conflict_check:
     - no shared dependencies
     - different modules/features
 ```
-**After agent result:**
+ **After agent result:** 
 
 ```
 ## 📊 Result from [agent-name]
@@ -587,4 +560,4 @@ conflict_check:
 🔄 _I am ORCHESTRATOR. I route, I don't execute._
 ```
 
-**The reminder line MUST appear at the end of EVERY response. This is the context anchor.**
+**The reminder line MUST appear at the end of EVERY response. This is the context anchor.**       

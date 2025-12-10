@@ -650,6 +650,15 @@ copy_agents() {
         fi
     done
 
+    # Operations agents
+    mkdir -p "$target/.claude/agents/operations"
+    for agent in DEVOPS-AGENT; do
+        if [ -f "$PACK_ROOT/.claude/agents/operations/$agent.md" ]; then
+            cp "$PACK_ROOT/.claude/agents/operations/$agent.md" "$target/.claude/agents/operations/"
+            ((count++))
+        fi
+    done
+
     print_success "Agents copied: $count files"
 }
 
@@ -792,10 +801,18 @@ copy_all_scripts() {
                 chmod +x "$target/scripts/$(basename "$script")"
             fi
         done
+
+        # Copy script documentation (.md files)
+        for doc in "$PACK_ROOT/scripts/"*.md; do
+            if [ -f "$doc" ]; then
+                cp "$doc" "$target/scripts/"
+            fi
+        done
     fi
 
-    local count=$(find "$target/scripts" -name "*.sh" 2>/dev/null | wc -l)
-    print_success "Scripts copied: $count files"
+    local sh_count=$(find "$target/scripts" -name "*.sh" 2>/dev/null | wc -l)
+    local md_count=$(find "$target/scripts" -name "*.md" 2>/dev/null | wc -l)
+    print_success "Scripts copied: $sh_count .sh + $md_count .md files"
 }
 
 copy_docs_structure() {
@@ -820,12 +837,48 @@ copy_config() {
 
     local target="$CONFIG_TARGET_PATH"
 
-    # Routing rules
-    if [ -f "$PACK_ROOT/.claude/config/routing-rules.yaml" ]; then
-        cp "$PACK_ROOT/.claude/config/routing-rules.yaml" "$target/.claude/config/"
+    # Copy all config files
+    if [ -d "$PACK_ROOT/.claude/config" ]; then
+        cp -r "$PACK_ROOT/.claude/config/"* "$target/.claude/config/" 2>/dev/null || true
     fi
 
     print_success "Configuration copied"
+}
+
+copy_claude_root_files() {
+    print_step "Copying .claude root documentation files..."
+
+    local target="$CONFIG_TARGET_PATH"
+    local count=0
+
+    # Copy all root-level .md files from .claude/
+    for file in CONTEXT-BUDGET.md MODEL-ROUTING.md MODULE-INDEX.md PATTERNS.md PROMPTS.md TABLES.md; do
+        if [ -f "$PACK_ROOT/.claude/$file" ]; then
+            cp "$PACK_ROOT/.claude/$file" "$target/.claude/"
+            ((count++))
+        fi
+    done
+
+    print_success ".claude root files copied: $count files"
+}
+
+copy_root_templates() {
+    print_step "Copying root templates..."
+
+    local target="$CONFIG_TARGET_PATH"
+    mkdir -p "$target/templates"
+
+    if [ -d "$PACK_ROOT/templates" ]; then
+        # Copy all files from root templates/
+        for file in "$PACK_ROOT/templates/"*; do
+            if [ -f "$file" ]; then
+                cp "$file" "$target/templates/"
+            fi
+        done
+    fi
+
+    local count=$(find "$target/templates" -type f 2>/dev/null | wc -l)
+    print_success "Root templates copied: $count files"
 }
 
 generate_settings_local() {
@@ -2000,6 +2053,8 @@ run_interactive() {
     copy_all_scripts
     copy_docs_structure
     copy_config
+    copy_claude_root_files
+    copy_root_templates
     generate_settings_local
     generate_project_config
     generate_claude_md
@@ -2020,10 +2075,13 @@ run_interactive() {
     echo -e "    migration/   $(find "$CONFIG_TARGET_PATH/.claude/migration" -name "*.md" 2>/dev/null | wc -l) files"
     echo -e "    state/       $(find "$CONFIG_TARGET_PATH/.claude/state" -name "*.md" 2>/dev/null | wc -l) files"
     echo -e "    scripts/     $(find "$CONFIG_TARGET_PATH/.claude/scripts" -name "*.sh" 2>/dev/null | wc -l) files"
+    echo -e "    config/      $(find "$CONFIG_TARGET_PATH/.claude/config" -type f 2>/dev/null | wc -l) files"
+    echo -e "    root docs    $(find "$CONFIG_TARGET_PATH/.claude" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l) files"
     echo ""
     echo -e "  ${WHITE}Other directories:${NC}"
-    echo -e "    scripts/     $(find "$CONFIG_TARGET_PATH/scripts" -name "*.sh" 2>/dev/null | wc -l) files"
+    echo -e "    scripts/     $(find "$CONFIG_TARGET_PATH/scripts" -name "*.sh" 2>/dev/null | wc -l) .sh + $(find "$CONFIG_TARGET_PATH/scripts" -name "*.md" 2>/dev/null | wc -l) .md"
     echo -e "    docs/        $(find "$CONFIG_TARGET_PATH/docs" -name "*.md" 2>/dev/null | wc -l) files"
+    echo -e "    templates/   $(find "$CONFIG_TARGET_PATH/templates" -type f 2>/dev/null | wc -l) files"
     echo ""
 
     print_info "You can delete the pack after verification:"
