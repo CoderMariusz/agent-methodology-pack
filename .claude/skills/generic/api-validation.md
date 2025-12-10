@@ -1,23 +1,24 @@
 ---
 name: api-validation
-version: 1.0.0
-tokens: ~600
+version: 1.1.0
+tokens: ~700
 confidence: high
 sources:
   - https://zod.dev/
   - https://express-validator.github.io/docs/
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [api, validation, zod, backend]
+zod_version: "4.x"
 ---
 
 ## When to Use
 
-Apply when validating API request inputs: body, query params, path params, and headers.
+Apply when validating API request inputs: body, query params, path params, and headers. This skill covers Zod v4 patterns.
 
 ## Patterns
 
-### Pattern 1: Zod Schema Validation
+### Pattern 1: Zod Schema Validation (v4)
 ```typescript
 // Source: https://zod.dev/
 import { z } from 'zod';
@@ -81,10 +82,10 @@ export async function GET(request: NextRequest) {
 }
 ```
 
-### Pattern 4: Reusable Validators
+### Pattern 4: Reusable Validators (Zod v4)
 ```typescript
 // Source: https://zod.dev/
-// Common field schemas
+// Common field schemas - Zod v4 format validators
 const EmailSchema = z.string().email();
 const UUIDSchema = z.string().uuid();
 const DateStringSchema = z.string().datetime();
@@ -133,6 +134,16 @@ function validate<T extends z.ZodSchema>(schema: T) {
 // Usage
 app.post('/users', validate(CreateUserSchema), createUserHandler);
 ```
+
+## Zod v4 Migration Notes
+
+**Breaking Changes from v3:**
+- String format validators: `z.string().email()` patterns still work in v4
+- Error messages: More descriptive (e.g., "Invalid input: expected string, received undefined")
+- `.nonempty()` behavior: Now identical to `.min(1)`, inferred type is `string[]` not `[string, ...string[]]`
+- Error API: `error.errors` is now `error.issues` (both work in v4 for compatibility)
+
+**Recommendation:** The patterns in this skill use v4-compatible syntax that works in both v3 and v4.
 
 ## Anti-Patterns
 

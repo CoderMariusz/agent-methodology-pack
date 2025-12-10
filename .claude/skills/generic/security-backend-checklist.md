@@ -1,13 +1,13 @@
 ---
 name: security-backend-checklist
-version: 1.0.0
-tokens: ~500
+version: 1.1.0
+tokens: ~550
 confidence: high
 sources:
   - https://owasp.org/www-project-top-ten/
   - https://cheatsheetseries.owasp.org/
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [security, backend, api, owasp]
 ---
 
@@ -60,12 +60,25 @@ catch (error) {
 }
 ```
 
+### Access Control (Top OWASP Risk)
+```typescript
+// ✅ Check auth on EVERY endpoint
+async function getResource(userId: string, resourceId: string) {
+  const resource = await db.resource.findUnique({ where: { id: resourceId } });
+  if (!resource || resource.ownerId !== userId) {
+    throw new ForbiddenError('Access denied');
+  }
+  return resource;
+}
+```
+
 ## Anti-Patterns
 - Trusting client-side validation alone
 - Storing passwords in plaintext (use bcrypt/argon2)
 - Hardcoded secrets in code
 - Exposing stack traces in production
 - Missing rate limiting on auth endpoints
+- Not validating third-party dependencies (supply chain risk)
 
 ## Verification Checklist
 - [ ] All user input validated server-side
@@ -76,3 +89,8 @@ catch (error) {
 - [ ] Rate limiting on login/register
 - [ ] Error responses don't leak internals
 - [ ] HTTPS enforced
+- [ ] Security misconfiguration checks (headers, CORS)
+- [ ] Dependencies audited (npm audit, supply chain)
+
+## Context
+Based on OWASP Top Ten 2021 (latest released standard). Note: 2025 RC emphasizes supply chain security and access control as top priorities.

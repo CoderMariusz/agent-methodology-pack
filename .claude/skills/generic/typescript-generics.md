@@ -1,13 +1,13 @@
 ---
 name: typescript-generics
-version: 1.0.0
-tokens: ~650
+version: 1.1.0
+tokens: ~750
 confidence: high
 sources:
   - https://www.typescriptlang.org/docs/handbook/2/generics.html
   - https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [typescript, generics, types]
 ---
 
@@ -115,6 +115,21 @@ const result: PaginatedResult = { data: [], page: 1, total: 0 };
 
 // Explicit type
 const users: PaginatedResult<User> = { data: [], page: 1, total: 0 };
+```
+
+### Pattern 7: NoInfer Utility (TypeScript 5.4+)
+```typescript
+// Source: https://www.typescriptlang.org/docs/handbook/utility-types.html
+// Blocks inference to ensure parameter matches previously inferred type
+function createStreetLight<C extends string>(
+  colors: C[],
+  defaultColor?: NoInfer<C>
+) {
+  return { colors, defaultColor };
+}
+
+createStreetLight(['red', 'yellow', 'green'], 'red');    // OK
+createStreetLight(['red', 'yellow', 'green'], 'blue');   // Error
 ```
 
 ## Anti-Patterns

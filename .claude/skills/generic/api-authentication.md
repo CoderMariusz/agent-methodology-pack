@@ -1,25 +1,26 @@
 ---
 name: api-authentication
-version: 1.0.0
-tokens: ~700
+version: 1.1.0
+tokens: ~750
 confidence: high
 sources:
   - https://datatracker.ietf.org/doc/html/rfc7519
+  - https://datatracker.ietf.org/doc/html/rfc8725
   - https://oauth.net/2/
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [api, authentication, jwt, security]
 ---
 
 ## When to Use
 
-Apply when implementing API authentication: JWT tokens, session management, API keys, and auth middleware.
+Apply when implementing API authentication: JWT tokens, session management, API keys, and auth middleware. Follows JWT Best Current Practices (RFC 8725).
 
 ## Patterns
 
 ### Pattern 1: JWT Authentication
 ```typescript
-// Source: https://datatracker.ietf.org/doc/html/rfc7519
+// Source: RFC 7519, RFC 8725 (JWT Best Practices)
 import jwt from 'jsonwebtoken';
 
 interface TokenPayload {
@@ -30,13 +31,16 @@ interface TokenPayload {
 
 function generateToken(payload: TokenPayload): string {
   return jwt.sign(payload, process.env.JWT_SECRET!, {
-    expiresIn: '1h',
+    expiresIn: '1h',      // RFC 8725: Always set expiration
     issuer: 'myapp',
+    algorithm: 'HS256',   // RFC 8725: Explicitly specify algorithm
   });
 }
 
 function verifyToken(token: string): TokenPayload {
-  return jwt.verify(token, process.env.JWT_SECRET!) as TokenPayload;
+  return jwt.verify(token, process.env.JWT_SECRET!, {
+    algorithms: ['HS256'], // RFC 8725: Prevent algorithm confusion
+  }) as TokenPayload;
 }
 ```
 
@@ -168,16 +172,26 @@ export async function DELETE(req: NextRequest) {
 }
 ```
 
+## Security Best Practices (RFC 8725)
+
+- **Always set token expiration** - Short-lived access tokens (15m-1h)
+- **Explicitly specify algorithm** - Prevent algorithm confusion attacks
+- **Validate algorithm on verify** - Pass `algorithms` array to `jwt.verify()`
+- **Use strong secrets** - Minimum 256 bits for HS256
+- **Rotate refresh tokens** - Invalidate old token when issuing new one
+
 ## Anti-Patterns
 
 - **JWT in localStorage** - Use httpOnly cookies for web
 - **No token expiration** - Always set expiry
 - **Storing plain API keys** - Hash before storing
 - **No refresh token rotation** - Rotate on use
+- **Missing algorithm validation** - Specify allowed algorithms
 
 ## Verification Checklist
 
 - [ ] Tokens have expiration
+- [ ] Algorithm explicitly specified
 - [ ] Refresh tokens are rotated
 - [ ] API keys stored hashed
 - [ ] Auth errors don't leak info

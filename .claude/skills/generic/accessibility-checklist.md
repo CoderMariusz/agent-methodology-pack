@@ -1,13 +1,13 @@
 ---
 name: accessibility-checklist
-version: 1.0.0
+version: 1.1.0
 tokens: ~450
 confidence: high
 sources:
-  - https://www.w3.org/WAI/WCAG21/quickref/
+  - https://www.w3.org/WAI/WCAG22/quickref/
   - https://developer.mozilla.org/en-US/docs/Web/Accessibility
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [accessibility, a11y, frontend, ux]
 ---
 
@@ -22,7 +22,7 @@ When building UI components, forms, or any user-facing interface. Check before e
 <button>Click me</button>  <!-- ✅ Naturally focusable -->
 <div role="button" tabindex="0">Click me</div>  <!-- ✅ Made focusable -->
 
-<!-- Focus visible -->
+<!-- Focus visible and not obscured (WCAG 2.2) -->
 button:focus { outline: 2px solid blue; }
 ```
 
@@ -58,12 +58,15 @@ button:focus { outline: 2px solid blue; }
 - Tiny touch targets (<44x44px)
 - Keyboard traps (can't escape with Tab/Escape)
 - Auto-playing media without controls
+- Focus obscured by sticky headers/modals
 
 ## Verification Checklist
 - [ ] All interactive elements reachable via Tab
 - [ ] Focus indicator visible on all focusables
+- [ ] Focus not obscured by sticky content (WCAG 2.2)
 - [ ] Images have meaningful alt (or alt="" if decorative)
 - [ ] Form inputs have associated labels
 - [ ] Color contrast ≥4.5:1 (text) / ≥3:1 (large text)
 - [ ] Touch targets ≥44x44px
 - [ ] `prefers-reduced-motion` respected
+- [ ] No cognitive tests for auth (avoid CAPTCHAs)

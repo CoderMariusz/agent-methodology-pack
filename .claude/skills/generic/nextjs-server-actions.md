@@ -1,18 +1,20 @@
 ---
 name: nextjs-server-actions
-version: 1.0.0
-tokens: ~450
+version: 1.1.0
+tokens: ~550
 confidence: high
 sources:
   - https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations
   - https://react.dev/reference/rsc/server-actions
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [nextjs, react, forms, server-actions, frontend]
 ---
 
 ## When to Use
 When handling form submissions, data mutations, or any action that modifies server-side data.
+
+**Version Context**: Next.js 16.0+ uses `useActionState` (replaces deprecated `useFormState`).
 
 ## Patterns
 
@@ -52,6 +54,7 @@ export default function Page() {
 'use server'
 
 import { z } from 'zod';
+import { redirect } from 'next/navigation';
 
 const schema = z.object({
   email: z.string().email(),
@@ -74,7 +77,29 @@ export async function register(formData: FormData) {
 }
 ```
 
-### With useFormState (pending + errors)
+### With useActionState (Next.js 16+)
+```tsx
+'use client'
+
+import { useActionState } from 'react';
+import { register } from './actions';
+
+export function RegisterForm() {
+  const [state, action, pending] = useActionState(register, null);
+
+  return (
+    <form action={action}>
+      <input name="email" />
+      {state?.error?.email && <p>{state.error.email}</p>}
+      <button disabled={pending}>
+        {pending ? 'Loading...' : 'Submit'}
+      </button>
+    </form>
+  );
+}
+```
+
+### Legacy: useFormState (Next.js 15 and earlier)
 ```tsx
 'use client'
 
@@ -99,14 +124,36 @@ export function RegisterForm() {
 }
 ```
 
+### Event Handler with useTransition
+```tsx
+'use client'
+
+import { useTransition } from 'react';
+import { updateProfile } from './actions';
+
+export function ProfileButton() {
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <button onClick={() => startTransition(async () => {
+      await updateProfile();
+    })}>
+      {isPending ? 'Saving...' : 'Update Profile'}
+    </button>
+  );
+}
+```
+
 ## Anti-Patterns
 - Not validating input server-side
 - Forgetting revalidatePath after mutation
 - Missing error handling
-- Not using useFormStatus for loading states
+- Using deprecated `useFormState` in Next.js 16+
+- Not handling pending states
 
 ## Verification Checklist
 - [ ] Input validated with Zod
 - [ ] revalidatePath/revalidateTag after mutations
 - [ ] Error handling with return values
-- [ ] Loading states with useFormStatus
+- [ ] Using `useActionState` for Next.js 16+
+- [ ] Pending states properly displayed

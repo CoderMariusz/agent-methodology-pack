@@ -1,13 +1,13 @@
 ---
 name: docker-basics
-version: 1.0.0
+version: 1.1.0
 tokens: ~650
 confidence: high
 sources:
   - https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
   - https://docs.docker.com/compose/
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [docker, containers, devops, deployment]
 ---
 
@@ -21,7 +21,7 @@ Apply when containerizing applications: writing Dockerfiles, docker-compose conf
 ```dockerfile
 # Source: https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -29,7 +29,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -68,7 +68,7 @@ coverage
 ```yaml
 # Source: https://docs.docker.com/compose/
 # docker-compose.yml
-version: '3.8'
+# Note: version field is deprecated in Compose Specification
 
 services:
   app:
@@ -87,7 +87,7 @@ services:
       - redis
 
   db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     ports:
       - "5432:5432"
     environment:

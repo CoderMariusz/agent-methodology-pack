@@ -1,12 +1,15 @@
 ---
 name: react-hooks
-version: 1.0.0
-tokens: ~750
+version: 1.1.0
+tokens: ~1100
 confidence: high
 sources:
   - https://react.dev/reference/react/hooks
-  - https://react.dev/learn/rules-of-hooks
-last_validated: 2025-01-10
+  - https://react.dev/reference/rules/rules-of-hooks
+  - https://react.dev/blog/2024/12/05/react-19
+  - https://react.dev/blog/2025/10/01/react-19-2
+react_version: "18.2+, 19.x"
+last_validated: 2025-12-10
 next_review: 2025-01-24
 tags: [react, hooks, frontend, state]
 ---
@@ -14,6 +17,8 @@ tags: [react, hooks, frontend, state]
 ## When to Use
 
 Apply when managing state, side effects, context, or refs in React functional components.
+
+**React 19+ Note**: React 19.x introduced new hooks for forms/actions (useActionState, useOptimistic, useFormStatus) and effect events (useEffectEvent in 19.2). Core hooks (useState, useEffect, useCallback, etc.) remain unchanged.
 
 ## Patterns
 
@@ -97,12 +102,57 @@ const focusInput = () => {
 return <input ref={inputRef} />;
 ```
 
+### Pattern 7: useActionState for Forms (React 19+)
+```typescript
+// Source: https://react.dev/blog/2024/12/05/react-19
+import { useActionState } from 'react';
+
+async function submitForm(prevState: any, formData: FormData) {
+  const name = formData.get('name');
+  // Perform async operation
+  return { success: true, name };
+}
+
+function MyForm() {
+  const [state, action, isPending] = useActionState(submitForm, null);
+
+  return (
+    <form action={action}>
+      <input name="name" disabled={isPending} />
+      <button disabled={isPending}>Submit</button>
+      {state?.success && <p>Success: {state.name}</p>}
+    </form>
+  );
+}
+```
+
+### Pattern 8: useEffectEvent for Non-Reactive Logic (React 19.2+)
+```typescript
+// Source: https://react.dev/reference/react/useEffectEvent
+import { useEffect, useEffectEvent } from 'react';
+
+function Chat({ roomId, theme }) {
+  // Event function always sees latest theme, but doesn't trigger effect
+  const onConnected = useEffectEvent(() => {
+    showNotification('Connected!', theme);
+  });
+
+  useEffect(() => {
+    const connection = createConnection(roomId);
+    connection.on('connected', onConnected);
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId]); // Only re-run when roomId changes
+}
+```
+
 ## Anti-Patterns
 
 - **Hooks in conditions/loops** - Call hooks at top level only
 - **Missing dependencies** - Include all values used in effect/callback
-- **Over-using useMemo/useCallback** - Use only when performance matters
+- **Over-using useMemo/useCallback** - Use only when performance matters (profile first)
 - **Mutating state directly** - Always use setter, spread for objects/arrays
+- **Async function as useEffect callback** - Define async function inside, then call it
 
 ## Verification Checklist
 
@@ -111,3 +161,4 @@ return <input ref={inputRef} />;
 - [ ] useEffect has cleanup for subscriptions/timers
 - [ ] Custom hooks start with `use` prefix
 - [ ] No direct state mutation
+- [ ] useEffectEvent excluded from dependency arrays (React 19.2+)

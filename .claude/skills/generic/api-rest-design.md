@@ -1,13 +1,13 @@
 ---
 name: api-rest-design
-version: 1.0.0
+version: 1.1.0
 tokens: ~700
 confidence: high
 sources:
   - https://restfulapi.net/
-  - https://www.rfc-editor.org/rfc/rfc7231
-last_validated: 2025-01-10
-next_review: 2025-01-24
+  - https://www.rfc-editor.org/rfc/rfc9110
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [api, rest, backend, design]
 ---
 
@@ -36,7 +36,7 @@ GET    /user/123           # Singular (use plural)
 
 ### Pattern 2: HTTP Status Codes
 ```
-# Source: https://www.rfc-editor.org/rfc/rfc7231
+# Source: https://www.rfc-editor.org/rfc/rfc9110
 Success:
 200 OK           - GET/PUT success with body
 201 Created      - POST success, include Location header
@@ -61,7 +61,7 @@ Server Errors:
 // Success response
 {
   "data": { "id": 123, "name": "John" },
-  "meta": { "timestamp": "2025-01-10T12:00:00Z" }
+  "meta": { "timestamp": "2025-12-10T12:00:00Z" }
 }
 
 // Error response

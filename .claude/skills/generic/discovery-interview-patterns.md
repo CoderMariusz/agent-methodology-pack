@@ -1,13 +1,13 @@
 ---
 name: discovery-interview-patterns
-version: 1.0.0
+version: 1.1.0
 tokens: ~450
 confidence: high
 sources:
   - https://www.nngroup.com/articles/interviewing-users/
-  - https://www.productplan.com/glossary/discovery-phase/
-last_validated: 2025-01-10
-next_review: 2025-01-24
+  - https://productschool.com/blog/product-fundamentals/what-is-product-discovery
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [discovery, requirements, interview, planning]
 ---
 

@@ -1,13 +1,13 @@
 ---
 name: typescript-api-types
-version: 1.0.0
-tokens: ~600
+version: 1.1.0
+tokens: ~650
 confidence: high
 sources:
   - https://www.typescriptlang.org/docs/handbook/utility-types.html
   - https://zod.dev/
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [typescript, api, types, validation]
 ---
 
@@ -121,6 +121,22 @@ async function api<K extends keyof ApiEndpoints>(
 ): Promise<ApiEndpoints[K]['response']> {
   // Implementation
 }
+```
+
+### Pattern 6: NoInfer for Strict Type Matching (TypeScript 5.4+)
+```typescript
+// Source: https://www.typescriptlang.org/docs/handbook/utility-types.html
+// Ensure parameter matches exact union, don't expand it
+function validateStatus<S extends string>(
+  validStatuses: S[],
+  currentStatus: NoInfer<S>
+): boolean {
+  return validStatuses.includes(currentStatus);
+}
+
+// S inferred as 'pending' | 'active' | 'done'
+validateStatus(['pending', 'active', 'done'], 'active');  // OK
+validateStatus(['pending', 'active', 'done'], 'invalid'); // Error
 ```
 
 ## Anti-Patterns

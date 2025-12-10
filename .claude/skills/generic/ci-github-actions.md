@@ -1,13 +1,13 @@
 ---
 name: ci-github-actions
-version: 1.0.0
+version: 1.1.0
 tokens: ~700
 confidence: high
 sources:
   - https://docs.github.com/en/actions/quickstart
   - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [ci, github-actions, automation, devops]
 ---
 
@@ -34,12 +34,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -63,12 +63,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [20, 22, 24]
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
@@ -87,9 +87,9 @@ jobs:
       ${{ runner.os }}-node-
 
 # Or use setup-node cache option
-- uses: actions/setup-node@v4
+- uses: actions/setup-node@v6
   with:
-    node-version: '20'
+    node-version: '22'
     cache: 'npm'  # Automatic caching
 ```
 
@@ -146,14 +146,14 @@ on:
       node-version:
         required: false
         type: string
-        default: '20'
+        default: '22'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
       - run: npm ci && npm test
@@ -163,7 +163,7 @@ jobs:
   call-tests:
     uses: ./.github/workflows/reusable-test.yml
     with:
-      node-version: '20'
+      node-version: '22'
 ```
 
 ## Anti-Patterns

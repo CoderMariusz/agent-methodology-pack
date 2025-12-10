@@ -1,20 +1,37 @@
 ---
 name: react-performance
-version: 1.0.0
-tokens: ~750
+version: 1.1.0
+tokens: ~950
 confidence: high
 sources:
+  - https://react.dev/learn/react-compiler
   - https://react.dev/reference/react/memo
   - https://react.dev/reference/react/useMemo
   - https://react.dev/learn/render-and-commit
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [react, performance, optimization, frontend]
 ---
 
 ## When to Use
 
 Apply when diagnosing slow renders, optimizing list rendering, or preventing unnecessary re-renders in React applications.
+
+## React Compiler (React 19+)
+
+**React Compiler automatically handles memoization for you.** If your project uses React Compiler (React 19.2+ with compiler enabled):
+
+- Manual `memo`, `useMemo`, and `useCallback` are often unnecessary
+- The compiler automatically prevents unnecessary re-renders
+- Profile first with React DevTools before adding manual optimizations
+- See [React Compiler docs](https://react.dev/learn/react-compiler) for setup
+
+**When to still use manual optimization with React Compiler:**
+- Third-party libraries that require memoized props/callbacks
+- Edge cases where compiler cannot optimize (check React DevTools)
+- React 17-18 projects without compiler support
+
+**Without React Compiler** (or React 17-18), use the patterns below.
 
 ## Patterns
 
@@ -103,10 +120,12 @@ function Dashboard() {
 - **memo everything** - Only memo components that receive same props often
 - **useMemo for simple values** - Overhead > benefit for trivial calculations
 - **Inline objects/arrays in JSX** - Creates new reference every render
+- **Manual memo with React Compiler** - Redundant if compiler is enabled
 
 ## Verification Checklist
 
 - [ ] Profiled with React DevTools before optimizing
+- [ ] Checked if React Compiler is enabled in project
 - [ ] memo'd components actually receive stable props
 - [ ] Lists with 100+ items use virtualization
 - [ ] Heavy components lazy loaded

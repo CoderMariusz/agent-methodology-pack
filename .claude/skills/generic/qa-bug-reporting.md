@@ -1,13 +1,13 @@
 ---
 name: qa-bug-reporting
-version: 1.0.0
+version: 1.1.0
 tokens: ~400
 confidence: high
 sources:
-  - https://www.atlassian.com/software/jira/guides/bugs-issues/tutorials
-  - https://testing.googleblog.com/2014/09/how-to-file-good-bug.html
-last_validated: 2025-01-10
-next_review: 2025-01-24
+  - https://istqb-glossary.page/bug-report/
+  - https://www.theknowledgeacademy.com/blog/defect-report-istqb/
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [qa, bugs, testing, reporting]
 ---
 

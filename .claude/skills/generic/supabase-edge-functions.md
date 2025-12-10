@@ -1,19 +1,19 @@
 ---
 name: supabase-edge-functions
-version: 1.0.0
+version: 1.1.0
 tokens: ~600
 confidence: high
 sources:
   - https://supabase.com/docs/guides/functions
   - https://supabase.com/docs/reference/javascript/functions-invoke
-last_validated: 2025-01-10
-next_review: 2025-01-24
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [supabase, edge-functions, serverless, deno]
 ---
 
 ## When to Use
 
-Apply when building serverless functions in Supabase: webhooks, background jobs, third-party integrations, or complex server-side logic.
+Apply when building serverless functions in Supabase: webhooks, background jobs, third-party integrations, or complex server-side logic. Runs on Deno 2.1+.
 
 ## Patterns
 
@@ -21,7 +21,8 @@ Apply when building serverless functions in Supabase: webhooks, background jobs,
 ```typescript
 // Source: https://supabase.com/docs/guides/functions
 // supabase/functions/hello/index.ts
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+// Note: Deno 2.1+ is now supported (Dec 2025)
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 
 serve(async (req) => {
   const { name } = await req.json();
@@ -36,7 +37,7 @@ serve(async (req) => {
 ### Pattern 2: With Supabase Client
 ```typescript
 // Source: https://supabase.com/docs/guides/functions
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 serve(async (req) => {
@@ -74,7 +75,7 @@ const { data, error } = await supabase.functions.invoke('process', {
 ```typescript
 // Source: https://supabase.com/docs/guides/functions
 // supabase/functions/stripe-webhook/index.ts
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
@@ -133,6 +134,7 @@ serve(async (req) => {
 
 ## Verification Checklist
 
+- [ ] Using Deno 2.1+ compatible imports
 - [ ] Secrets stored in Supabase dashboard, not code
 - [ ] CORS headers for browser invocations
 - [ ] Error responses with appropriate status codes

@@ -1,13 +1,13 @@
 ---
 name: requirements-clarity-scoring
-version: 1.0.0
+version: 1.1.0
 tokens: ~350
 confidence: high
 sources:
-  - https://www.modernanalyst.com/Resources/Articles/tabid/115/ID/1427/Requirements-Quality-Checklist.aspx
-  - https://ieeexplore.ieee.org/document/720574
-last_validated: 2025-01-10
-next_review: 2025-01-24
+  - https://standards.ieee.org/ieee/29148/6937/
+  - https://www.reqview.com/doc/iso-iec-ieee-29148-templates/
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [requirements, discovery, clarity, planning]
 ---
 

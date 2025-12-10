@@ -1,19 +1,21 @@
 ---
 name: nextjs-app-router
-version: 1.0.0
-tokens: ~850
+version: 1.1.0
+tokens: ~950
 confidence: high
 sources:
   - https://nextjs.org/docs/app/building-your-application/routing
   - https://nextjs.org/docs/app/building-your-application/data-fetching
-last_validated: 2025-01-10
-next_review: 2025-01-24
+  - https://nextjs.org/docs/messages/sync-dynamic-apis
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [nextjs, routing, frontend, ssr]
+nextjs_version: "13-16 (App Router)"
 ---
 
 ## When to Use
 
-Apply when building Next.js 13+ applications with App Router for routing, layouts, data fetching, and server components.
+Apply when building Next.js 13-16 applications with App Router for routing, layouts, data fetching, and server components.
 
 ## Patterns
 
@@ -68,6 +70,8 @@ export function Counter() {
 ```typescript
 // Source: https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes
 // app/posts/[id]/page.tsx
+// Note: In Next.js 15+, params is a Promise and must be awaited.
+// Earlier versions used synchronous access (deprecated pattern).
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -79,7 +83,23 @@ export default async function PostPage({ params }: Props) {
 }
 ```
 
-### Pattern 5: API Route Handler
+### Pattern 5: Search Params (Query Strings)
+```typescript
+// Source: https://nextjs.org/docs/messages/sync-dynamic-apis
+// app/shop/page.tsx
+// Note: In Next.js 15+, searchParams is a Promise and must be awaited.
+interface Props {
+  searchParams: Promise<{ sort?: string; page?: string }>;
+}
+
+export default async function ShopPage({ searchParams }: Props) {
+  const { sort, page } = await searchParams;
+  const products = await getProducts({ sort, page: Number(page) || 1 });
+  return <ProductList products={products} />;
+}
+```
+
+### Pattern 6: API Route Handler
 ```typescript
 // Source: https://nextjs.org/docs/app/building-your-application/routing/route-handlers
 // app/api/users/route.ts
@@ -97,7 +117,7 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-### Pattern 6: Metadata for SEO
+### Pattern 7: Metadata for SEO
 ```typescript
 // Source: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
 // app/posts/[id]/page.tsx
@@ -114,11 +134,13 @@ export async function generateMetadata({ params }: Props) {
 - **Fetching in client components** - Fetch in server components, pass as props
 - **Direct DB in client** - Use API routes or server actions
 - **Missing loading.tsx** - Always add for async pages
+- **Accessing params/searchParams without await** - Next.js 15+ requires async access
 
 ## Verification Checklist
 
 - [ ] Server components for data fetching (no 'use client')
 - [ ] Client components only for interactivity
-- [ ] Dynamic routes use params correctly
+- [ ] Dynamic routes use params correctly (awaited in Next.js 15+)
+- [ ] searchParams awaited for query string access
 - [ ] loading.tsx exists for async pages
 - [ ] Metadata defined for SEO

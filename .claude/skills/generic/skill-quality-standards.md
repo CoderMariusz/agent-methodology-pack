@@ -1,12 +1,13 @@
 ---
 name: skill-quality-standards
-version: 1.0.0
-tokens: ~400
+version: 1.1.0
+tokens: ~420
 confidence: high
 sources:
   - internal: .claude/skills/REGISTRY.yaml
-last_validated: 2025-01-10
-next_review: 2025-01-24
+  - https://www.anthropic.com/news/claude-2-1-prompting (context window optimization)
+last_validated: 2025-12-10
+next_review: 2025-12-24
 tags: [skills, quality, standards, meta]
 ---
 
@@ -49,6 +50,8 @@ LOW:
 ```markdown
 ---
 [YAML frontmatter with metadata]
+sources:
+  - [URL or internal path]
 ---
 
 ## When to Use
@@ -79,14 +82,14 @@ Project:    .claude/skills/project/
 
 ## Anti-Patterns
 - Skills over 1500 tokens (split them)
-- Patterns without source links
+- Patterns without source links in frontmatter
 - Vague "When to Use" triggers
 - Theory without code examples
 - Missing anti-patterns section
 
 ## Verification Checklist
 - [ ] Under 1500 tokens
-- [ ] Every pattern has source
+- [ ] Every pattern has source in frontmatter
 - [ ] "When to Use" is specific
 - [ ] 2+ patterns with code
 - [ ] Anti-patterns included
