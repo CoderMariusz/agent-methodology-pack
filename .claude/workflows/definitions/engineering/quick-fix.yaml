@@ -25,7 +25,7 @@ eligibility:
 
 steps:
   - id: assess
-    agent: senior-dev
+    agent: SENIOR-DEV
     type: assess_fix
     description: "Assess fix scope and approach"
     input:
@@ -36,49 +36,116 @@ steps:
         - estimated_scope: "small | medium | large"
         - files_affected: []
         - approach: "description"
+        - bug_type: "backend | frontend"
     decision:
-      small: implement
+      small: write_reproduction_test
       medium_or_large: escalate_to_story
 
-  - id: implement
-    agent: senior-dev
-    type: fix_with_tests
-    description: "Implement fix with corresponding tests"
+  - id: write_reproduction_test
+    agent: TEST-WRITER
+    type: write_failing_test
+    description: "Write test that reproduces the bug (RED phase)"
+    model: haiku
     input:
       context_refs:
-        - "Affected source files"
+        - "Bug description"
+        - "Steps to reproduce"
         - "Related test files"
     output:
       deliverables:
+        - "Failing reproduction test"
+    checkpoint:
+      - "Test reproduces the bug"
+      - "Test FAILS with current code"
+    gate:
+      name: "BUG_REPRODUCED"
+      criteria:
+        - "Reproduction test written"
+        - "Test fails (proves bug exists)"
+      on_pass: implement
+    next: implement
+
+  - id: implement
+    agent_selection:
+      backend_bug: BACKEND-DEV
+      frontend_bug: FRONTEND-DEV
+      default: BACKEND-DEV
+    type: fix_with_tests
+    description: "Implement fix to make reproduction test pass"
+    model: haiku
+    input:
+      context_refs:
+        - "Affected source files"
+        - "Reproduction test"
+    output:
+      deliverables:
         - "Fixed source files"
-        - "Updated/new tests"
     checkpoint:
       - "Fix addresses root cause"
-      - "Tests cover the fix"
-      - "All tests pass"
+      - "Reproduction test now passes"
+      - "All existing tests still pass"
+    gate:
+      name: "FIX_IMPLEMENTED"
+      criteria:
+        - "Reproduction test passes"
+        - "All tests pass"
+      on_pass: review
     next: review
 
   - id: review
-    agent: code-reviewer
+    agent: CODE-REVIEWER
     type: quick_review
     description: "Fast review for small changes"
+    model: haiku
     input:
       context_refs:
         - "Changed files (diff)"
+        - "Reproduction test"
     decision:
-      approved: complete
-      request_changes: return_to_implement
+      approved: verify
+      request_changes: implement
     checkpoint:
       - "No security issues"
       - "Tests adequate"
       - "Code quality OK"
+    gate:
+      name: "REVIEW_APPROVED"
+      criteria:
+        - "Code review passed"
+        - "No security issues"
+        - "Test coverage adequate"
+      on_pass: verify
+
+  - id: verify
+    agent: QA-AGENT
+    type: quick_verify
+    description: "Quick verification that fix works"
+    model: haiku
+    input:
+      context_refs:
+        - "Bug description"
+        - "Fixed code"
+    activities:
+      - "Verify bug is fixed"
+      - "Quick smoke test of affected area"
+      - "Confirm no obvious regressions"
+    decision:
+      pass: complete
+      fail: implement
+    gate:
+      name: "QA_VERIFIED"
+      criteria:
+        - "Bug confirmed fixed"
+        - "No new issues introduced"
+      on_pass: complete
 
   - id: complete
     type: fix_complete
-    summary: "Fix implemented and reviewed"
+    summary: "Fix implemented, reviewed, and verified"
     actions:
       - "Update issue status"
       - "Create commit"
+      - "Close bug"
 
   - id: escalate_to_story
     type: escalation
@@ -86,14 +153,33 @@ steps:
     action: "Create story, route to story-delivery workflow"
     next_workflow: "engineering/story-delivery.yaml"
 
+# Quality Gates Summary
+quality_gates:
+  BUG_REPRODUCED:
+    step: write_reproduction_test
+    agent: TEST-WRITER
+    blocker: "Cannot implement fix without failing test"
+  FIX_IMPLEMENTED:
+    step: implement
+    agent: BACKEND-DEV | FRONTEND-DEV
+    blocker: "Cannot proceed to review"
+  REVIEW_APPROVED:
+    step: review
+    agent: CODE-REVIEWER
+    blocker: "Must fix and resubmit"
+  QA_VERIFIED:
+    step: verify
+    agent: QA-AGENT
+    blocker: "Cannot close bug"
+
 # Shortcuts for common fixes
 shortcuts:
   typo_fix:
-    skip_to: implement
+    skip_to: write_reproduction_test
     skip_review: false
 
   config_change:
-    skip_to: implement
+    skip_to: write_reproduction_test
     require_review: true
 
 # Error handling

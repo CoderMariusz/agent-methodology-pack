@@ -1,5 +1,11 @@
 # DISCOVERY-FLOW
 
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/product/new-project.yaml
+> **Updated:** 2025-12-10
+
+---
+
 ## Purpose
 
 Ensure complete project understanding before planning or development begins.

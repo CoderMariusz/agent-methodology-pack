@@ -1,5 +1,11 @@
 # Sprint Workflow
 
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/engineering/sprint-workflow.yaml
+> **Updated:** 2025-12-10
+
+---
+
 ## Overview
 
 Sprint management workflow covering the complete sprint lifecycle from initialization to retrospective. The ORCHESTRATOR initializes each sprint, agents work through the daily cycle, and the sprint concludes with review, retrospective, and archival.

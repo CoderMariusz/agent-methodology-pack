@@ -1,5 +1,11 @@
 # Bug Workflow
 
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/engineering/quick-fix.yaml
+> **Updated:** 2025-12-10
+
+---
+
 ## Overview
 
 Bug fix workflow with complexity-based routing. Bugs are triaged by severity and complexity, then routed to the appropriate fix path: simple fixes use fast review, medium bugs follow standard TDD, and complex bugs may require architectural review or full story workflow.

@@ -1,5 +1,11 @@
 # AD-HOC-FLOW (Quick Task Workflow)
 
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/engineering/ad-hoc-flow.yaml
+> **Updated:** 2025-12-10
+
+---
+
 ## Overview
 
 Workflow for tasks that are NOT part of formal Epics/Stories - direct user requests, quick fixes, refactoring, or small features. Unlike Story Workflow, AD-HOC-FLOW is triggered directly by user requests but maintains ALL quality gates. The key difference: no Epic/Story planning phase, but Testing and Review phases are MANDATORY.

@@ -1,5 +1,11 @@
 # Story Workflow
 
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/engineering/story-delivery.yaml
+> **Updated:** 2025-12-10
+
+---
+
 ## Overview
 
 TDD-based story implementation workflow following the RED-GREEN-REFACTOR cycle. This workflow ensures code quality through test-first development, continuous validation, and comprehensive review.

@@ -1,5 +1,11 @@
 # Epic Workflow
 
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/engineering/epic-workflow.yaml
+> **Updated:** 2025-12-10
+
+---
+
 ## Overview
 
 End-to-end process for delivering an epic from conception to completion. This workflow orchestrates multiple agents through discovery, design, planning, development, quality, and documentation phases.

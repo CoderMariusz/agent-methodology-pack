@@ -1,5 +1,11 @@
 # Feature Flow
 
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/engineering/feature-flow.yaml
+> **Updated:** 2025-12-10
+
+---
+
 ## Overview
 
 Lightweight workflow for adding features to existing projects. Faster than STORY-WORKFLOW but maintains quality through streamlined TDD. Includes automatic PRD/Architecture updates to keep documentation in sync.

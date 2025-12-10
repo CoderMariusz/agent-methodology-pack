@@ -1,35 +1,35 @@
 # PLANNING-FLOW
 
-> **Wersja:** 1.0
-> **Definicja:** @.claude/workflows/definitions/product/planning-flow.yaml
-> **Autor:** ORCHESTRATOR
-> **Aktualizacja:** 2025-12-08
+> **Version:** 1.0
+> **Definition:** @.claude/workflows/definitions/product/planning-flow.yaml
+> **Author:** ORCHESTRATOR
+> **Updated:** 2025-12-08
 
 ---
 
-## Cel Workflow
+## Workflow Purpose
 
-PLANNING-FLOW łączy output z DISCOVERY-FLOW z wejściem do EPIC-WORKFLOW. Odpowiada za:
+PLANNING-FLOW connects DISCOVERY-FLOW outputs to EPIC-WORKFLOW inputs. It handles:
 
-1. **Konsolidację inputów** z discovery i research
-2. **Tworzenie/aktualizację PRD** z mierzalnymi outcomes
-3. **Identyfikację epików** i mapowanie zależności
-4. **Priorytetyzację** i tworzenie roadmapy NOW/NEXT/LATER
-5. **Przygotowanie stories** do sprint intake
-
----
-
-## Kiedy Używać
-
-| Tryb | Trigger | Fazy | Przykład |
-|------|---------|------|----------|
-| **PORTFOLIO** | Nowy projekt, duży pivot | Wszystkie 6 | Greenfield project |
-| **EPIC-SCOPED** | Nowa funkcjonalność | Skip: outcomes | Dodanie modułu płatności |
-| **ADJUSTMENT** | Zmiana priorytetów | Tylko: context, prioritization, confirmation | Mid-sprint reprioritization |
+1. **Input consolidation** from discovery and research
+2. **PRD creation/update** with measurable outcomes
+3. **Epic identification** and dependency mapping
+4. **Prioritization** and NOW/NEXT/LATER roadmap creation
+5. **Story preparation** for sprint intake
 
 ---
 
-## Diagram Przepływu
+## When to Use
+
+| Mode | Trigger | Phases | Example |
+|------|---------|--------|---------|
+| **PORTFOLIO** | New project, major pivot | All 6 phases | Greenfield project |
+| **EPIC-SCOPED** | New functionality | Skip: outcomes | Adding payment module |
+| **ADJUSTMENT** | Priority changes | Only: context, prioritization, confirmation | Mid-sprint reprioritization |
+
+---
+
+## Flow Diagram
 
 ```
                     ┌─────────────────────────────────────────────────────────────┐
@@ -91,29 +91,29 @@ PLANNING-FLOW łączy output z DISCOVERY-FLOW z wejściem do EPIC-WORKFLOW. Odpo
 
 ---
 
-## Fazy Szczegółowo
+## Phase Details
 
-### Faza 1: CONTEXT GATHERING
+### Phase 1: CONTEXT GATHERING
 
-**Agent:** ORCHESTRATOR
+**Agent:** orchestrator
 
-**Cel:** Zebranie i walidacja wszystkich inputów potrzebnych do planowania.
+**Purpose:** Collect and validate all inputs needed for planning.
 
-**Inputy:**
+**Inputs:**
 
-| Źródło | Ścieżka | Wymagane |
-|--------|---------|----------|
-| Discovery Output | `docs/0-DISCOVERY/PROJECT-UNDERSTANDING.md` | Tak |
-| Research | `docs/0-DISCOVERY/research/*.md` | Opcjonalne |
-| Existing PRD | `docs/1-BASELINE/product/prd.md` | Opcjonalne |
-| User Context | {user provided} | Opcjonalne |
+| Source | Path | Required |
+|--------|------|----------|
+| Discovery Output | `docs/0-DISCOVERY/PROJECT-UNDERSTANDING.md` | Yes |
+| Research | `docs/0-DISCOVERY/research/*.md` | Optional |
+| Existing PRD | `docs/1-BASELINE/product/prd.md` | Optional |
+| User Context | {user provided} | Optional |
 
-**Aktywności:**
+**Activities:**
 
-1. Walidacja completeness discovery outputs
-2. Identyfikacja luk informacyjnych
-3. Trigger research agents jeśli potrzebne (parallel)
-4. Konsolidacja wszystkich inputów
+1. Validate discovery outputs completeness
+2. Identify information gaps
+3. Trigger research agents if needed (parallel)
+4. Consolidate all inputs
 
 **Research Triggers:**
 
@@ -137,25 +137,25 @@ parallel_research:
 **Quality Gate:**
 
 - [ ] Clarity score >= 60%
-- [ ] Wszystkie wymagane inputy dostępne
-- [ ] Brak krytycznych unknowns blokujących
+- [ ] All required inputs available
+- [ ] No critical unknowns blocking
 
 ---
 
-### Faza 2: OUTCOMES & PRD
+### Phase 2: OUTCOMES & PRD
 
-**Agent:** PM-AGENT
+**Agent:** pm-agent
 
-**Cel:** Zdefiniowanie mierzalnych outcomes i stworzenie/aktualizacja PRD.
+**Purpose:** Define measurable outcomes and create/update PRD.
 
-**Aktywności:**
+**Activities:**
 
 1. **Define SMART Success Metrics**
-   - Specific: Co konkretnie mierzymy?
-   - Measurable: Jak mierzymy? Jaka baseline?
-   - Achievable: Czy realistyczne?
-   - Relevant: Czy aligned z business goal?
-   - Time-bound: Do kiedy?
+   - Specific: What exactly are we measuring?
+   - Measurable: How do we measure? What baseline?
+   - Achievable: Is it realistic?
+   - Relevant: Is it aligned with business goal?
+   - Time-bound: By when?
 
 2. **Create/Update PRD**
    - Functional Requirements (FR)
@@ -164,15 +164,15 @@ parallel_research:
    - Assumptions
 
 3. **Apply MoSCoW Prioritization**
-   - **Must:** Bez tego project nie ma sensu
-   - **Should:** Ważne, ale można obejść
+   - **Must:** Without this, project makes no sense
+   - **Should:** Important but can be worked around
    - **Could:** Nice to have
-   - **Won't:** Explicit out of scope (ważne!)
+   - **Won't:** Explicit out of scope (important!)
 
 4. **Define Scope Boundaries**
-   - IN SCOPE: Co robimy
-   - OUT OF SCOPE: Czego NIE robimy
-   - FUTURE: Co rozważymy później
+   - IN SCOPE: What we do
+   - OUT OF SCOPE: What we do NOT do
+   - FUTURE: What we'll consider later
 
 **Template:** `@.claude/templates/prd-template.md`
 
@@ -182,26 +182,26 @@ parallel_research:
 
 **Quality Gate:**
 
-- [ ] Wszystkie requirements mają priorytet MoSCoW
-- [ ] Success metrics są SMART
+- [ ] All requirements have MoSCoW priority
+- [ ] Success metrics are SMART
 - [ ] Scope explicitly defined (IN/OUT/FUTURE)
 - [ ] Min. 3 MUST requirements
 
 ---
 
-### Faza 3: EPIC DISCOVERY
+### Phase 3: EPIC DISCOVERY
 
-**Agent:** ARCHITECT-AGENT
+**Agent:** architect-agent
 
-**Cel:** Identyfikacja epików, mapowanie zależności, ocena ryzyka.
+**Purpose:** Identify epics, map dependencies, assess risks.
 
 #### 3.1 Epic Identification
 
-**Aktywności:**
+**Activities:**
 
-1. Mapowanie PRD requirements → Epics
-2. Definiowanie granic każdego epicu
-3. Walidacja INVEST na poziomie epicu
+1. Map PRD requirements → Epics
+2. Define boundaries for each epic
+3. Validate INVEST at epic level
 
 **Template:** `@.claude/templates/epic-template.md`
 
@@ -209,18 +209,18 @@ parallel_research:
 
 **Checkpoints:**
 
-- [ ] Każdy PRD requirement zmapowany do epicu
-- [ ] Granice epiców są jasne
-- [ ] Brak orphan requirements
+- [ ] Each PRD requirement mapped to epic
+- [ ] Epic boundaries are clear
+- [ ] No orphan requirements
 
 #### 3.2 Dependency Mapping
 
-**Aktywności:**
+**Activities:**
 
-1. Identyfikacja zależności technicznych
-2. Identyfikacja zależności biznesowych
-3. Stworzenie dependency graph
-4. Identyfikacja critical path
+1. Identify technical dependencies
+2. Identify business dependencies
+3. Create dependency graph
+4. Identify critical path
 
 **Template:** `@.claude/templates/epic-dependency-graph.md`
 
@@ -228,25 +228,25 @@ parallel_research:
 
 ```
 Dependency Types:
-- BLOCKS: A musi być przed B
-- ENHANCES: A lepiej działa z B, ale nie wymaga
-- CONFLICTS: A i B nie mogą być równolegle
+- BLOCKS: A must be before B
+- ENHANCES: A works better with B but doesn't require it
+- CONFLICTS: A and B cannot run in parallel
 ```
 
 **Checkpoints:**
 
-- [ ] Wszystkie zależności explicit
-- [ ] Brak circular dependencies
-- [ ] Critical path zidentyfikowany
+- [ ] All dependencies explicit
+- [ ] No circular dependencies
+- [ ] Critical path identified
 
 #### 3.3 Risk Assessment
 
-**Aktywności:**
+**Activities:**
 
-1. Identyfikacja ryzyk technicznych
-2. Identyfikacja ryzyk biznesowych
-3. Propozycje mitygacji
-4. Flagowanie unknowns wymagających research
+1. Identify technical risks
+2. Identify business risks
+3. Propose mitigations
+4. Flag unknowns requiring research
 
 **Template:** `@.claude/templates/risk-registry.md`
 
@@ -254,26 +254,26 @@ Dependency Types:
 
 **Risk Matrix:**
 
-| Prawdopodobieństwo \ Wpływ | Low | Medium | High |
-|---------------------------|-----|--------|------|
-| **High** | 🟡 | 🟠 | 🔴 |
-| **Medium** | 🟢 | 🟡 | 🟠 |
-| **Low** | 🟢 | 🟢 | 🟡 |
+| Probability \ Impact | Low | Medium | High |
+|---------------------|-----|--------|------|
+| **High** | Medium | High | Critical |
+| **Medium** | Low | Medium | High |
+| **Low** | Low | Low | Medium |
 
 ---
 
-### Faza 4: PRIORITIZATION
+### Phase 4: PRIORITIZATION
 
-**Agent:** PRODUCT-OWNER
+**Agent:** product-owner
 
-**Cel:** Priorytetyzacja epików i stworzenie roadmapy.
+**Purpose:** Prioritize epics and create roadmap.
 
 #### 4.1 Value Scoring
 
 **Scoring Framework:**
 
-| Kryterium | Waga | Skala |
-|-----------|------|-------|
+| Criterion | Weight | Scale |
+|-----------|--------|-------|
 | Business Value | 30% | 1-5 |
 | User Impact | 25% | 1-5 |
 | Technical Risk | 20% | 1-5 (inverse) |
@@ -304,69 +304,69 @@ Score = (BV * 0.30) + (UI * 0.25) + ((6-TR) * 0.20) + ((4-DW) * 0.15) + (SA * 0.
 
 **Checkpoints:**
 
-- [ ] NOW bucket ma max 2-3 epiki
-- [ ] Zależności respektowane w sequencing
-- [ ] Jasne milestone definitions
+- [ ] NOW bucket has max 2-3 epics
+- [ ] Dependencies respected in sequencing
+- [ ] Clear milestone definitions
 
 ---
 
-### Faza 5: SPRINT INTAKE
+### Phase 5: SPRINT INTAKE
 
-**Agents:** ARCHITECT-AGENT + PRODUCT-OWNER
+**Agents:** architect-agent + product-owner
 
-**Cel:** Przygotowanie pierwszych epików do sprint planning.
+**Purpose:** Prepare first epics for sprint planning.
 
-#### 5.1 Story Breakdown (ARCHITECT-AGENT)
+#### 5.1 Story Breakdown (architect-agent)
 
-**Aktywności:**
+**Activities:**
 
-1. Rozbicie epiku na stories
-2. Zastosowanie INVEST
-3. Zdefiniowanie AC w Given/When/Then
-4. Estymacja complexity (S/M/L)
+1. Break epic into stories
+2. Apply INVEST criteria
+3. Define AC in Given/When/Then format
+4. Estimate complexity (S/M/L)
 
 **Template:** `@.claude/templates/story-template.md`
 
 **Output:** `docs/2-MANAGEMENT/epics/epic-{N}-stories.md`
 
-#### 5.2 INVEST Validation (PRODUCT-OWNER)
+#### 5.2 INVEST Validation (product-owner)
 
 **INVEST Criteria:**
 
-| Litera | Kryterium | Pytanie kontrolne |
-|--------|-----------|-------------------|
-| **I** | Independent | Czy można rozwijać bez innych stories? |
-| **N** | Negotiable | Czy HOW jest elastyczne? |
-| **V** | Valuable | Czy dostarcza wartość userowi/biznesowi? |
-| **E** | Estimable | Czy można oszacować? |
-| **S** | Small | Czy mieści się w 1-3 sesjach? |
-| **T** | Testable | Czy AC są weryfikowalne? |
+| Letter | Criterion | Control Question |
+|--------|-----------|------------------|
+| **I** | Independent | Can it be developed without other stories? |
+| **N** | Negotiable | Is the HOW flexible? |
+| **V** | Valuable | Does it deliver value to user/business? |
+| **E** | Estimable | Can it be estimated? |
+| **S** | Small | Does it fit in 1-3 sessions? |
+| **T** | Testable | Are AC verifiable? |
 
 **Template:** `@.claude/templates/story-checklist-template.md`
 
 **Output:** `docs/2-MANAGEMENT/reviews/invest-review-epic-{N}.md`
 
 **Decision:**
-- ✅ APPROVED → Confirmation
-- ⚠️ NEEDS_REVISION → Return to Story Breakdown (max 2 iterations)
+- APPROVED → Confirmation
+- NEEDS_REVISION → Return to Story Breakdown (max 2 iterations)
 
 ---
 
-### Faza 6: CONFIRMATION
+### Phase 6: CONFIRMATION
 
-**Agent:** ORCHESTRATOR
+**Agent:** orchestrator
 
-**Cel:** Finalna weryfikacja i handoff do EPIC-WORKFLOW.
+**Purpose:** Final verification and handoff to EPIC-WORKFLOW.
 
-**Aktywności:**
+**Activities:**
 
-1. Weryfikacja wszystkich artefaktów
-2. Potwierdzenie alignment ze stakeholderami
-3. Przygotowanie handoff
+1. Verify all artifacts
+2. Confirm stakeholder alignment
+3. Prepare handoff
 
 **Output:** `docs/2-MANAGEMENT/planning-summary.md`
 
-**Planning Summary zawiera:**
+**Planning Summary includes:**
 
 ```markdown
 ## Planning Summary
@@ -391,12 +391,12 @@ Score = (BV * 0.30) + (UI * 0.25) + ((6-TR) * 0.20) + ((4-DW) * 0.15) + (SA * 0.
 ```
 
 **Next Workflow:**
-- → EPIC-WORKFLOW (Phase 2: Story Breakdown) dla implementacji
-- lub → new-project.yaml (scope_validation) dla full validation
+- → EPIC-WORKFLOW (Phase 2: Story Breakdown) for implementation
+- or → new-project.yaml (scope_validation) for full validation
 
 ---
 
-## Quality Gates Między Fazami
+## Quality Gates Between Phases
 
 ```
 CONTEXT ──────────────────────► OUTCOMES
@@ -424,10 +424,10 @@ SPRINT INTAKE ────────────────► CONFIRMATION
 
 ---
 
-## Artefakty
+## Artifacts
 
-| Artefakt | Ścieżka | Faza |
-|----------|---------|------|
+| Artifact | Path | Phase |
+|----------|------|-------|
 | Planning Context | `docs/0-DISCOVERY/planning-context.md` | Context |
 | PRD | `docs/1-BASELINE/product/prd.md` | Outcomes |
 | Success Metrics | `docs/1-BASELINE/product/success-metrics.md` | Outcomes |
@@ -444,16 +444,16 @@ SPRINT INTAKE ────────────────► CONFIRMATION
 
 ## Error Recovery
 
-| Błąd | Akcja | Komunikat |
-|------|-------|-----------|
-| Clarity za niska | Return to DISCOVERY | "Potrzeba więcej informacji" |
-| Circular dependency | Escalate to user | "Wykryto cykliczną zależność" |
-| Scope creep | Pause | "Wykryto rozszerzenie scope - potwierdzenie wymagane" |
-| INVEST fail x2 | Escalate | "Stories nie spełniają INVEST po 2 iteracjach" |
+| Error | Action | Message |
+|-------|--------|---------|
+| Clarity too low | Return to DISCOVERY | "Need more information" |
+| Circular dependency | Escalate to user | "Circular dependency detected" |
+| Scope creep | Pause | "Scope expansion detected - confirmation required" |
+| INVEST fail x2 | Escalate | "Stories don't meet INVEST after 2 iterations" |
 
 ---
 
-## Połączenie z Innymi Workflows
+## Integration with Other Workflows
 
 ### Input: DISCOVERY-FLOW
 
@@ -475,9 +475,9 @@ epic-{N}-stories.md ──────────► EPIC-WORKFLOW (Phase 2+)
 
 ---
 
-## Przykład Użycia
+## Usage Example
 
-### Tryb PORTFOLIO (Nowy Projekt)
+### PORTFOLIO Mode (New Project)
 
 ```bash
 # Start
@@ -489,21 +489,21 @@ ORCHESTRATOR: "Starting PLANNING-FLOW in PORTFOLIO mode"
 → Create planning-context.md
 
 # Phase 2
-→ PM-AGENT creates PRD with MoSCoW priorities
+→ pm-agent creates PRD with MoSCoW priorities
 → Define SMART success metrics
 
 # Phase 3
-→ ARCHITECT-AGENT identifies 5 epics
+→ architect-agent identifies 5 epics
 → Maps dependencies (Epic-2 blocks Epic-4)
 → Assesses risks (High: third-party API integration)
 
 # Phase 4
-→ PRODUCT-OWNER scores epics
+→ product-owner scores epics
 → Creates roadmap: NOW=[Epic-1, Epic-2], NEXT=[Epic-3, Epic-5], LATER=[Epic-4]
 
 # Phase 5
-→ ARCHITECT-AGENT breaks Epic-1 into 6 stories
-→ PRODUCT-OWNER validates INVEST
+→ architect-agent breaks Epic-1 into 6 stories
+→ product-owner validates INVEST
 
 # Phase 6
 → Planning summary created
@@ -512,7 +512,7 @@ ORCHESTRATOR: "Starting PLANNING-FLOW in PORTFOLIO mode"
 
 ---
 
-**Powiązane:**
+**Related:**
 - @.claude/workflows/documentation/DISCOVERY-FLOW.md
 - @.claude/workflows/documentation/EPIC-WORKFLOW.md
 - @.claude/agents/PM-AGENT.md

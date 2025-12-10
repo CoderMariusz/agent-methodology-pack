@@ -20,7 +20,7 @@ modes:
       - "new_project"
       - "major_pivot"
       - "annual_planning"
-    phases: [context, outcomes, epic_discovery, prioritization, sprint_intake, confirmation]
+    phases: [context, outcomes, prd_validation, epic_discovery, prioritization, sprint_intake, confirmation]
 
   - id: epic_scoped
     description: "Single epic deep-dive - feature expansion"
@@ -28,7 +28,7 @@ modes:
       - "new_feature"
       - "epic_expansion"
     phases: [context, epic_discovery, prioritization, confirmation]
-    skip_phases: [outcomes]
+    skip_phases: [outcomes, prd_validation]
 
   - id: adjustment
     description: "Quick priority adjustment - mid-sprint changes"
@@ -37,7 +37,7 @@ modes:
       - "scope_adjustment"
       - "resource_change"
     phases: [context, prioritization, confirmation]
-    skip_phases: [outcomes, epic_discovery]
+    skip_phases: [outcomes, prd_validation, epic_discovery]
 
 # Input sources - flexible, user can add more
 inputs:
@@ -72,7 +72,7 @@ phases:
   - id: context
     name: "Context Gathering"
     description: "Collect and validate all inputs for planning"
-    agent: orchestrator
+    agent: ORCHESTRATOR
     type: coordination
 
     activities:
@@ -84,7 +84,7 @@ phases:
     parallel_research:
       enabled: true
       agents:
-        - research-agent
+        - RESEARCH-AGENT
       triggers:
         - "technology_unknown"
         - "market_gap"
@@ -104,8 +104,23 @@ phases:
       - "No critical unknowns blocking"
 
     gate:
-      pass: outcomes
-      fail: return_to_discovery
+      id: CONTEXT_GATHERED
+      type: quality_gate
+      enforcer: ORCHESTRATOR
+      criteria:
+        - "All required inputs available"
+        - "Clarity score >= 60%"
+        - "No critical unknowns blocking"
+      on_pass: outcomes
+      on_fail:
+        action: return_to_phase
+        target: discovery_flow
+        message: "Need more information - returning to DISCOVERY-FLOW"
+      block_message: |
+        [STOP] Cannot proceed to OUTCOMES:
+        - Required inputs: {status}
+        - Clarity score: {score}%
+        - Critical unknowns: {count}
 
     on_blocked:
       action: trigger_discovery_agent
@@ -118,7 +133,7 @@ phases:
   - id: outcomes
     name: "Outcomes & PRD"
     description: "Define measurable outcomes and create/update PRD"
-    agent: pm-agent
+    agent: PM-AGENT
     type: prd_creation
 
     activities:
@@ -146,16 +161,76 @@ phases:
       - "At least 3 MUST requirements defined"
 
     gate:
-      pass: epic_discovery
-      needs_revision:
+      id: PRD_COMPLETE
+      type: quality_gate
+      enforcer: PM-AGENT
+      criteria:
+        - "All requirements have MoSCoW priority"
+        - "Success metrics are SMART"
+        - "Scope explicitly defined (IN/OUT/FUTURE)"
+        - "At least 3 MUST requirements defined"
+      on_pass: prd_validation
+      on_fail:
         action: iterate
+        target: outcomes
         max_iterations: 2
+        message: "PRD incomplete - needs revision"
+      block_message: |
+        [STOP] Cannot proceed to PRD VALIDATION:
+        - MoSCoW priorities: {status}
+        - SMART metrics: {status}
+        - Scope definition: {status}
+        - MUST requirements: {count}/3
 
     quality_criteria:
       - name: requirement_completeness
         check: "Each FR has: description, priority, AC, traces"
       - name: nfr_coverage
         check: "Performance, Security, Scalability addressed"
+
+  # ═══════════════════════════════════════════════════════════════════
+  # PHASE 2b: PRD VALIDATION
+  # ═══════════════════════════════════════════════════════════════════
+  - id: prd_validation
+    name: "PRD Validation"
+    description: "Product Owner validates PRD before epic discovery"
+    agent: PRODUCT-OWNER
+    type: approval
+
+    activities:
+      - "Review PRD completeness"
+      - "Validate business alignment"
+      - "Approve scope boundaries"
+      - "Sign off on success metrics"
+
+    input:
+      context_refs:
+        - "@docs/1-BASELINE/product/prd.md"
+        - "@docs/1-BASELINE/product/success-metrics.md"
+
+    checkpoint:
+      - "PRD business-aligned"
+      - "Scope approved"
+      - "Metrics realistic"
+
+    gate:
+      id: PRD_VALIDATED
+      type: approval_gate
+      enforcer: PRODUCT-OWNER
+      criteria:
+        - "PRD reviewed and approved"
+        - "Business alignment confirmed"
+        - "Scope boundaries accepted"
+      on_pass: epic_discovery
+      on_fail:
+        action: return_to_phase
+        target: outcomes
+        message: "PRD needs revision based on PO feedback"
+      block_message: |
+        [STOP] Cannot proceed to EPIC DISCOVERY:
+        - PRD approval: {status}
+        - Business alignment: {status}
+        - Scope acceptance: {status}
 
   # ═══════════════════════════════════════════════════════════════════
   # PHASE 3: EPIC DISCOVERY
@@ -167,7 +242,7 @@ phases:
     sub_phases:
 
       - id: epic_identification
-        agent: architect-agent
+        agent: ARCHITECT-AGENT
         type: epic_breakdown
         description: "Identify and structure epics from PRD"
 
@@ -191,7 +266,7 @@ phases:
           - "No orphan requirements"
 
       - id: dependency_mapping
-        agent: architect-agent
+        agent: ARCHITECT-AGENT
         type: dependency_analysis
         description: "Map dependencies between epics"
 
@@ -216,7 +291,7 @@ phases:
           - "Critical path identified"
 
       - id: risk_assessment
-        agent: architect-agent
+        agent: ARCHITECT-AGENT
         type: risk_analysis
         description: "Assess risks per epic"
 
@@ -242,11 +317,31 @@ phases:
           - "Research spikes identified for unknowns"
 
     gate:
-      pass: prioritization
-      needs_research:
+      id: ARCHITECTURE_COMPLETE
+      type: quality_gate
+      enforcer: ARCHITECT-AGENT
+      criteria:
+        - "Each PRD requirement mapped to epic"
+        - "Epic boundaries are clear"
+        - "All dependencies explicit"
+        - "No circular dependencies"
+        - "Critical path identified"
+        - "Each epic has risk assessment"
+        - "High risks have mitigation plans"
+      on_pass: prioritization
+      on_fail:
         action: trigger_research
-        agent: research-agent
-        return_to: epic_discovery.risk_assessment
+        target: epic_discovery.risk_assessment
+        agent: RESEARCH-AGENT
+        message: "Architecture incomplete - research needed for unknowns"
+      block_message: |
+        [STOP] Cannot proceed to PRIORITIZATION:
+        - PRD mapping: {status}
+        - Epic boundaries: {status}
+        - Dependencies: {status}
+        - Circular deps: {count}
+        - Critical path: {status}
+        - Risk assessment: {status}
 
   # ═══════════════════════════════════════════════════════════════════
   # PHASE 4: PRIORITIZATION
@@ -258,7 +353,7 @@ phases:
     sub_phases:
 
       - id: value_scoring
-        agent: product-owner
+        agent: PRODUCT-OWNER
         type: prioritization
         description: "Score epics by business value"
 
@@ -283,7 +378,7 @@ phases:
           deliverable: "docs/2-MANAGEMENT/epics/prioritized-backlog.md"
 
       - id: roadmap_creation
-        agent: product-owner
+        agent: PRODUCT-OWNER
         type: roadmap
         description: "Create NOW/NEXT/LATER roadmap"
 
@@ -309,12 +404,28 @@ phases:
           - "Clear milestone definitions"
 
     gate:
-      pass: sprint_intake
-      needs_revision:
+      id: STORIES_CREATED
+      type: quality_gate
+      enforcer: ARCHITECT-AGENT
+      criteria:
+        - "NOW bucket has max 2-3 epics"
+        - "Dependencies respected in sequencing"
+        - "Clear milestone definitions"
+        - "Roadmap complete"
+      on_pass: sprint_intake
+      on_fail:
         action: rebalance
+        target: prioritization.roadmap_creation
         triggers:
           - "NOW bucket > 3 epics"
           - "dependency_violation"
+        message: "Prioritization needs rebalancing"
+      block_message: |
+        [STOP] Cannot proceed to SPRINT INTAKE:
+        - NOW bucket epics: {count}/3
+        - Dependency violations: {count}
+        - Milestones defined: {status}
+        - Roadmap status: {status}
 
   # ═══════════════════════════════════════════════════════════════════
   # PHASE 5: SPRINT INTAKE
@@ -326,7 +437,7 @@ phases:
     sub_phases:
 
       - id: story_breakdown
-        agent: architect-agent
+        agent: ARCHITECT-AGENT
         type: story_creation
         description: "Break NOW epics into INVEST stories"
 
@@ -353,7 +464,7 @@ phases:
           - "Complexity estimated"
 
       - id: invest_validation
-        agent: product-owner
+        agent: PRODUCT-OWNER
         type: story_review
         description: "Validate stories against INVEST and PRD"
 
@@ -373,11 +484,29 @@ phases:
         output:
           deliverable: "docs/2-MANAGEMENT/reviews/invest-review-epic-{N}.md"
 
-        decision:
-          approved: confirmation
-          needs_revision:
-            return_to: sprint_intake.story_breakdown
+        gate:
+          id: STORIES_VALIDATED
+          type: approval_gate
+          enforcer: PRODUCT-OWNER
+          criteria:
+            - "All stories pass INVEST"
+            - "AC in Given/When/Then format"
+            - "PRD traceability verified"
+            - "Scope alignment confirmed"
+            - "AC testability validated"
+          on_pass: confirmation
+          on_fail:
+            action: return_to_phase
+            target: sprint_intake.story_breakdown
             max_iterations: 2
+            message: "Stories need revision based on PO review"
+          block_message: |
+            [STOP] Cannot proceed to CONFIRMATION:
+            - INVEST compliance: {status}
+            - AC format: {status}
+            - PRD traceability: {status}
+            - Scope alignment: {status}
+            - AC testability: {status}
 
   # ═══════════════════════════════════════════════════════════════════
   # PHASE 6: CONFIRMATION
@@ -385,7 +514,7 @@ phases:
   - id: confirmation
     name: "Planning Confirmation"
     description: "Final review and handoff"
-    agent: orchestrator
+    agent: ORCHESTRATOR
     type: confirmation
 
     activities:
@@ -422,30 +551,82 @@ phases:
         start_at: "Phase 2: Story Breakdown"
 
 # ═══════════════════════════════════════════════════════════════════
-# QUALITY GATES
+# QUALITY GATES SUMMARY
 # ═══════════════════════════════════════════════════════════════════
 quality_gates:
-  context_to_outcomes:
-    - clarity_score >= 60
-    - no_critical_unknowns
+  # Context phase gate
+  CONTEXT_GATHERED:
+    phase: context
+    enforcer: ORCHESTRATOR
+    type: quality_gate
+    blocker: "Cannot proceed to outcomes definition"
+    criteria:
+      - "All required inputs available"
+      - "Clarity score >= 60%"
+      - "No critical unknowns blocking"
 
-  outcomes_to_epic_discovery:
-    - prd_complete
-    - requirements_prioritized
-    - scope_defined
+  # Outcomes/PRD phase gate
+  PRD_COMPLETE:
+    phase: outcomes
+    enforcer: PM-AGENT
+    type: quality_gate
+    blocker: "Cannot proceed to PRD validation"
+    criteria:
+      - "All requirements have MoSCoW priority"
+      - "Success metrics are SMART"
+      - "Scope explicitly defined"
+      - "At least 3 MUST requirements"
 
-  epic_discovery_to_prioritization:
-    - epics_identified
-    - dependencies_mapped
-    - risks_assessed
+  # PRD validation gate
+  PRD_VALIDATED:
+    phase: prd_validation
+    enforcer: PRODUCT-OWNER
+    type: approval_gate
+    blocker: "Cannot proceed to epic discovery"
+    criteria:
+      - "PRD reviewed and approved"
+      - "Business alignment confirmed"
+      - "Scope boundaries accepted"
 
-  prioritization_to_sprint_intake:
-    - roadmap_created
-    - now_bucket_defined
+  # Epic discovery phase gate
+  ARCHITECTURE_COMPLETE:
+    phase: epic_discovery
+    enforcer: ARCHITECT-AGENT
+    type: quality_gate
+    blocker: "Cannot proceed to prioritization"
+    criteria:
+      - "Each PRD requirement mapped to epic"
+      - "Epic boundaries are clear"
+      - "All dependencies explicit"
+      - "No circular dependencies"
+      - "Critical path identified"
+      - "Each epic has risk assessment"
+      - "High risks have mitigation plans"
 
-  sprint_intake_to_confirmation:
-    - stories_invest_compliant
-    - ac_testable
+  # Prioritization phase gate
+  STORIES_CREATED:
+    phase: prioritization
+    enforcer: ARCHITECT-AGENT
+    type: quality_gate
+    blocker: "Cannot proceed to sprint intake"
+    criteria:
+      - "NOW bucket has max 2-3 epics"
+      - "Dependencies respected in sequencing"
+      - "Clear milestone definitions"
+      - "Roadmap complete"
+
+  # Sprint intake phase gate
+  STORIES_VALIDATED:
+    phase: sprint_intake.invest_validation
+    enforcer: PRODUCT-OWNER
+    type: approval_gate
+    blocker: "Cannot proceed to confirmation"
+    criteria:
+      - "All stories pass INVEST"
+      - "AC in Given/When/Then format"
+      - "PRD traceability verified"
+      - "Scope alignment confirmed"
+      - "AC testability validated"
 
 # ═══════════════════════════════════════════════════════════════════
 # ERROR HANDLING
@@ -453,20 +634,62 @@ quality_gates:
 on_error:
   log_to: "@.claude/logs/workflows/"
   retry_count: 1
-  escalate_to: user
+  escalation:
+    context_phase: DISCOVERY-AGENT
+    outcomes_phase: PM-AGENT
+    epic_discovery_phase: ARCHITECT-AGENT
+    prioritization_phase: PRODUCT-OWNER
+    sprint_intake_phase: ARCHITECT-AGENT
+    default: ORCHESTRATOR
 
 error_recovery:
   clarity_too_low:
-    action: return_to_discovery
-    message: "Need more information - returning to DISCOVERY-FLOW"
+    actions:
+      - "Request more context from user"
+      - "Trigger discovery-agent for gap filling"
+      - "Return to DISCOVERY-FLOW if critical gaps"
+    if_still_blocked:
+      - "Escalate to user"
+      - "Document blocking issues"
+      - "Pause workflow"
 
   circular_dependency:
-    action: escalate
-    message: "Circular dependency detected - user decision required"
+    actions:
+      - "Identify circular dependency chain"
+      - "Propose dependency resolution options"
+      - "Escalate to architect-agent"
+    if_still_blocked:
+      - "Escalate to user for decision"
+      - "Document architecture constraint"
 
   scope_creep_detected:
-    action: pause
-    message: "Scope expansion detected - confirm with user before proceeding"
+    actions:
+      - "Identify new scope items"
+      - "Categorize as IN/OUT/FUTURE"
+      - "Pause for user confirmation"
+    if_still_blocked:
+      - "Log scope change request"
+      - "Return to outcomes phase if significant"
+
+  prd_validation_failed:
+    actions:
+      - "Document PO feedback"
+      - "Return to outcomes phase"
+      - "Iterate with PM-AGENT"
+    max_iterations: 2
+    if_still_blocked:
+      - "Escalate to user"
+      - "Request stakeholder alignment session"
+
+  stories_rejected:
+    actions:
+      - "Document rejection reasons"
+      - "Return to story_breakdown"
+      - "Re-apply INVEST criteria"
+    max_iterations: 2
+    if_still_blocked:
+      - "Escalate to architect-agent"
+      - "Consider epic restructuring"
 
 # ═══════════════════════════════════════════════════════════════════
 # ARTIFACTS
