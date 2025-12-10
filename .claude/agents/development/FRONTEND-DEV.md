@@ -16,6 +16,9 @@ skills:
     - react-performance
     - tailwind-patterns
     - nextjs-app-router
+    - nextjs-server-components
+    - nextjs-middleware
+    - nextjs-server-actions
     - accessibility-checklist
     - ui-ux-patterns
 ---

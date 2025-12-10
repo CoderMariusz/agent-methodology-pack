@@ -2,8 +2,8 @@
 # Auto-maintained by SKILL-CREATOR and SKILL-VALIDATOR agents
 
 metadata:
-  version: 1.3.0
-  total_skills: 48
+  version: 1.4.0
+  total_skills: 51
   last_full_audit: 2025-01-10
   next_scheduled_review: 2025-01-24
   max_skills_per_task: 3
@@ -140,6 +140,30 @@ generic:
     confidence: high
     status: active
     tags: [tailwind, css, styling]
+
+  nextjs-server-components:
+    version: 1.0.0
+    file: generic/nextjs-server-components.md
+    tokens: 450
+    confidence: high
+    status: active
+    tags: [nextjs, react, rsc, server-components, frontend]
+
+  nextjs-middleware:
+    version: 1.0.0
+    file: generic/nextjs-middleware.md
+    tokens: 400
+    confidence: high
+    status: active
+    tags: [nextjs, middleware, auth, routing, frontend]
+
+  nextjs-server-actions:
+    version: 1.0.0
+    file: generic/nextjs-server-actions.md
+    tokens: 450
+    confidence: high
+    status: active
+    tags: [nextjs, react, forms, server-actions, frontend]
 
   # ---------------------------------------------------------------------------
   # TYPESCRIPT (4 skills)
@@ -480,6 +504,9 @@ skill_index:
   nextjs-app-router: "Next.js App Router patterns"
   nextjs-data-fetching: "Server-side data fetching and caching"
   nextjs-api-routes: "API route handlers in Next.js"
+  nextjs-server-components: "RSC patterns, 'use client' directive, composition"
+  nextjs-middleware: "Auth redirects, headers, matcher patterns"
+  nextjs-server-actions: "Form handling, Zod validation, useFormState"
   tailwind-patterns: "Tailwind CSS utility patterns"
 
   # TypeScript
