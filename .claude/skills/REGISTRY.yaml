@@ -2,8 +2,8 @@
 # Auto-maintained by SKILL-CREATOR and SKILL-VALIDATOR agents
 
 metadata:
-  version: 1.2.0
-  total_skills: 45
+  version: 1.3.0
+  total_skills: 48
   last_full_audit: 2025-01-10
   next_scheduled_review: 2025-01-24
   max_skills_per_task: 3
@@ -352,7 +352,7 @@ generic:
     tags: [ui, ux, design, frontend]
 
   # ---------------------------------------------------------------------------
-  # PLANNING & PROCESS (4 skills)
+  # PLANNING & PROCESS (7 skills)
   # ---------------------------------------------------------------------------
   invest-stories:
     version: 1.0.0
@@ -385,6 +385,30 @@ generic:
     confidence: high
     status: active
     tags: [architecture, adr, decisions, documentation]
+
+  requirements-clarity-scoring:
+    version: 1.0.0
+    file: generic/requirements-clarity-scoring.md
+    tokens: 350
+    confidence: high
+    status: active
+    tags: [requirements, discovery, clarity, planning]
+
+  qa-bug-reporting:
+    version: 1.0.0
+    file: generic/qa-bug-reporting.md
+    tokens: 400
+    confidence: high
+    status: active
+    tags: [qa, bugs, testing, reporting]
+
+  agile-retrospective:
+    version: 1.0.0
+    file: generic/agile-retrospective.md
+    tokens: 300
+    confidence: high
+    status: active
+    tags: [agile, retrospective, scrum, planning]
 
   # ---------------------------------------------------------------------------
   # SKILLS META (3 skills) - For SKILL-CREATOR and SKILL-VALIDATOR
@@ -499,6 +523,9 @@ skill_index:
   discovery-interview-patterns: "Requirements gathering interview patterns"
   prd-structure: "PRD structure with MoSCoW and requirements"
   architecture-adr: "Architecture Decision Record format"
+  requirements-clarity-scoring: "Clarity scoring (1-5) for requirements gathering"
+  qa-bug-reporting: "Bug report structure and severity levels"
+  agile-retrospective: "Start/Stop/Continue retrospective format"
 
   # Skills Meta
   research-source-evaluation: "How to find and verify authoritative sources"
