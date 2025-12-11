@@ -62,7 +62,12 @@
       "EnterPlanMode",
       "ExitPlanMode",
       "mcp__ide__getDiagnostics",
-      "mcp__ide__executeCode"
+      "mcp__ide__executeCode",
+      "Bash(bash scripts/cache-test.sh:*)",
+      "Bash(OPENAI_API_KEY=YOUR_OPENAI_API_KEY python3 cache_manager.py)",
+      "Bash(OPENAI_API_KEY=YOUR_OPENAI_API_KEY python3 .claude/cache/cache_manager.py)",
+      "Bash(OPENAI_API_KEY=YOUR_OPENAI_API_KEY python3 .claude/cache/semantic_cache.py)",
+      "Bash(bash:*)"
     ],
     "deny": [],
     "ask": []
