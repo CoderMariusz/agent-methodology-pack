@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "agent-cache": {
+      "command": "python",
+      "args": [
+        "-u",
+        "C:/Users/Mariusz K/Documents/Programowanie/Agents/agent-methodology-pack/.claude/mcp-servers/cache-server/server.py"
+      ],
+      "env": {
+        "CACHE_DIR": "C:/Users/Mariusz K/Documents/Programowanie/Agents/agent-methodology-pack/.claude/cache"
+      }
+    }
+  }
+}
