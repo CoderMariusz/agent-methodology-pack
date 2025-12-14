@@ -1,0 +1,111 @@
+{
+  "name": "agent-cache",
+  "version": "1.0.0",
+  "description": "Universal cache for agent task results - 60-80% cost savings",
+  "schema_version": "1.0",
+  "command": "python",
+  "args": ["-u", "server.py"],
+  "env": {
+    "PYTHONUNBUFFERED": "1",
+    "CACHE_DIR": "../../cache"
+  },
+  "tools": [
+    {
+      "name": "cache_get",
+      "description": "Retrieve cached result for a task. Returns null if not found. Always check cache before executing expensive operations.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Cache key in format: agent:name:task:type:hash (e.g., agent:research:task:analysis:abc123def)"
+          }
+        },
+        "required": ["key"]
+      }
+    },
+    {
+      "name": "cache_set",
+      "description": "Store task result in cache for reuse. Call after executing expensive operations with cacheable results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Cache key (must match format: agent:name:task:type:hash)"
+          },
+          "value": {
+            "type": "object",
+            "description": "Result to cache (any JSON-serializable dict)"
+          },
+          "ttl": {
+            "type": "integer",
+            "description": "Time to live in seconds (default 3600 = 1 hour)",
+            "default": 3600
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Optional metadata (agent, quality_score, tags, etc.)",
+            "default": {}
+          }
+        },
+        "required": ["key", "value"]
+      }
+    },
+    {
+      "name": "cache_stats",
+      "description": "Get cache performance statistics - hit rates, tokens saved, cost savings",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "cache_clear",
+      "description": "Clear cache entries matching pattern. Use '*' for all. Use with caution - this invalidates cached results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Glob pattern for keys to clear (default '*' = all)",
+            "default": "*"
+          }
+        }
+      }
+    },
+    {
+      "name": "generate_key",
+      "description": "Helper to generate consistent cache keys for agents",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_name": {
+            "type": "string",
+            "description": "Agent name (research, test, backend, etc.)"
+          },
+          "task_type": {
+            "type": "string",
+            "description": "Task type (analysis, testing, boilerplate, etc.)"
+          },
+          "content": {
+            "type": "string",
+            "description": "Task content/query to hash for uniqueness"
+          }
+        },
+        "required": ["agent_name", "task_type", "content"]
+      }
+    }
+  ],
+  "metadata": {
+    "author": "Agent Methodology Pack",
+    "license": "MIT",
+    "repository": "https://github.com/your-repo/agent-methodology-pack",
+    "created": "2025-12-14",
+    "expected_savings": {
+      "hit_rate_target": "50-70%",
+      "cost_reduction": "60-80%",
+      "monthly_cost_reduction_gbp": "£240-320 (from £400 to £85-180)"
+    }
+  }
+}

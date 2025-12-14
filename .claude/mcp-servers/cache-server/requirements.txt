@@ -1,0 +1,6 @@
+# MCP Cache Server Dependencies
+# No external dependencies - uses only Python stdlib + existing cache_manager.py
+
+# Note: cache_manager.py requires these (should already be installed):
+# - No external deps for basic cache functionality
+# - Optional: chromadb for semantic cache (Phase 4, not required for MCP)
