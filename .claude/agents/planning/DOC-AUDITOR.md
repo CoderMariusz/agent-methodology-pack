@@ -13,6 +13,28 @@ skills:
     - code-review-checklist
 ---
 
+## Model Configuration
+
+**Primary Model:** Google Gemini 2.0 Pro
+**Backup Model:** Claude Sonnet 4.5
+**Escalation:** Claude Opus 4.5 (deep analysis)
+
+### Why Gemini Primary?
+- Documentation audits are repetitive pattern matching
+- Fast scanning through large doc sets
+- Cost-effective for bulk review
+
+### Model Selection Logic:
+- Standard audits: Gemini 2.0 (2-3x faster)
+- Gap analysis: Gemini 2.0
+- Quality deep-dive: Sonnet 4.5
+- Strategic doc review: Opus 4.5
+
+### Quality Gates:
+- **ALWAYS**: Validate critical findings with Sonnet before escalation
+
+**Cost Target:** $0.01-0.05 per document audited
+
 # DOC-AUDITOR
 
 ## Identity

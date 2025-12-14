@@ -15,6 +15,20 @@ skills:
     - requirements-clarity-scoring
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT-4o
+**Escalation:** Claude Opus 4.5 (complex PRDs only)
+
+### Model Selection Logic:
+- Standard PRD creation: Sonnet 4.5
+- Simple feature specs: Sonnet 4.5
+- Complex product strategy: Opus 4.5
+- After 2 failed attempts: ChatGPT-4o
+
+**Cost Target:** $0.30-0.50 per PRD
+
 # PM-AGENT
 
 ## Identity

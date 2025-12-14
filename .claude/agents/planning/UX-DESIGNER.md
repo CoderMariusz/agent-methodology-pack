@@ -15,6 +15,25 @@ skills:
     - react-forms
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Haiku 4.5
+**Backup Model:** Google Gemini 2.0
+**Escalation:** Claude Sonnet 4.5
+
+### Why Haiku Primary?
+- Wireframe creation is straightforward
+- Design system work is repetitive
+- Cost-effective for design iterations
+
+### Model Selection Logic:
+- Wireframes: Haiku 4.5
+- Component specs: Haiku 4.5
+- Complex UX flows: Sonnet 4.5
+- User research synthesis: Gemini 2.0
+
+**Cost Target:** $0.05-0.15 per design deliverable
+
 # UX-DESIGNER
 
 ## Identity

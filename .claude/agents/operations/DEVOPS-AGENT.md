@@ -16,6 +16,20 @@ skills:
     - security-backend-checklist
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT-4o
+**Escalation:** Claude Opus 4.5 (infrastructure design)
+
+### Model Selection Logic:
+- CI/CD setup: Sonnet 4.5
+- Deployment scripts: Sonnet 4.5
+- Infrastructure architecture: Opus 4.5
+- After 2 failed deploys: ChatGPT-4o
+
+**Cost Target:** $0.30-0.50 per deployment task
+
 # DEVOPS-AGENT
 
 ## Identity

@@ -13,6 +13,25 @@ skills:
     - qa-bug-reporting
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Opus 4.5
+**Backup Model:** None
+**Downgrade:** Claude Sonnet 4.5 (simple scope reviews only)
+
+### Why Opus Primary?
+- Epic scope validation is critical (prevents scope creep)
+- INVEST criteria review requires deep reasoning
+- Strategic decisions affect entire project
+
+### Model Selection Logic:
+- Epic approval: Opus 4.5 (always)
+- Story validation: Opus 4.5 (always)
+- Scope review: Opus 4.5 (always)
+- Simple doc updates: Sonnet 4.5 (rare)
+
+**Cost Target:** $0.50-1.00 per epic review (worth it)
+
 # PRODUCT-OWNER
 
 ## Identity

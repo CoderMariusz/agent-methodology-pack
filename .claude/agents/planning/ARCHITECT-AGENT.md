@@ -14,6 +14,64 @@ skills:
     - security-backend-checklist
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Opus 4.5 (ALWAYS)
+**Backup Model:** None (Opus is highest tier)
+**Downgrade:** Claude Sonnet 4.5 (simple fixes only)
+
+### Why Opus Always?
+- Architecture decisions have long-term impact (months/years)
+- ADR quality affects entire team and codebase
+- Security architecture errors can cost $1M+ in breaches
+- Epic breakdown quality determines project success
+- Cost of Opus ($1-2 per ADR) << cost of wrong architecture
+
+### Model Selection Logic:
+- **ADR creation**: Opus 4.5 (always)
+- **Epic breakdown**: Opus 4.5 (always)
+- **System design**: Opus 4.5 (always)
+- **Architecture review**: Opus 4.5 (always)
+- **Security architecture**: Opus 4.5 (critical)
+- **Simple architecture updates**: Sonnet 4.5 (rare exception)
+
+### Never Downgrade For:
+- Security-critical architecture
+- Database schema design
+- API contract design
+- Epic breakdown into stories
+- ADR creation
+- System integration patterns
+
+### Only Downgrade To Sonnet For:
+- Updating existing ADR with minor clarifications
+- Fixing typos in architecture docs
+- Generating diagrams from existing architecture
+- Formatting architecture documentation
+
+### Quality Requirements:
+- All ADRs reviewed by PRODUCT-OWNER (Opus)
+- Epic breakdown validated by PRODUCT-OWNER
+- Architecture reviewed by SENIOR-DEV (Opus)
+- Security architecture reviewed by security expert
+
+### Cost-Benefit Analysis:
+```
+Cost per ADR: $1.14 (Opus)
+vs
+Cost of wrong architecture:
+  - Team velocity: -30% for 6 months
+  - Rewrite cost: $50K-200K
+  - Security breach: $1M+
+  - Technical debt: Months of refactoring
+
+ROI: Using Opus for architecture saves 100x-1000x its cost
+```
+
+**Cost Target:** $1-2 per ADR (acceptable for quality)
+**Success Rate:** 98%+ (highest quality decisions)
+**When to use:** Epic-level decisions, ADRs, system design, security
+
 # ARCHITECT-AGENT
 
 ## Identity

@@ -14,6 +14,19 @@ skills:
     - version-changelog-patterns
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** Claude Haiku 4.5
+**Escalation:** Claude Opus 4.5 (complex validation)
+
+### Model Selection Logic:
+- Standard validation: Sonnet 4.5
+- Quick syntax checks: Haiku 4.5
+- Deep validation: Opus 4.5
+
+**Cost Target:** $0.10-0.30 per validation
+
 # SKILL-VALIDATOR Agent
 
 ## Identity
@@ -85,7 +98,7 @@ You ensure skills contain accurate, up-to-date, verified knowledge. You are the 
 ### Source Check
 | Source | Status | Notes |
 |--------|--------|-------|
-| [url] | ✅/⚠️/❌ | [details] |
+| [url] | ✓/✓/X | [details] |
 
 ### Freshness
 - Current version: X.Y.Z
@@ -94,15 +107,15 @@ You ensure skills contain accurate, up-to-date, verified knowledge. You are the 
 
 ### Size
 - Tokens: XXX / 1500
-- Status: ✅ OK / ⚠️ Near / ❌ Over
+- Status: ✓ OK / X Near / X Over
 
 ### REGISTRY Update
-\`\`\`yaml
+```yaml
 [skill-name]:
   status: [new-status]
   last_validated: [today]
   next_review: [+14 days]
-\`\`\`
+```
 ```
 
 ## Review Cycle

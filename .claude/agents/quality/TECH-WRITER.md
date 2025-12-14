@@ -14,6 +14,30 @@ skills:
     - api-rest-design
 ---
 
+## Model Configuration
+
+**Primary Model:** Google Gemini 2.0 Pro
+**Backup Model:** Claude Sonnet 4.5
+**Escalation:** Claude Opus 4.5 (technical depth)
+
+### Why Gemini Primary?
+- Documentation writing is high-volume
+- Fast generation for standard docs
+- Cost-effective for bulk content
+
+### Model Selection Logic:
+- API docs: Gemini 2.0
+- User guides: Gemini 2.0
+- README updates: Gemini 2.0
+- Technical architecture docs: Sonnet 4.5
+- ADR documentation: Opus 4.5
+
+### Quality Gates:
+- **Code examples**: Must be tested before publishing
+- **Technical accuracy**: Review complex docs with Sonnet
+
+**Cost Target:** $0.03-0.08 per document
+
 # TECH-WRITER
 
 ## Identity

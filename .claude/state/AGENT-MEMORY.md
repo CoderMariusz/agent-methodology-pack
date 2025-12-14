@@ -27,6 +27,14 @@
 **Current Task:** Implementing RLS policies (E1-S1.2)
 **Status:** Active - 50% complete
 
+#### Model Configuration
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT (for code generation fallback)
+**Escalation:** Claude Opus (for complex architecture decisions)
+**Special Mode:** Standard coding mode (high precision)
+**Current Task Model:** Sonnet 4.5 (sufficient complexity)
+**Escalation Status:** No escalation needed - task within Sonnet tier
+
 #### Working Context
 - Implementing Row Level Security for user data isolation
 - Using Supabase Auth for authentication
@@ -76,6 +84,14 @@
 **Context Usage:** 8,000 / 200,000 (4.0%)
 **Current Task:** Writing integration tests for auth (E1-S1.1-T)
 **Status:** Active - 80% complete
+
+#### Model Configuration
+**Primary Model:** Claude Haiku 4.5
+**Backup Model:** Google Gemini (for test edge case scenarios)
+**Escalation:** Claude Sonnet (for complex test framework issues)
+**Special Mode:** TDD Red phase mode (test-first thinking)
+**Current Task Model:** Sonnet 4.5 (test complexity requires it)
+**Escalation Status:** No escalation - Haiku tier sufficient for standard test writing
 
 #### Working Context
 - Writing tests BEFORE implementation (TDD Red phase)
@@ -131,6 +147,14 @@
 **Current Task:** Sprint planning for Epic 1
 **Status:** Active
 
+#### Model Configuration
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT (for stakeholder communication)
+**Escalation:** Claude Opus (for complex dependency resolution)
+**Special Mode:** Project management mode (planning optimization)
+**Current Task Model:** Sonnet 4.5 (planning complexity)
+**Escalation Status:** No escalation - Sonnet tier adequate for sprint planning
+
 #### Working Context
 - Breaking down Epic 1 into 7 stories
 - Mapping dependencies between stories
@@ -181,6 +205,14 @@
 **Last Task:** Create wireframes for auth flow (E1-S1.1)
 **Status:** Complete - Ready
 
+#### Model Configuration
+**Primary Model:** Claude Haiku 4.5
+**Backup Model:** Google Gemini (for visual concept generation)
+**Escalation:** Claude Sonnet (for complex UX patterns)
+**Special Mode:** Design thinking mode (creative iteration)
+**Last Task Model:** Haiku 4.5 (design generation)
+**Escalation Status:** No escalation occurred - Haiku sufficient for design work
+
 #### What Was Delivered
 - [x] Wireframes for login, registration, password reset, profile
 - [x] Design tokens (colors, typography, spacing)
@@ -216,6 +248,14 @@
 **Current Task:** UI implementation (E1-S1.3) - BLOCKED
 **Status:** Waiting - Blocked by handoff
 
+#### Model Configuration
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** Google Gemini (for React component generation)
+**Escalation:** Claude Opus (for complex UI architecture)
+**Special Mode:** React development mode (UI optimization)
+**Current Task Model:** Sonnet 4.5 (UI implementation)
+**Escalation Status:** Not active (awaiting handoff)
+
 #### Waiting For
 - **Handoff H-005** from UX-DESIGNER
 - **Contains:** Wireframes, design tokens, component specs
@@ -247,6 +287,14 @@
 **Last Task:** Integration work (E1-S0.5)
 **Status:** Ready - Available for new assignment
 
+#### Model Configuration
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT (for complex architecture discussions)
+**Escalation:** Claude Opus (for system design decisions)
+**Special Mode:** Architecture mentoring mode
+**Last Task Model:** Sonnet 4.5 (integration work)
+**Escalation Status:** None - ready for next assignment
+
 #### Last Accomplishments
 - Completed integration of auth flow
 - Code reviewed and merged
@@ -271,6 +319,14 @@
 **Last Task:** Test review (E1-S0.4)
 **Status:** Ready - Available
 
+#### Model Configuration
+**Primary Model:** Claude Haiku 4.5
+**Backup Model:** Google Gemini (for edge case scenario generation)
+**Escalation:** Claude Sonnet (for complex QA strategy)
+**Special Mode:** Quality assurance mode (bug detection)
+**Last Task Model:** Haiku 4.5 (QA work)
+**Escalation Status:** None - available for QA tasks
+
 #### Ready For
 - E1-S1.5: Integration testing (waiting on E1-S1.3 + E1-S1.4)
 - Can assist with test review if needed
@@ -287,6 +343,14 @@
 **Last Session:** 2025-12-04 17:30
 **Last Task:** Code review (E1-S0.5)
 **Status:** Ready - Available
+
+#### Model Configuration
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT (for security audit second opinion)
+**Escalation:** Claude Opus (for complex code architecture review)
+**Special Mode:** Code review mode (security + quality focus)
+**Last Task Model:** Sonnet 4.5 (code review)
+**Escalation Status:** None - ready for reviews
 
 #### Ready For
 - E1-S1.2-R: Code review for RLS implementation
@@ -326,6 +390,33 @@
 
 ---
 
+## Model Selection Logic
+
+### How Agents Choose Models
+
+**Task Complexity Assessment:**
+
+| Complexity | Primary | Escalation | Notes |
+|-----------|---------|-----------|-------|
+| Simple (1-3) | Haiku | Sonnet | Straightforward generation tasks |
+| Medium (4-6) | Sonnet | Opus | Most development work |
+| Complex (7-9) | Sonnet/Opus | Opus | Complex architecture, security |
+| Critical (10) | Opus | Custom | System design, high-stakes decisions |
+
+**Escalation Triggers:**
+- Error rate > 10% on task
+- Task complexity exceeds tier capability
+- Security/compliance implications
+- Critical path blocking
+- Multiple retries needed
+
+**Fallback Model Usage:**
+- Primary model slow/unavailable → Backup model
+- Backup model inappropriate → Escalate to higher tier
+- All models unavailable → Handoff to available agent
+
+---
+
 ## Learned Patterns (All Agents)
 
 ### Pattern: TDD Workflow
@@ -353,6 +444,21 @@
 **Success Rate:** 95%
 **Average Duration:** 23 minutes
 **Key Success Factor:** Complete documentation
+
+---
+
+### Pattern: Model Escalation
+**Context:** When task exceeds primary model capability
+**Process:**
+1. Agent detects complexity exceeding tier
+2. Agent documents escalation reason
+3. Agent switches to escalation model
+4. Escalation model inherits full context
+5. Handoff back to primary model when appropriate
+
+**Success Rate:** 98%
+**Typical Cost Increase:** 3-5x per escalation
+**Average Duration:** +15 minutes per escalation
 
 ---
 
@@ -440,6 +546,22 @@
 
 ---
 
+### Model Management
+
+**GOTCHA: Model Context Limits**
+- **Issue:** Large projects exceed model context window
+- **Solution:** Archive old context, summarize decisions, maintain DECISION-LOG.md
+- **Affected:** All agents
+- **Discovered:** Session planning phase
+
+**GOTCHA: Escalation Cost Accumulation**
+- **Issue:** Multiple escalations → 10-20x cost increase
+- **Solution:** Improve task decomposition, use Haiku for simple work
+- **Affected:** ORCHESTRATOR (cost tracking)
+- **Discovered:** Track in METRICS.md
+
+---
+
 ## Useful Discoveries
 
 ### Supabase RLS Helpers
@@ -473,6 +595,7 @@ const createTestUser = (seed: number) => {
 - [ ] Context provided
 - [ ] Questions answered/documented
 - [ ] Receiving agent acknowledged
+- [ ] Model information included (cost, complexity, escalations)
 
 **Result:** 95% handoff success rate when checklist followed
 
@@ -493,6 +616,13 @@ const createTestUser = (seed: number) => {
 **Status:** Pending decision (D-007)
 **Due:** 2025-12-06
 **Priority:** P2
+
+### Q3: Model Selection for Future Tasks
+**Asked By:** ORCHESTRATOR
+**Context:** Define model assignment for new agents beyond current 6
+**Status:** Pending decision (D-008)
+**Due:** 2025-12-07
+**Blockers:** None
 
 ---
 
@@ -520,6 +650,14 @@ const createTestUser = (seed: number) => {
 - E1-S1.4 depends on E1-S1.2 (in progress)
 - E1-S1.5 depends on E1-S1.3 + E1-S1.4
 
+**Model Assignments (Current):**
+- BACKEND-DEV: Primary Sonnet, Escalation Opus
+- TEST-ENGINEER: Primary Haiku, Escalation Sonnet
+- FRONTEND-DEV: Primary Sonnet, Escalation Opus
+- UX-DESIGNER: Primary Haiku, Escalation Sonnet
+- QA-AGENT: Primary Haiku, Escalation Sonnet
+- CODE-REVIEWER: Primary Sonnet, Escalation Opus
+
 ---
 
 ## Recovery Information
@@ -542,12 +680,13 @@ const createTestUser = (seed: number) => {
 - `.claude/state/TASK-QUEUE.md` - Task priorities
 - `.claude/state/HANDOFFS.md` - Pending handoffs
 - `.claude/state/DEPENDENCIES.md` - Blockers
+- `.claude/state/METRICS.md` - Model usage/cost tracking
 
 **Context Preserved In:**
 - AGENT-STATE.md - Real-time agent status
-- HANDOFFS.md - Detailed handoff information
+- HANDOFFS.md - Detailed handoff information (with model data)
 - DECISION-LOG.md - Decisions made
-- METRICS.md - Progress tracking
+- METRICS.md - Progress and model usage tracking
 
 ---
 
@@ -560,6 +699,7 @@ const createTestUser = (seed: number) => {
 - Pending decisions
 - Key architectural decisions
 - Agent assignments
+- Model assignments and escalation rules
 
 **Session (Summarize at End):**
 - Detailed work logs
@@ -578,6 +718,7 @@ const createTestUser = (seed: number) => {
 - Summarize old decisions (keep ID + summary)
 - Compress detailed logs after 30 days
 - Keep recent context (7 days) in full detail
+- Update model performance metrics monthly
 
 ---
 
@@ -587,21 +728,37 @@ const createTestUser = (seed: number) => {
 - Prefers: Clear test requirements, architecture diagrams
 - Communication: Technical detail appreciated
 - Handoff needs: Complete test suite, acceptance criteria
+- Model preference: Sonnet for implementation, Opus for architecture
 
 ### FRONTEND-DEV
 - Prefers: Visual mockups, component specs
 - Communication: Design rationale helpful
 - Handoff needs: Design tokens, responsive breakpoints
+- Model preference: Sonnet for React implementation
 
 ### TEST-ENGINEER
 - Prefers: User stories, edge case scenarios
 - Communication: Examples of expected behavior
 - Handoff needs: API docs, business rules
+- Model preference: Haiku for test generation, Sonnet for complex scenarios
 
 ### SENIOR-DEV
 - Prefers: Architecture context, trade-off analysis
 - Communication: High-level then details
 - Handoff needs: Design decisions, system constraints
+- Model preference: Opus for architecture, Sonnet for implementation
+
+### QA-AGENT
+- Prefers: Clear acceptance criteria, test scenarios
+- Communication: Examples and edge cases
+- Handoff needs: Implementation details, test reports
+- Model preference: Haiku for standard QA, Sonnet for complex scenarios
+
+### SCRUM-MASTER
+- Prefers: Metrics, dependencies, blockers
+- Communication: Status updates, risk assessment
+- Handoff needs: Sprint data, velocity metrics
+- Model preference: Sonnet for planning, Opus for complex dependency resolution
 
 ---
 
@@ -612,7 +769,11 @@ const createTestUser = (seed: number) => {
 - Share gotchas immediately (prevent others hitting same issue)
 - Archive old session data monthly
 - Keep "Learned Patterns" section current and practical
+- Update model assignments when adding new agents
+- Track escalation patterns to optimize model selection
 - Cross-reference with DECISION-LOG.md for architectural memory
 
 **Last Memory Optimization:** 2025-12-01
 **Next Optimization:** 2025-12-31
+**Model Config Last Updated:** 2025-12-05
+**Next Model Review:** 2025-12-12

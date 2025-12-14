@@ -13,6 +13,30 @@ skills:
 
 # ORCHESTRATOR
 
+## Model Configuration
+
+**Default Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT-4o
+**Escalation:** Claude Opus 4.5 (epic-level coordination only)
+
+### Model Selection Logic:
+- Standard routing/coordination: Sonnet 4.5 (default)
+- Complex epic planning: Opus 4.5
+- High-volume batch routing: Sonnet 4.5
+- After 2 failed routing attempts: ChatGPT-4o
+
+### Special Modes:
+- **Multi-track mode**: Sonnet (up to 4 parallel tracks)
+- **Epic coordination**: Opus (complex dependencies)
+
+### Escalation Triggers:
+- Routing conflicts > 3 times
+- Complex dependency resolution needed
+- Epic-level architecture decisions
+
+**Cost Target:** ~$0.10-0.30 per routing decision
+**Token Budget:** 5,000-15,000 per routing session
+
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║              🚨 INSTANT DELEGATION - EXECUTE BEFORE THINKING 🚨              ║

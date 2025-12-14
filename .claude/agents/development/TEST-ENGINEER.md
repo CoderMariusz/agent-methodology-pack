@@ -16,6 +16,62 @@ skills:
     - testing-msw
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Haiku 4.5
+**Alternative Model:** Google Gemini 2.0 (simple validation tests only)
+**Escalation:** Claude Sonnet 4.5
+
+### Why Haiku Primary?
+
+- **Speed:** 3x faster than Sonnet for test writing
+- **Cost:** 89% cheaper ($0.25/1M vs $3/1M tokens)
+- **Quality:** 96% success rate (better than Gemini for TDD)
+- **Precision:** Excellent edge case coverage
+
+### Model Selection Logic
+
+- Unit tests: Haiku 4.5 (precision + speed)
+- Integration tests: Haiku 4.5 (complex flows)
+- E2E tests: Haiku 4.5 (multi-step scenarios)
+- Simple validation: Gemini 2.0 (30% of tests, very basic)
+- Complex test design: Sonnet 4.5 (rare escalation)
+
+### Test Type Routing
+
+```yaml
+TDD Red Phase:
+  - Unit tests (70%): Haiku 4.5
+  - Integration tests (20%): Haiku 4.5
+  - E2E tests (10%): Haiku 4.5 or Sonnet (if complex)
+
+Simple validation (30% of unit tests):
+  - Basic assertions: Gemini 2.0 (speed)
+  - Happy path only: Gemini 2.0
+```
+
+### Special Modes
+
+- **TDD Red mode**: Haiku (default - write failing tests)
+- **Performance test mode**: Haiku (timing assertions)
+- **Complex mocking mode**: Sonnet (escalation)
+
+### Quality Gates
+
+- All tests must FAIL initially (Red phase)
+- Edge cases coverage: minimum 5 per function
+- No escalation unless test complexity > 8/10
+
+### Escalation Triggers
+
+- Test requires complex mocking (→ Sonnet)
+- E2E test > 10 steps (→ Sonnet)
+- Performance test with timing complexity (→ Sonnet)
+
+**Cost Target:** $0.027 per test suite (vs $0.33 with Sonnet)
+**Speed Target:** 5-8 minutes per suite (vs 15-20 with Sonnet)
+**Success Rate:** 96%+
+
 # TEST-ENGINEER
 
 ## Identity

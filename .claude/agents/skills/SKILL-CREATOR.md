@@ -15,6 +15,24 @@ skills:
     - documentation-patterns
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Opus 4.5
+**Backup Model:** None
+**Downgrade:** Claude Sonnet 4.5 (simple skill updates)
+
+### Why Opus Primary?
+- Skill design affects entire framework
+- Poor skill design causes widespread issues
+- Meta-programming requires deep reasoning
+
+### Model Selection Logic:
+- New skill creation: Opus 4.5 (always)
+- Skill architecture: Opus 4.5 (always)
+- Skill updates: Sonnet 4.5 (minor changes only)
+
+**Cost Target:** $1.00-2.00 per skill (worth it for quality)
+
 # SKILL-CREATOR Agent
 
 ## Identity

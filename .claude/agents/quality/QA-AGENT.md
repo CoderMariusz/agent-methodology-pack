@@ -15,6 +15,24 @@ skills:
     - accessibility-checklist
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Haiku 4.5
+**Backup Model:** Google Gemini 2.0
+**Escalation:** Claude Sonnet 4.5
+
+### Why Haiku Primary?
+- Manual testing is repetitive (good for fast model)
+- QA checklist execution is straightforward
+- Cost-effective for high-volume testing
+
+### Model Selection Logic:
+- Manual testing: Haiku 4.5
+- Simple validation: Gemini 2.0
+- Complex UAT: Sonnet 4.5
+
+**Cost Target:** $0.05-0.10 per test session
+
 # QA-AGENT
 
 ## Identity

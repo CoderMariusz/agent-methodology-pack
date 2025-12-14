@@ -24,6 +24,10 @@ class CacheManager:
     - Layer 4: Semantic Cache (OpenAI embeddings)
     """
 
+    # Claude Sonnet 4.5 pricing (per 1K tokens)
+    CLAUDE_INPUT_COST_PER_1K = 0.003  # $3.00 per 1M input tokens
+    CLAUDE_OUTPUT_COST_PER_1K = 0.015  # $15.00 per 1M output tokens
+
     def __init__(self, config_path: str = ".claude/cache/config.json"):
         """Initialize cache manager with configuration"""
         self.config_path = config_path
@@ -78,6 +82,43 @@ class CacheManager:
         age_minutes = (time.time() - timestamp) / 60
         return age_minutes > ttl_minutes
 
+    def _calculate_savings(self, cached_response: Dict):
+        """Calculate tokens and cost saved from cache hit"""
+        # Extract token counts from cached response
+        response_data = cached_response.get("response", {})
+
+        # Support multiple formats: tokens_used, input_tokens+output_tokens
+        if "tokens_used" in response_data:
+            tokens_saved = response_data["tokens_used"]
+        elif "input_tokens" in response_data and "output_tokens" in response_data:
+            input_tokens = response_data["input_tokens"]
+            output_tokens = response_data["output_tokens"]
+            tokens_saved = input_tokens + output_tokens
+
+            # Calculate cost based on actual input/output split
+            cost_saved = (
+                (input_tokens / 1000) * self.CLAUDE_INPUT_COST_PER_1K +
+                (output_tokens / 1000) * self.CLAUDE_OUTPUT_COST_PER_1K
+            )
+
+            self.metrics["tokens_saved"] += tokens_saved
+            self.metrics["cost_saved"] += cost_saved
+            return
+        else:
+            # No token info available, use default estimate
+            tokens_saved = 5000  # Default estimate
+
+        # Calculate cost (assuming average mix of input/output)
+        # Conservative estimate: 70% input, 30% output
+        cost_saved = (
+            (tokens_saved * 0.7 / 1000) * self.CLAUDE_INPUT_COST_PER_1K +
+            (tokens_saved * 0.3 / 1000) * self.CLAUDE_OUTPUT_COST_PER_1K
+        )
+
+        # Update metrics
+        self.metrics["tokens_saved"] += tokens_saved
+        self.metrics["cost_saved"] += cost_saved
+
     def get(self, query: str, context: Optional[Dict] = None) -> Optional[Dict]:
         """
         Get response from cache (multi-layer lookup)
@@ -96,6 +137,7 @@ class CacheManager:
             hot_result = self._check_hot_cache(cache_key)
             if hot_result:
                 self.metrics["hot_hits"] += 1
+                self._calculate_savings(hot_result)
                 self._log_access("hot", cache_key, "HIT")
                 return hot_result
 
@@ -106,6 +148,7 @@ class CacheManager:
             cold_result = self._check_cold_cache(cache_key)
             if cold_result:
                 self.metrics["cold_hits"] += 1
+                self._calculate_savings(cold_result)
                 self._log_access("cold", cache_key, "HIT")
                 # Promote to hot cache
                 self._set_hot_cache(cache_key, cold_result)

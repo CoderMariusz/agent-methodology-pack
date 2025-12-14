@@ -171,6 +171,14 @@ PRODUCT-OWNER reviewed and approved Epic 1 (Authentication System) for sprint de
 **Date Created:** {YYYY-MM-DD HH:MM}
 **Expected Start:** {YYYY-MM-DD HH:MM or IMMEDIATE}
 
+#### Model Information
+**Model Used (FROM-AGENT):** {Model name and version}
+**Complexity Score:** {1-10, where 10 is most complex}
+**Tier:** {Haiku/Sonnet/Opus/Custom}
+**Escalations:** {If any escalations occurred: "Yes - escalated to {Model}" OR "No"}
+**Tokens Used:** {X / 200,000}
+**Estimated Cost:** ${X.XX}
+
 #### Context
 {1-2 paragraphs: What was done? Why is this handoff happening? What should the receiving agent know?}
 
@@ -183,6 +191,7 @@ PRODUCT-OWNER reviewed and approved Epic 1 (Authentication System) for sprint de
 ```
 @path/to/artifact1
 @path/to/artifact2
+```
 ```
 
 #### Implementation Notes
@@ -216,6 +225,78 @@ OR "None - all clarifications documented"
 **{X-Y hours}** ({Complexity: S/M/L})
 
 ```
+
+---
+
+## Example Filled Handoff with Model Data
+
+### Handoff H-007: BACKEND-DEV → CODE-REVIEWER (EXAMPLE)
+
+**Status:** ✓ Complete
+**Priority:** P0
+**Story:** E1-S1.2 - Implement RLS Policies
+**Date Created:** 2025-12-05 11:30
+**Expected Start:** 2025-12-05 11:45
+
+#### Model Information
+**Model Used (FROM-AGENT):** Claude Sonnet 4.5
+**Complexity Score:** 7/10 (Security-critical database policies)
+**Tier:** Sonnet (Standard production tier)
+**Escalations:** No - Sonnet handled complexity without escalation
+**Tokens Used:** 42,350 / 200,000 (21.2%)
+**Estimated Cost:** $0.89
+
+#### Context
+BACKEND-DEV has completed the RLS policy implementation for user data isolation. All policies tested against TEST-ENGINEER's test suite (100% passage). Implementation uses Supabase RLS with PostgreSQL 15 functions for complex role-based access control. Code follows team security standards and passes initial review.
+
+#### Deliverables
+- [x] RLS policies migration: `/database/migrations/20251205_rls_policies.sql`
+- [x] Auth helper functions: `/database/functions/auth_helpers.sql`
+- [x] TypeScript client wrapper: `/lib/supabase/rls-policies.ts`
+- [x] Test results: All 34 tests passing
+- [x] Performance report: No measurable impact on query times
+- [x] Security audit notes: 2 recommendations (documented)
+
+#### Artifacts Location
+```
+@/database/migrations/20251205_rls_policies.sql
+@/database/functions/auth_helpers.sql
+@/lib/supabase/rls-policies.ts
+@/tests/integration/auth-rls.test.ts
+```
+
+#### Implementation Notes
+1. **RLS Enable Order** - Policies created AFTER enabling RLS on table
+2. **NULL Handling** - All policies check `auth.uid() IS NOT NULL` to handle anonymous users
+3. **Performance** - No index changes needed; queries remain < 10ms
+4. **Admin Access** - Separate admin function allows full data access
+5. **Test Coverage** - 34 tests covering normal, edge case, and attack scenarios
+
+#### Dependencies Met
+- [x] TEST-ENGINEER test suite complete and passing
+- [x] Security requirements reviewed
+- [x] Architecture approval received
+- [x] Database environment prepared
+
+#### Open Questions
+None - all clarifications documented in inline comments and ADR-004
+
+#### Next Steps for CODE-REVIEWER
+1. Review security implications of RLS policies
+2. Validate test coverage against requirements
+3. Check for edge cases not covered
+4. Performance validation
+5. Recommend approval or request changes
+
+#### Quality Checklist
+- [x] All deliverables complete
+- [x] Documentation comprehensive
+- [x] Context provided
+- [x] Questions answered/documented
+- [x] Receiving agent acknowledged
+
+#### Estimated Review Time
+**45 minutes - 1 hour** (Medium complexity review, security-focused)
 
 ---
 
@@ -346,3 +427,4 @@ OR "None - all clarifications documented"
 - Track quality to improve process
 - Archive completed handoffs weekly
 - Review metrics in retrospectives
+- Include model information for all handoffs (cost tracking + escalation awareness)

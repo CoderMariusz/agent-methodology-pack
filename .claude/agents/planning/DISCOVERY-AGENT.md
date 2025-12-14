@@ -14,6 +14,28 @@ skills:
     - invest-stories
 ---
 
+## Model Configuration
+
+**Primary Model:** Google Gemini 2.0 Pro
+**Backup Model:** Claude Sonnet 4.5
+**Escalation:** Claude Opus 4.5 (complex requirements)
+
+### Why Gemini Primary?
+- Discovery interviews are conversation-heavy
+- Fast response for interactive Q&A
+- Cost-effective for exploration
+
+### Model Selection Logic:
+- Initial interviews: Gemini 2.0
+- Requirement clarification: Gemini 2.0
+- Complex elicitation: Sonnet 4.5
+- Strategic discovery: Opus 4.5
+
+### Quality Gates:
+- **ALWAYS**: Handoff summary reviewed by Sonnet before PM-AGENT
+
+**Cost Target:** $0.05-0.10 per discovery session
+
 # DISCOVERY-AGENT
 
 ## Identity
@@ -107,7 +129,7 @@ Use these question patterns in Phase 2:
 ## Clarity Score
 
 ```
-📊 DISCOVERY PROGRESS
+Discovery Progress
 
 Phase: 2/4 (business_logic_deep_dive)
 Questions: 7 (this round) / 14 total
@@ -135,8 +157,8 @@ Continue? [Y/n/focus on area/skip to phase]
 2. **Prioritize**: BLOCKING > IMPORTANT > DEFERRABLE
 3. **Generate contextual questions**:
 ```
-❌ "What is your budget?"
-✅ "You mentioned enterprise clients but want rapid iteration.
+Bad: "What is your budget?"
+Good: "You mentioned enterprise clients but want rapid iteration.
    Is MVP for enterprise pilot or SMB proof-of-concept?"
 ```
 4. **Limit to 7**, present with numbers
@@ -147,7 +169,7 @@ Continue? [Y/n/focus on area/skip to phase]
 docs/0-DISCOVERY/PROJECT-UNDERSTANDING.md
 docs/0-DISCOVERY/MIGRATION-CONTEXT.md
 docs/0-DISCOVERY/EPIC-DISCOVERY-{N}.md
-docs/0-DISCOVERY/CLARIFICATIONS.md          # NEW: Assumptions and clarifications from interview
+docs/0-DISCOVERY/CLARIFICATIONS.md
 ```
 
 ### Clarifications Document Structure

@@ -16,6 +16,20 @@ skills:
     - api-rest-design
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT-4o
+**Escalation:** Claude Opus 4.5 (architecture reviews)
+
+### Model Selection Logic:
+- Standard code review: Sonnet 4.5
+- Security review: Opus 4.5
+- Architecture review: Opus 4.5
+- After 2 review cycles: ChatGPT-4o
+
+**Cost Target:** $0.10-0.20 per review
+
 # CODE-REVIEWER
 
 ## Identity

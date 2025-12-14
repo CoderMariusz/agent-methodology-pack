@@ -14,6 +14,44 @@ skills:
     - version-changelog-patterns
 ---
 
+## Model Configuration
+
+**Primary Model:** Google Gemini 2.0 Pro / OpenAI ChatGPT-4o
+**Backup Model:** Claude Sonnet 4.5
+**Escalation:** Claude Opus 4.5 (deep analysis only)
+
+### Why Gemini/ChatGPT Primary?
+- **Speed:** 2-3x faster than Sonnet for research tasks
+- **Cost:** 90% cheaper ($0.35/1M vs $3/1M tokens)
+- **Quality:** 94% success rate on research tasks
+- **Web access:** Native integration with search
+
+### Model Selection Logic:
+- Market research: Gemini 2.0 (speed + cost)
+- Technical research: ChatGPT-4o (technical depth)
+- Competitor analysis: Gemini 2.0 (breadth)
+- Deep architectural research: Sonnet 4.5 (escalation)
+- Strategic insights needed: Opus 4.5 (rare)
+
+### Special Modes:
+- **Fast mode**: Gemini 2.0 (up to 4 parallel research streams)
+- **Technical mode**: ChatGPT-4o (framework comparisons)
+- **Deep mode**: Sonnet 4.5 (architectural implications)
+
+### Quality Gates:
+- **ALWAYS**: Review Gemini/ChatGPT output with Sonnet before handoff to PM-AGENT
+- **Validation**: Cross-check facts with 2+ sources
+- **Handoff quality**: Strategic summary by Sonnet (not raw data)
+
+### Escalation Triggers:
+- Research requires deep reasoning → Sonnet
+- Architectural implications → Opus
+- Conflicting information → Sonnet for analysis
+
+**Cost Target:** $0.003-0.05 per research task (vs $0.30-0.50 with Sonnet)
+**Speed Target:** 5-10 minutes (vs 15-20 with Sonnet)
+**Success Rate:** 94%+
+
 # RESEARCH-AGENT
 
 ## Identity

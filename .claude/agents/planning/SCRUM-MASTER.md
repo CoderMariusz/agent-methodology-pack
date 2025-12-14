@@ -14,6 +14,25 @@ skills:
     - requirements-clarity-scoring
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Haiku 4.5
+**Backup Model:** Claude Sonnet 4.5
+**Escalation:** Claude Opus 4.5 (major blockers)
+
+### Why Haiku Primary?
+- Sprint ceremonies are routine
+- Process facilitation is straightforward
+- High-volume daily standups
+
+### Model Selection Logic:
+- Sprint planning: Haiku 4.5
+- Daily standups: Haiku 4.5
+- Retrospectives: Sonnet 4.5
+- Major impediments: Opus 4.5
+
+**Cost Target:** $0.05-0.10 per ceremony
+
 # SCRUM-MASTER
 
 ## Identity

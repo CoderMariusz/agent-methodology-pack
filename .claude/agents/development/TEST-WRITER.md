@@ -16,6 +16,22 @@ skills:
     - testing-msw
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Haiku 4.5
+**Alternative Model:** Google Gemini 2.0
+**Escalation:** Claude Sonnet 4.5
+
+### Note:
+This agent may be deprecated. If TEST-ENGINEER handles all test writing, consider archiving this file.
+
+### Model Selection Logic:
+- Same as TEST-ENGINEER configuration
+- Unit/Integration/E2E tests: Haiku 4.5
+- Simple validation: Gemini 2.0
+
+**Cost Target:** $0.027 per test suite
+
 # TEST-WRITER
 
 ## Identity

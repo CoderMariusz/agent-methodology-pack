@@ -1109,7 +1109,333 @@ Currently in: RED phase (write tests)
 
 ---
 
-## 9. Quick Reference Card
+## 9. Multi-Model Routing Examples
+
+This section shows how to strategically route work to different Claude models to save costs while maintaining quality. Each example demonstrates a real-world task, the routing decision, cost savings, and the benefits of that approach.
+
+### Example 1: Research Task (Gemini)
+
+**Task:** Analyze competitor pricing strategies across 5 major market players
+
+**Complexity:** Medium (research, synthesis, comparison)
+
+**Flow:**
+```
+ORCHESTRATOR
+  ↓
+RESEARCH-AGENT (Gemini)  [Cost: $0.003]
+  ↓
+PM-AGENT (Sonnet)        [Cost: $0.05]  [Reviews findings]
+```
+
+**What Happens:**
+1. ORCHESTRATOR recognizes this is pure research (no production code)
+2. Routes to RESEARCH-AGENT with Gemini for cost efficiency
+3. Gemini researches and synthesizes competitor data
+4. PM-AGENT (Sonnet) reviews findings and refines recommendations
+5. Final document delivered to product team
+
+**Cost Breakdown:**
+- Gemini research work: $0.003
+- Sonnet review & refinement: $0.05
+- **Total: $0.053**
+- **vs. Sonnet-only: $0.55**
+- **Savings: 94%** (10x cheaper)
+
+**When to Use This Pattern:**
+- Market research
+- Technology evaluations
+- Competitive analysis
+- Best practices gathering
+- Non-code research tasks
+
+---
+
+### Example 2: Feature Implementation (Sonnet → ChatGPT)
+
+**Task:** Implement user profile API with complex validation rules
+
+**Complexity:** High (implementation, debugging, edge cases)
+
+**Flow:**
+```
+TEST-ENGINEER (Sonnet)   [Cost: $0.10]  [Writes tests]
+  ↓
+BACKEND-DEV (Sonnet)     [Attempts: $0.25, fails on complex edge case]
+  ↓
+SENIOR-DEV (ChatGPT)     [Cost: $0.20]  [Escalates, fixes complexity]
+  ↓
+QA-AGENT (Sonnet)        [Cost: $0.10]  [Final validation]
+```
+
+**What Happens:**
+1. TEST-ENGINEER (Sonnet) writes comprehensive test suite
+2. BACKEND-DEV (Sonnet) starts implementation, handles 80% successfully
+3. Encounters complex validation edge case (timezone handling in timestamps)
+4. Escalates to ChatGPT for sophisticated problem-solving
+5. ChatGPT solves the complex edge case
+6. QA-AGENT validates complete solution
+7. CODE-REVIEWER (not shown, cost: $0.05) approves
+
+**Cost Breakdown:**
+- TEST-ENGINEER (Sonnet): $0.10
+- BACKEND-DEV (Sonnet): $0.25
+- SENIOR-DEV (ChatGPT): $0.20
+- QA-AGENT (Sonnet): $0.10
+- CODE-REVIEWER (Sonnet): $0.05
+- **Total: $0.70**
+- **vs. all-Sonnet: $0.85**
+- **vs. all-ChatGPT: $1.00**
+- **vs. all-Opus: $3.50**
+- **Savings: 18%** (vs Sonnet, 30% vs ChatGPT, 80% vs Opus)
+
+**Failure Mode:** If we used Opus for the whole thing:
+- Overkill for basic implementation
+- 5x more expensive than necessary
+- Too much power for routine work
+
+**When to Use This Pattern:**
+- Start with economical model
+- Escalate only when needed
+- Complex algorithmic problems
+- Difficult debugging scenarios
+
+---
+
+### Example 3: Critical Architecture (Force Opus)
+
+**Task:** Design Row-Level Security (RLS) for multi-tenant SaaS database
+
+**Complexity:** Critical (security-sensitive, high impact, complex design)
+
+**Flow:**
+```
+ARCHITECT-AGENT (Opus 4.5)  [Cost: $1.14]  [Security-critical design]
+  ↓
+CODE-REVIEWER (Sonnet)      [Cost: $0.08]  [Security validation review]
+  ↓
+TECH-WRITER (Sonnet)        [Cost: $0.06]  [Document security model]
+```
+
+**What Happens:**
+1. ORCHESTRATOR identifies this as security-critical
+2. Forces Opus (most powerful) for ARCHITECT-AGENT
+3. Opus designs comprehensive RLS strategy:
+   - Isolation boundaries
+   - Permission model
+   - Testing approach
+   - Edge cases and attack vectors
+4. CODE-REVIEWER (Sonnet) validates design is secure
+5. TECH-WRITER documents for team
+
+**Cost Breakdown:**
+- ARCHITECT-AGENT (Opus): $1.14
+- CODE-REVIEWER (Sonnet): $0.08
+- TECH-WRITER (Sonnet): $0.06
+- **Total: $1.28**
+
+**Cost Analysis:**
+- **Why Opus here:**
+  - Security breach = company liability
+  - 1 mistake could expose customer data
+  - Complex threat modeling required
+  - $1.14 cost << $1M+ breach cost
+- **Why not Sonnet:**
+  - Sonnet can implement, but can't design securely
+  - Review and refinement cycle would be longer
+  - False confidence in partially-correct design
+  - "Pay $0.05 now or $1M later" decision
+
+**When to Use This Pattern:**
+- Security-critical work
+- Architecture affecting entire system
+- High-impact design decisions
+- When cost of failure >> model cost
+- Regulatory or compliance requirements
+
+**Output (Architecture Decision Record):**
+```markdown
+# ADR-003: Row-Level Security Design
+
+## Problem
+Multi-tenant system needs data isolation without exposing queries.
+
+## Decision
+Implement RLS using:
+- Database-level RLS policies
+- JWT claims for user identification
+- Column-level encryption for sensitive data
+
+## Implementation Details
+[Opus-designed comprehensive security model]
+
+## Reviewed by
+CODE-REVIEWER (Sonnet) - APPROVED
+```
+
+---
+
+### Example 4: Test Writing (Haiku)
+
+**Task:** Write 50 unit tests for utility functions (string parsing, validation, formatting)
+
+**Complexity:** Low-Medium (repetitive, well-defined test patterns)
+
+**Flow:**
+```
+TEST-ENGINEER (Haiku)  [Cost: $0.027]  [Fast test generation]
+  ↓
+CODE-REVIEWER (Sonnet) [Cost: $0.08]   [Coverage validation]
+```
+
+**What Happens:**
+1. ORCHESTRATOR routes to TEST-ENGINEER
+2. TEST-ENGINEER uses Haiku for cost efficiency
+3. Haiku generates test patterns rapidly:
+   - Happy path tests
+   - Edge case tests
+   - Error condition tests
+   - Boundary value tests
+4. All tests written in 1 invocation
+5. CODE-REVIEWER validates coverage is adequate
+
+**Cost Breakdown:**
+- TEST-ENGINEER (Haiku): $0.027
+- CODE-REVIEWER (Sonnet): $0.08
+- **Total: $0.107**
+
+**Cost Comparison:**
+- **Haiku:** $0.027 (baseline)
+- **Sonnet:** $0.25 (9x more)
+- **Opus:** $1.14 (42x more)
+- **Savings using Haiku:** 92% vs Sonnet, 97% vs Opus
+
+**Quality Notes:**
+- Haiku output quality: 95% of Sonnet
+- Test patterns are well-established
+- No algorithmic complexity
+- CODE-REVIEWER ensures coverage
+- Suitable for: Boilerplate, repetitive, straightforward tests
+
+**When to Use This Pattern:**
+- Unit tests for simple logic
+- Boilerplate code generation
+- Repetitive tasks
+- Straightforward patterns
+- High volume, low complexity
+
+---
+
+### Example 5: Boilerplate CRUD (Gemini → Review)
+
+**Task:** Generate CRUD endpoints for User, Product, Order models
+
+**Complexity:** Low (boilerplate, standard patterns, repetitive)
+
+**Flow:**
+```
+BACKEND-DEV (Gemini)     [Cost: $0.035]  [Fast generation]
+  ↓
+CODE-REVIEWER (Sonnet)   [Cost: $0.099]  [Security & quality review]
+```
+
+**What Happens:**
+1. ORCHESTRATOR routes to BACKEND-DEV
+2. BACKEND-DEV uses Gemini for speed/cost
+3. Gemini generates 3 models × 5 endpoints = 15 endpoints in one invocation:
+   - Create (POST)
+   - Read (GET)
+   - Update (PATCH)
+   - Delete (DELETE)
+   - List (GET with pagination)
+4. CODE-REVIEWER (Sonnet) checks for:
+   - Security issues (input validation, auth)
+   - Missing error handling
+   - API consistency
+   - Performance concerns (N+1 queries)
+5. Final code approved and merged
+
+**Cost Breakdown:**
+- BACKEND-DEV (Gemini): $0.035
+- CODE-REVIEWER (Sonnet): $0.099
+- **Total: $0.134**
+
+**Cost Comparison:**
+- **Gemini generation:** $0.035
+- **All-Sonnet:** $0.30
+- **All-Opus:** $1.50
+- **Savings:** 55% vs Sonnet, 91% vs Opus
+
+**Quality Assurance:**
+- Gemini generates standard patterns correctly
+- CODE-REVIEWER (Sonnet) catches issues Gemini might miss:
+  - Authentication/authorization edge cases
+  - Input validation completeness
+  - Error response standards
+  - Performance anti-patterns
+- Trust = Speed × Review rigor
+
+**Generated Endpoints Example:**
+```javascript
+// Generated by Gemini (standard pattern)
+POST   /api/users           // Create user
+GET    /api/users/:id       // Get user
+PATCH  /api/users/:id       // Update user
+DELETE /api/users/:id       // Delete user
+GET    /api/users           // List users (pagination)
+
+POST   /api/products        // Create product
+GET    /api/products/:id    // Get product
+PATCH  /api/products/:id    // Update product
+DELETE /api/products/:id    // Delete product
+GET    /api/products        // List products (pagination)
+
+POST   /api/orders          // Create order
+GET    /api/orders/:id      // Get order
+PATCH  /api/orders/:id      // Update order (cancel)
+DELETE /api/orders/:id      // Delete order
+GET    /api/orders          // List orders (pagination)
+```
+
+**Review Findings (CODE-REVIEWER):**
+- Missing: `userId` isolation in GET /api/orders (users should only see own orders)
+- Missing: Audit logging on DELETE operations
+- Missing: Rate limiting on POST endpoints
+- All fixed and re-reviewed: APPROVED
+
+**When to Use This Pattern:**
+- Boilerplate CRUD generation
+- Standard API endpoints
+- Initial scaffolding
+- High volume, low complexity
+- With review as safety check
+
+**Timeline:**
+- Gemini generation: 2 min
+- CODE-REVIEWER review: 10 min
+- Fixes and approval: 5 min
+- **Total: 17 min** vs **45 min with all-Sonnet**
+
+---
+
+### Multi-Model Strategy Summary
+
+| Task Type | Model | Cost | Why |
+|-----------|-------|------|-----|
+| Research only | Gemini | $0.003 | No code, just synthesis |
+| Unit tests | Haiku | $0.027 | Repetitive patterns |
+| Boilerplate CRUD | Gemini | $0.035 | Standard templates |
+| API implementation | Sonnet | $0.25 | Balance of speed/quality |
+| Complex problem | ChatGPT | $0.20 | When Sonnet escalates |
+| Architecture (critical) | Opus 4.5 | $1.14 | Security/high-impact |
+| Code review | Sonnet | $0.08 | Quality validation |
+
+**Key Insight:**
+Use the least expensive model that can handle the task well, then review/validate with a stronger model if needed. This is often faster AND cheaper than using one expensive model for everything.
+
+---
+
+## 10. Quick Reference Card
 
 ### Agent Cheat Sheet
 
@@ -1177,7 +1503,7 @@ docs/2-MANAGEMENT/sprints/                   # Sprint docs
 
 ---
 
-## 10. Getting Help
+## 11. Getting Help
 
 ### Where to Ask Questions
 
@@ -1266,9 +1592,9 @@ The Orchestrator will analyze your project state and recommend your first task.
 
 ---
 
-**Onboarding Guide Version:** 1.0
-**Last Updated:** 2025-12-05
-**Estimated Reading Time:** 30 minutes
+**Onboarding Guide Version:** 1.1
+**Last Updated:** 2025-12-14
+**Estimated Reading Time:** 40 minutes
 **Hands-on Time:** 30 minutes
 
 **Questions?** Load ORCHESTRATOR and ask!

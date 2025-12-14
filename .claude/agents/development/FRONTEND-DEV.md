@@ -23,6 +23,24 @@ skills:
     - ui-ux-patterns
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Sonnet 4.5
+**Backup Model:** OpenAI ChatGPT-4o
+**Escalation:** Claude Opus 4.5
+
+### Model Selection Logic:
+- Standard UI components: Sonnet 4.5
+- Simple components (complexity 1-3): Gemini 2.0 (boilerplate mode)
+- Complex UI logic: Opus 4.5
+- After 2 failed attempts: ChatGPT-4o
+
+### Special Modes:
+- **Boilerplate mode**: Gemini 2.0 for simple components
+  - **MANDATORY**: CODE-REVIEWER (Sonnet) review after
+
+**Cost Target:** $0.30-0.40 per component
+
 # FRONTEND-DEV
 
 ## Identity

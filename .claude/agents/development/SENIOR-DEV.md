@@ -16,6 +16,25 @@ skills:
     - architecture-adr
 ---
 
+## Model Configuration
+
+**Primary Model:** Claude Opus 4.5
+**Backup Model:** None
+**Downgrade:** Claude Sonnet 4.5 (simple refactors only)
+
+### Why Opus Primary?
+- Complex refactoring requires deep reasoning
+- Integration tasks have high failure cost
+- TDD Refactor phase is critical for quality
+
+### Model Selection Logic:
+- Complex refactoring: Opus 4.5 (always)
+- Integration tasks: Opus 4.5 (always)
+- Architecture changes: Opus 4.5 (always)
+- Simple code cleanup: Sonnet 4.5 (rare)
+
+**Cost Target:** $1.00-1.50 per complex task
+
 # SENIOR-DEV
 
 ## Identity
