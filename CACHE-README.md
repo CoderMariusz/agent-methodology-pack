@@ -1,6 +1,22 @@
-# Universal Cache System 🚀
+# Universal Cache System
 
-**95% Token Savings | 90% Cost Reduction | Zero-Config Portability**
+**Version:** 2.0.0
+**Status:** Manual Integration Required
+
+---
+
+## IMPORTANT LIMITATIONS
+
+**The cache system is NOT automatically integrated with Claude Code Task tool.**
+
+### What This Means:
+- Task() agent delegations: **NOT CACHED**
+- Manual Python API calls: **CAN BE CACHED** (requires integration)
+- Current savings for Task tool usage: **~5-10%** (Claude's built-in prompt cache only)
+- Advertised 95% savings: **Requires manual integration** (2-3 hours work)
+
+### For Full Details:
+Read: `.claude/cache/CACHE-REALITY-CHECK.md`
 
 ---
 
@@ -81,17 +97,21 @@ python .claude/cache/cache_manager.py
 
 ---
 
-## 💰 OSZCZĘDNOŚCI
+## 💰 POTENTIAL SAVINGS (With Manual Integration)
 
-**Przed:**
+**IMPORTANT:** These savings require manual integration (see CACHE-REALITY-CHECK.md)
+
+**Before:**
 - 15M tokens/month
 - **Cost: $450/month**
 
-**Po:**
-- 0.9M tokens/month (94% reduction!)
-- **Cost: $3/month**
+**After (with full integration):**
+- 0.9M tokens/month (94% reduction)
+- **Cost: $3-25/month**
 
-**ROI: 150x return on investment!** 🤑
+**Current (Task tool only):**
+- ~5-10% automatic savings from Claude's prompt cache
+- **Cost: $400-425/month** (minimal reduction)
 
 ---
 

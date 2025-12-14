@@ -1,0 +1,15 @@
+{
+  "hot_hits": 3,
+  "hot_misses": 19,
+  "cold_hits": 0,
+  "cold_misses": 19,
+  "semantic_hits": 0,
+  "semantic_misses": 19,
+  "total_queries": 22,
+  "cost_saved": 0.099,
+  "tokens_saved": 15000,
+  "hot_hit_rate": 13.636363636363635,
+  "cold_hit_rate": 0.0,
+  "semantic_hit_rate": 0.0,
+  "overall_hit_rate": 13.636363636363635
+}

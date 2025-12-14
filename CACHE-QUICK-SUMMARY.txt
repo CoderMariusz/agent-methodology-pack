@@ -1,0 +1,75 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                 CACHE SYSTEM INVESTIGATION RESULTS                           ║
+║                        2025-12-14 | CRITICAL                                 ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+
+FINDING: You were RIGHT - cache is NOT being used!
+
+EVIDENCE:
+  • access.log: 10 entries (all manual test) vs 12+ Task delegations = 0 hits
+  • Your costs: $0.40-0.55/100min = NO cache savings
+  • Metrics show test data only, not real usage
+
+ROOT CAUSE:
+  Task tool creates isolated sessions → cache_manager.py NEVER CALLED
+
+WHAT YOU'RE ACTUALLY GETTING:
+  ~5-10% savings from Claude's built-in prompt cache (minimal)
+
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                              YOUR OPTIONS                                    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+
+[DONE] Option 1: Accept Reality (20 min)
+  ✓ Documentation updated with honest limitations
+  ✓ cache-stats.sh shows reality warning
+  ✓ You know real costs: ~5-10% savings
+  → Read: CACHE-README.md (updated)
+
+[IF WANTED] Option 2: MCP Integration (2-3 hours)
+  • Create MCP server for cache access
+  • Agents can call cache.get/set explicitly
+  • Expected savings: 60-80% (not automatic)
+  • Request: "DEVOPS-AGENT: Implement MCP cache integration"
+
+[NOT RECOMMENDED] Option 3: Proxy Wrapper (8-10 hours)
+  • Too complex, uncertain benefits
+  • Maintenance burden
+  • Skip this
+
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                           COST REALITY                                       ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+
+Advertised:   $450/mo → $3/mo (95% savings)  ← NOT HAPPENING
+Reality:      $450/mo → $405/mo (5-10% savings)  ← WHAT YOU GET
+With MCP:     $450/mo → $90-180/mo (60-80% savings)  ← IF YOU INVEST 2-3h
+
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                         FILES UPDATED                                        ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+
+✓ CACHE-README.md                    - Added limitations section
+✓ scripts/cache-stats.sh             - Added reality warning
+✓ .claude/cache/CACHE-REALITY-CHECK.md  - Full technical analysis
+✓ CACHE-INVESTIGATION-RESULTS.md     - This summary (detailed)
+
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                         NEXT STEPS                                           ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+
+1. Read: CACHE-README.md (limitations now clear)
+2. Run: bash scripts/cache-stats.sh (see new warning)
+3. Decide:
+   → Accept 5-10% savings (do nothing)
+   → Request MCP integration (2-3 hours work)
+
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+BOTTOM LINE:
+  • Cache system works - just not integrated with Task tool
+  • You're paying ~full costs because of architectural gap
+  • Documentation now honest (Option 1 DONE)
+  • MCP integration possible if you want real savings (Option 2)
+
+YOUR CALL: Reply with next action or accept current state.

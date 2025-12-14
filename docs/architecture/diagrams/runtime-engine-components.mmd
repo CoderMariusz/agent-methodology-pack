@@ -1,0 +1,451 @@
+%% Workflow Runtime Engine - Component Diagram
+%% File: runtime-engine-components.mmd
+%% Author: ARCHITECT-AGENT
+%% Date: 2025-12-14
+
+%% =============================================================================
+%% DIAGRAM 1: High-Level System Architecture
+%% =============================================================================
+
+graph TB
+    subgraph External["External Interfaces"]
+        YAML["YAML Workflow Files<br/>.claude/workflows/definitions/"]
+        State["State Files<br/>.claude/state/"]
+        Agents["Agent Definitions<br/>.claude/agents/"]
+        Cache["MCP Cache Server<br/>.claude/mcp-servers/"]
+    end
+
+    subgraph Engine["Workflow Runtime Engine"]
+        API["WorkflowRuntime<br/>(Public API)"]
+        Parser["YAML Parser<br/>& Validator"]
+        WE["Workflow Engine<br/>(Coordinator)"]
+        SM["State Machine"]
+        GC["Gate Checker"]
+        AI["Agent Invoker"]
+        PT["Progress Tracker"]
+        PRM["Pause/Resume<br/>Manager"]
+        RH["Rollback Handler"]
+        ED["Event Dispatcher"]
+    end
+
+    subgraph Orchestrator["ORCHESTRATOR Integration"]
+        ORCH["ORCHESTRATOR.md"]
+        Task["Task Tool"]
+    end
+
+    %% External to Engine connections
+    YAML --> Parser
+    State <--> PT
+    Agents --> AI
+    Cache <--> WE
+
+    %% Internal Engine connections
+    API --> WE
+    Parser --> WE
+    WE --> SM
+    WE --> GC
+    WE --> AI
+    WE --> PT
+    WE --> PRM
+    WE --> RH
+    WE --> ED
+
+    %% Engine to Orchestrator
+    AI --> Task
+    Task --> ORCH
+    ORCH --> Agents
+
+    %% Styling
+    classDef external fill:#e1f5fe,stroke:#01579b
+    classDef engine fill:#fff3e0,stroke:#e65100
+    classDef orchestrator fill:#f3e5f5,stroke:#7b1fa2
+
+    class YAML,State,Agents,Cache external
+    class API,Parser,WE,SM,GC,AI,PT,PRM,RH,ED engine
+    class ORCH,Task orchestrator
+
+
+%% =============================================================================
+%% DIAGRAM 2: State Machine - Workflow States
+%% =============================================================================
+
+stateDiagram-v2
+    [*] --> CREATED: load()
+
+    CREATED --> RUNNING: start()
+
+    RUNNING --> PAUSED: pause()
+    RUNNING --> COMPLETED: all phases done
+    RUNNING --> FAILED: unrecoverable error
+
+    PAUSED --> RUNNING: resume()
+    PAUSED --> CANCELLED: cancel()
+
+    COMPLETED --> [*]
+    FAILED --> [*]
+    CANCELLED --> [*]
+
+    note right of RUNNING
+        Active workflow execution
+        - Executing phases
+        - Checking gates
+        - Invoking agents
+    end note
+
+    note right of PAUSED
+        Workflow suspended
+        - State persisted
+        - Can resume
+        - Can cancel
+    end note
+
+
+%% =============================================================================
+%% DIAGRAM 3: State Machine - Phase States
+%% =============================================================================
+
+stateDiagram-v2
+    [*] --> PENDING
+
+    PENDING --> ACTIVE: previous phase PASSED
+
+    ACTIVE --> WAITING_GATE: steps complete
+
+    WAITING_GATE --> PASSED: gate criteria met
+    WAITING_GATE --> FAILED: gate criteria not met
+
+    FAILED --> ACTIVE: retry (error recovery)
+
+    PASSED --> [*]: next phase
+
+    note right of ACTIVE
+        Executing phase steps
+        - Running agents
+        - Parallel if configured
+    end note
+
+    note right of WAITING_GATE
+        All steps done
+        - Evaluating gate
+        - May need approval
+    end note
+
+
+%% =============================================================================
+%% DIAGRAM 4: Execution Flow
+%% =============================================================================
+
+flowchart TB
+    Start([User Request]) --> Load[Load Workflow YAML]
+    Load --> Parse[Parse & Validate]
+    Parse --> Init[Create Instance]
+    Init --> ExecLoop{For Each Phase}
+
+    ExecLoop --> CheckPrereq[Check Prerequisites]
+    CheckPrereq --> |Met| ExecSteps[Execute Steps]
+    CheckPrereq --> |Not Met| Wait[Wait/Block]
+    Wait --> CheckPrereq
+
+    ExecSteps --> Parallel{Parallel Steps?}
+    Parallel --> |Yes| ParallelExec[Execute in Parallel]
+    Parallel --> |No| SequentialExec[Execute Sequentially]
+
+    ParallelExec --> WaitAll[Wait for All]
+    SequentialExec --> WaitAll
+
+    WaitAll --> CheckGate{Check Gate}
+    CheckGate --> |PASSED| NextPhase[Move to Next Phase]
+    CheckGate --> |FAILED| ErrorRecovery{Recoverable?}
+    CheckGate --> |PENDING| WaitApproval[Wait for Approval]
+
+    WaitApproval --> CheckGate
+
+    ErrorRecovery --> |Yes| Retry[Execute Recovery Action]
+    ErrorRecovery --> |No| Fail[Workflow FAILED]
+
+    Retry --> ExecSteps
+
+    NextPhase --> ExecLoop
+    ExecLoop --> |All Done| Complete[Workflow COMPLETED]
+
+    Complete --> UpdateState[Update State Files]
+    Fail --> UpdateState
+
+    UpdateState --> End([End])
+
+
+%% =============================================================================
+%% DIAGRAM 5: Agent Invocation Flow
+%% =============================================================================
+
+sequenceDiagram
+    participant RE as Runtime Engine
+    participant AI as Agent Invoker
+    participant ORCH as ORCHESTRATOR
+    participant Task as Task Tool
+    participant Agent as Target Agent
+
+    RE->>AI: invoke(agent, step, context)
+    AI->>AI: Build prompt from step definition
+    AI->>AI: Gather context references
+
+    AI->>ORCH: Return Task call structure
+    Note over AI,ORCH: Engine generates Task call<br/>ORCHESTRATOR executes it
+
+    ORCH->>Task: Execute Task tool
+    Task->>Agent: Load agent definition<br/>Execute with prompt
+
+    Agent->>Agent: Process task
+    Agent->>Agent: Generate deliverables
+
+    Agent-->>Task: Return result
+    Task-->>ORCH: Agent response
+    ORCH-->>AI: Execution result
+
+    AI->>RE: InvocationResult
+    Note over RE: status, summary,<br/>deliverables, metrics
+
+
+%% =============================================================================
+%% DIAGRAM 6: Gate Evaluation Flow
+%% =============================================================================
+
+flowchart TB
+    subgraph Gate["Gate: QUALITY_GATE"]
+        Criteria1["Criterion: All tests pass"]
+        Criteria2["Criterion: Coverage >= 80%"]
+        Criteria3["Criterion: No vulnerabilities"]
+    end
+
+    GC[Gate Checker] --> Gate
+
+    Gate --> Eval1[Evaluate: tests_pass]
+    Gate --> Eval2[Evaluate: coverage]
+    Gate --> Eval3[Evaluate: security_scan]
+
+    Eval1 --> |Run pytest| Result1{Exit code 0?}
+    Eval2 --> |Parse report| Result2{>= 80%?}
+    Eval3 --> |Run scanner| Result3{Clean?}
+
+    Result1 --> |Yes| Pass1[PASSED]
+    Result1 --> |No| Fail1[FAILED]
+    Result2 --> |Yes| Pass2[PASSED]
+    Result2 --> |No| Fail2[FAILED]
+    Result3 --> |Yes| Pass3[PASSED]
+    Result3 --> |No| Fail3[FAILED]
+
+    Pass1 --> Aggregate
+    Fail1 --> Aggregate
+    Pass2 --> Aggregate
+    Fail2 --> Aggregate
+    Pass3 --> Aggregate
+    Fail3 --> Aggregate
+
+    Aggregate{All Passed?}
+    Aggregate --> |Yes| GatePassed[Gate PASSED]
+    Aggregate --> |No| GateFailed[Gate FAILED]
+
+
+%% =============================================================================
+%% DIAGRAM 7: Component Dependencies
+%% =============================================================================
+
+graph LR
+    subgraph Core["Core Components"]
+        API[WorkflowRuntime]
+        WE[WorkflowEngine]
+        SM[StateMachine]
+    end
+
+    subgraph Execution["Execution Components"]
+        Parser[YAMLParser]
+        GC[GateChecker]
+        AI[AgentInvoker]
+    end
+
+    subgraph State["State Components"]
+        PT[ProgressTracker]
+        PRM[PauseResumeManager]
+        RH[RollbackHandler]
+    end
+
+    subgraph Events["Event System"]
+        ED[EventDispatcher]
+    end
+
+    %% Dependencies
+    API --> WE
+    WE --> SM
+    WE --> Parser
+    WE --> GC
+    WE --> AI
+    WE --> PT
+    WE --> PRM
+    WE --> RH
+    WE --> ED
+
+    PT --> ED
+    GC --> ED
+    AI --> ED
+    PRM --> PT
+    RH --> PT
+
+
+%% =============================================================================
+%% DIAGRAM 8: File Structure
+%% =============================================================================
+
+graph TB
+    subgraph Root[".claude/"]
+        subgraph Runtime["runtime/"]
+            init["__init__.py"]
+            api["api.py<br/>(WorkflowRuntime)"]
+            engine["engine.py<br/>(WorkflowEngine)"]
+            parser["parser.py<br/>(YAMLParser)"]
+            sm["state_machine.py"]
+            gc["gate_checker.py"]
+            ai["agent_invoker.py"]
+            pt["progress.py"]
+            prm["pause_resume.py"]
+            rh["rollback.py"]
+            events["events.py"]
+            types["types.py"]
+
+            subgraph Criteria["criteria/"]
+                c_init["__init__.py"]
+                c_file["file_exists.py"]
+                c_tests["tests_pass.py"]
+                c_cov["coverage.py"]
+                c_appr["approval.py"]
+            end
+
+            subgraph StateDir["state/"]
+                instances["instances/<br/>{instance_id}.json"]
+                checkpoints["checkpoints/<br/>{checkpoint_id}.json"]
+            end
+        end
+
+        subgraph Workflows["workflows/definitions/"]
+            epic["epic-workflow.yaml"]
+            story["story-delivery.yaml"]
+            feature["feature-flow.yaml"]
+            bug["bug-workflow.yaml"]
+        end
+
+        subgraph StateFiles["state/"]
+            ws["WORKFLOW-STATE.md"]
+            as["AGENT-STATE.md"]
+            ho["HANDOFFS.md"]
+        end
+    end
+
+
+%% =============================================================================
+%% DIAGRAM 9: Event Flow
+%% =============================================================================
+
+flowchart LR
+    subgraph Sources["Event Sources"]
+        WE[WorkflowEngine]
+        GC[GateChecker]
+        AI[AgentInvoker]
+        PT[ProgressTracker]
+    end
+
+    ED[EventDispatcher]
+
+    subgraph Events["Events"]
+        WS[WORKFLOW_STARTED]
+        WC[WORKFLOW_COMPLETED]
+        WF[WORKFLOW_FAILED]
+        PS[PHASE_STARTED]
+        PC[PHASE_COMPLETED]
+        GP[GATE_PASSED]
+        GF[GATE_FAILED]
+        AG[AGENT_INVOKED]
+        AC[AGENT_COMPLETED]
+        CP[CHECKPOINT_CREATED]
+    end
+
+    subgraph Callbacks["Callbacks"]
+        CB1[on_phase_start]
+        CB2[on_gate_check]
+        CB3[on_agent_invoke]
+        CB4[on_complete]
+        CB5[on_progress]
+    end
+
+    WE --> ED
+    GC --> ED
+    AI --> ED
+    PT --> ED
+
+    ED --> WS
+    ED --> WC
+    ED --> WF
+    ED --> PS
+    ED --> PC
+    ED --> GP
+    ED --> GF
+    ED --> AG
+    ED --> AC
+    ED --> CP
+
+    WS --> CB1
+    PS --> CB1
+    GP --> CB2
+    GF --> CB2
+    AG --> CB3
+    AC --> CB3
+    WC --> CB4
+    WF --> CB4
+    PC --> CB5
+
+
+%% =============================================================================
+%% DIAGRAM 10: Integration Points
+%% =============================================================================
+
+graph TB
+    subgraph RuntimeEngine["Workflow Runtime Engine"]
+        RE[Engine Core]
+    end
+
+    subgraph Existing["Existing v1.1.1 Components"]
+        ORCH[ORCHESTRATOR.md]
+        Cache[MCP Cache Server]
+        Agents[20 Agent Definitions]
+        Workflows[8 YAML Workflows]
+        StateFiles[State Files]
+    end
+
+    subgraph Future["Future Features (Depends on Engine)"]
+        AH[Auto-Healing #5]
+        AC[Agent Collaboration #1]
+        CI[CI/CD Integration #6]
+        Dash[Analytics Dashboard #10]
+        NL[NL Workflows #3]
+    end
+
+    %% Integration points
+    RE <--> ORCH
+    RE <--> Cache
+    RE --> Agents
+    RE --> Workflows
+    RE <--> StateFiles
+
+    %% Future dependencies
+    RE --> AH
+    RE --> AC
+    RE --> CI
+    RE --> Dash
+    RE --> NL
+
+    %% Styling
+    classDef engine fill:#fff3e0,stroke:#e65100
+    classDef existing fill:#e8f5e9,stroke:#2e7d32
+    classDef future fill:#e3f2fd,stroke:#1565c0
+
+    class RE engine
+    class ORCH,Cache,Agents,Workflows,StateFiles existing
+    class AH,AC,CI,Dash,NL future

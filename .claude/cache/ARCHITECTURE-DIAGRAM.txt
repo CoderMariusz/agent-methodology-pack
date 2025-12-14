@@ -1,0 +1,325 @@
+CACHE SYSTEM ARCHITECTURE ANALYSIS
+===================================
+
+WHAT YOU THOUGHT WAS HAPPENING (Expected)
+==========================================
+
+┌─────────────────────────────────────────────────────────────┐
+│                          USER                               │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ Task("backend-dev", context)
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│               CACHE SYSTEM (Layer 2-4)                      │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  1. Check cache_manager.get(query)                  │   │
+│  │  2. If HIT → return cached (95% of time)           │   │
+│  │  3. If MISS → continue to API                       │   │
+│  └─────────────────────────────────────────────────────┘   │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ Only on cache MISS (5% of time)
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    CLAUDE API                               │
+│          (Layer 1: Built-in Prompt Cache)                   │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ Response
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Cache stores response via cache_manager.set()             │
+└─────────────────────────────────────────────────────────────┘
+
+Expected Savings: 95% (5% API calls, 95% cache hits)
+Expected Cost: $3-25/month
+
+
+WHAT IS ACTUALLY HAPPENING (Reality)
+=====================================
+
+┌─────────────────────────────────────────────────────────────┐
+│                          USER                               │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            │ Task("backend-dev", context)
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│              CLAUDE CODE TASK TOOL                          │
+│  • Creates NEW session ID every time                        │
+│  • Fresh conversation context                               │
+│  • Isolated execution environment                           │
+│  • NO cache integration                                     │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ EVERY TIME (100%)
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    CLAUDE API                               │
+│          (Layer 1: Built-in Prompt Cache)                   │
+│  • Only 5-10% reuse within single session                   │
+│  • New session = no cache benefit                           │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ Response
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    USER GETS RESULT                         │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│         cache_manager.py (ORPHANED - NEVER CALLED)          │
+│  • Sitting idle in .claude/cache/                           │
+│  • Has hot/cold/semantic layers ready                       │
+│  • Only used by manual test scripts                         │
+│  • Zero integration with Task tool                          │
+└─────────────────────────────────────────────────────────────┘
+
+Actual Savings: 5-10% (Claude's built-in only)
+Actual Cost: $400-425/month
+
+
+WHY THE GAP EXISTS
+==================
+
+cache_manager.py is designed as:
+
+    from cache_manager import CacheManager
+
+    cache = CacheManager()
+    result = cache.get(query)  # Requires explicit call
+
+    if result:
+        return result
+    else:
+        api_response = call_claude_api(query)
+        cache.set(query, api_response)
+        return api_response
+
+This works when YOU control the API call.
+
+Task tool workflow:
+
+    Task("backend-dev", context)
+      → Claude Code internal routing
+      → New Claude API session
+      → Agent executes
+      → Response
+
+    No place to insert cache.get() or cache.set()
+
+Task tool is a BLACK BOX from your perspective.
+
+
+SOLUTION OPTIONS
+================
+
+OPTION 1: ACCEPT REALITY (DONE)
+--------------------------------
+
+┌─────────────────────────────────────────────────────────────┐
+│  USER → Task Tool → Claude API (5-10% cache) → Response    │
+└─────────────────────────────────────────────────────────────┘
+
+Documentation now reflects this reality.
+
+
+OPTION 2: MCP SERVER INTEGRATION (2-3 hours)
+---------------------------------------------
+
+┌─────────────────────────────────────────────────────────────┐
+│                          USER                               │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ Task("backend-dev", context)
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│              CLAUDE CODE TASK TOOL                          │
+│  • Loads MCP servers                                        │
+│  • Agent sees cache.get() and cache.set() tools             │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ Agent's code execution
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    AGENT LOGIC                              │
+│                                                             │
+│  if needs_answer:                                           │
+│      cached = cache.get(query)  ← MCP TOOL CALL            │
+│      if cached:                                             │
+│          return cached                                      │
+│      else:                                                  │
+│          answer = think_and_respond()                       │
+│          cache.set(query, answer)  ← MCP TOOL CALL         │
+│          return answer                                      │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ MCP protocol
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│            CACHE MCP SERVER                                 │
+│  • Receives cache.get/set requests                          │
+│  • Calls cache_manager.py                                   │
+│  • Returns results to agent                                 │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│         cache_manager.py (NOW USED!)                        │
+│  • Hot/cold/semantic cache layers                           │
+│  • Returns cached responses                                 │
+│  • Stores new responses                                     │
+└─────────────────────────────────────────────────────────────┘
+
+Expected Savings: 60-80% (agents must remember to cache)
+Expected Cost: $90-180/month
+
+
+OPTION 3: PROXY WRAPPER (8-10 hours, NOT RECOMMENDED)
+------------------------------------------------------
+
+Create custom wrapper:
+
+    def cached_task(agent, context):
+        key = hash(f"{agent}:{context}")
+        cached = cache.get(key)
+        if cached:
+            return cached
+        result = Task(agent, context)
+        cache.set(key, result)
+        return result
+
+Problems:
+- Can't modify Claude Code Task tool
+- User must remember to use cached_task() instead of Task()
+- Context hashing is tricky
+- Not integrated with UI
+- High maintenance burden
+
+
+THE REAL ARCHITECTURAL ISSUE
+=============================
+
+cache_manager.py:         Library (requires explicit calls)
+Task tool:                Black box (you can't inject cache calls)
+Result:                   No integration point
+
+Claude Code is designed for:
+  • Agent delegation
+  • Tool usage (Read, Write, Bash, etc.)
+  • MCP server integration
+
+NOT designed for:
+  • Custom middleware layers
+  • API call interception
+  • Session persistence across Task calls
+
+
+WHY MCP IS THE RIGHT ANSWER
+============================
+
+MCP (Model Context Protocol) is:
+  • Built into Claude Code
+  • Exposes tools to agents
+  • Agents can call tools explicitly
+  • Supported integration method
+
+Implementation:
+
+1. Create cache-mcp-server.py:
+   - Exposes cache.get(query)
+   - Exposes cache.set(query, response)
+   - Calls cache_manager.py internally
+
+2. Add to mcp.json:
+   {
+     "mcpServers": {
+       "cache": {
+         "command": "python",
+         "args": [".claude/cache/cache-mcp-server.py"]
+       }
+     }
+   }
+
+3. Update agent prompts:
+   "Before answering repeated questions, check cache.get(query)"
+
+4. Agent workflow becomes:
+   Agent: I should check cache first
+   Agent: [calls cache.get("How to implement JWT?")]
+   MCP: Returns cached response
+   Agent: Uses cached answer
+
+
+LIMITATIONS OF MCP APPROACH
+============================
+
+NOT automatic:
+  • Agents must remember to cache
+  • Requires agent logic changes
+  • Won't work for first-time questions
+
+Partial savings:
+  • Only works when agent uses cache tools
+  • Not all queries will be cached
+  • Expected 60-80% (not 95%)
+
+Maintenance:
+  • Agent prompts must mention caching
+  • MCP server must be maintained
+  • Additional complexity
+
+
+BOTTOM LINE
+===========
+
+Current Architecture:
+  Task tool → Claude API (isolated sessions)
+  cache_manager.py → Never called
+  Result: 5-10% savings
+
+Option 1 (Honest docs):
+  Accept 5-10% savings
+  Know real costs
+  No work needed
+
+Option 2 (MCP integration):
+  Expose cache as MCP server
+  Agents call cache explicitly
+  60-80% savings (not automatic)
+  2-3 hours work
+
+Recommended:
+  Option 1 unless costs are prohibitive
+  Then consider Option 2
+  Never do Option 3
+
+
+FILES CREATED
+=============
+
+Architecture analysis:
+  • .claude/cache/ARCHITECTURE-DIAGRAM.txt (this file)
+
+Investigation results:
+  • CACHE-INVESTIGATION-RESULTS.md (detailed report)
+  • CACHE-QUICK-SUMMARY.txt (visual summary)
+  • .claude/cache/CACHE-REALITY-CHECK.md (technical deep-dive)
+
+Updated documentation:
+  • CACHE-README.md (limitations section)
+  • scripts/cache-stats.sh (reality warning)
+
+Next steps:
+  • Your decision: Accept or request MCP implementation

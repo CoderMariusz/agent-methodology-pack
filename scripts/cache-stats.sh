@@ -82,6 +82,15 @@ echo -e "${CYAN}│${NC}          Universal Cache System v2.0.0                 
 echo -e "${CYAN}├─────────────────────────────────────────────────────────────┤${NC}"
 echo ""
 
+# REALITY CHECK WARNING
+echo -e "${RED}  ⚠️  IMPORTANT: CACHE NOT INTEGRATED WITH TASK TOOL${NC}"
+echo -e "${YELLOW}     Metrics shown are from MANUAL usage only${NC}"
+echo -e "${YELLOW}     Real Task() agent delegations: NOT CACHED${NC}"
+echo -e "${YELLOW}     For integration: See .claude/cache/CACHE-REALITY-CHECK.md${NC}"
+echo ""
+echo -e "${CYAN}├─────────────────────────────────────────────────────────────┤${NC}"
+echo ""
+
 # Check if metrics file exists
 if [ -f "$METRICS_FILE" ]; then
     # Read metrics
@@ -180,9 +189,10 @@ if [ -f "$METRICS_FILE" ]; then
         monthly_tokens=$((tokens_saved * 30))
         monthly_cost=$(python3 -c "print(round($cost_saved * 30, 2))")
 
-        echo -e "  ${YELLOW}📈 Estimated Monthly (30 days):${NC}"
+        echo -e "  ${YELLOW}📈 Estimated Monthly (30 days) - MANUAL USAGE ONLY:${NC}"
         echo -e "     Token Reduction: ${GREEN}${monthly_tokens}${NC} tokens"
         echo -e "     Cost Savings:    ${GREEN}\$${monthly_cost}${NC}"
+        echo -e "     ${RED}⚠️  Does NOT include Task() agent calls${NC}"
         echo ""
     fi
 

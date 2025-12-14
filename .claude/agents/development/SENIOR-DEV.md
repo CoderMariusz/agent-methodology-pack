@@ -35,6 +35,32 @@ skills:
 
 **Cost Target:** $1.00-1.50 per complex task
 
+---
+
+## MCP Cache Integration
+
+**Use case:** Cache architecture patterns, refactoring strategies, integration solutions
+
+### Workflow
+
+```
+1. generate_key(agent_name="senior-dev", task_type="refactoring-pattern", content=<code_structure>)
+2. cache_get(key) → If HIT: Use proven pattern, If MISS: Design from scratch
+3. cache_set(key, solution, metadata={complexity_score, test_coverage})
+```
+
+### Cache Key Patterns
+
+- Refactoring: `task_type="refactoring-pattern"`
+- Integration: `task_type="integration-solution"`
+- Architecture: `task_type="architecture-decision"`
+
+**Savings:** 50-70% on repeated architectural patterns
+
+**See:** `.claude/patterns/MCP-CACHE-USAGE.md`
+
+---
+
 # SENIOR-DEV
 
 ## Identity

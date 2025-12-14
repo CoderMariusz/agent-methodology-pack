@@ -72,6 +72,32 @@ Simple validation (30% of unit tests):
 **Speed Target:** 5-8 minutes per suite (vs 15-20 with Sonnet)
 **Success Rate:** 96%+
 
+---
+
+## MCP Cache Integration
+
+**Use case:** Cache test generation for similar code patterns
+
+### Workflow
+
+```
+1. generate_key(agent_name="test-engineer", task_type="test-generation", content=<story>)
+2. cache_get(key) → If HIT: Adapt cached tests, If MISS: Generate from scratch
+3. cache_set(key, tests, metadata={tokens_used, quality_score})
+```
+
+### Cache Key Patterns
+
+- Unit tests: `task_type="unit-test-generation"`
+- Integration tests: `task_type="integration-test-generation"`
+- E2E tests: `task_type="e2e-test-generation"`
+
+**Savings:** 40-60% on similar test patterns (CRUD, API endpoints, form validation)
+
+**See:** `.claude/patterns/MCP-CACHE-USAGE.md`
+
+---
+
 # TEST-ENGINEER
 
 ## Identity

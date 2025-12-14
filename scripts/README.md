@@ -1049,9 +1049,219 @@ Cannot fix:
 | **sprint-transition.sh** | Sprint archiving | End of sprint, start new sprint |
 | **find-large-files.sh** | Find files needing sharding | Context optimization, doc maintenance |
 | **shard-document.sh** | Split large files | After finding large files, token reduction |
+| **status.sh** | Quick status command | Check workflow/agent/task status |
+| **visualize-workflow.sh** | Workflow visualization | Generate Mermaid diagrams from YAML |
+| **agent-health.sh** | Agent health check | Validate agent files and readiness |
 
 ---
 
-**Version:** 1.2
+### 12. status.sh (Quick Status Command)
+**Purpose:** Shows active workflows, agent status, and pending tasks in one command
+
+**Usage:**
+```bash
+# Full status
+bash scripts/status.sh
+
+# One-liner summary
+bash scripts/status.sh --compact
+
+# JSON output for integration
+bash scripts/status.sh --json
+
+# Filter by type
+bash scripts/status.sh --workflows  # Workflows only
+bash scripts/status.sh --agents     # Agents only
+bash scripts/status.sh --tasks      # Tasks only
+```
+
+**What it shows:**
+- Active workflows with progress
+- Agent status (active, waiting, blocked, ready)
+- Pending tasks with priorities
+- Pending handoffs
+- Health status and alerts
+
+**Example output:**
+```
+STATUS
+======================================
+
+Health: HEALTHY
+
+Active Workflows: 2
+  - Epic-1: In Progress
+
+Active Agents: 3
+  - BACKEND-DEV: Implementing RLS policies (E1-S1.2)
+  - TEST-ENGINEER: Writing integration tests (E1-S1.1)
+  - SCRUM-MASTER: Sprint planning (E1)
+
+Pending Tasks: 4
+  - [P0] Implement UI components from wireframes (E1-S1.3)
+  - [P0] Refactor auth middleware (E1-S1.4)
+
+Pending Handoffs: 2
+
+[OK] No alerts
+
+Last Updated: 2025-12-14 14:30
+```
+
+**Compact output:**
+```
+STATUS [OK] Workflows:2 | Agents: 3 active, 1 waiting, 0 blocked, 7 ready | Tasks: 4 pending | Handoffs: 2 pending
+```
+
+---
+
+### 13. visualize-workflow.sh (Workflow Visualization)
+**Purpose:** Generates Mermaid diagrams from workflow YAML files
+
+**Usage:**
+```bash
+# Visualize specific workflow
+bash scripts/visualize-workflow.sh epic-workflow.yaml
+bash scripts/visualize-workflow.sh .claude/workflows/definitions/engineering/epic-workflow.yaml
+
+# Visualize all workflows
+bash scripts/visualize-workflow.sh --all
+
+# Custom output file
+bash scripts/visualize-workflow.sh epic-workflow.yaml --output docs/diagrams/epic-flow.md
+
+# Output to stdout only (no file)
+bash scripts/visualize-workflow.sh epic-workflow.yaml --stdout
+```
+
+**What it generates:**
+- Mermaid flowchart diagram
+- Phase nodes with agents
+- Gates with pass/fail paths
+- Parallel execution visualization
+- Phase summary table
+
+**Example output:**
+```markdown
+# epic-workflow - Workflow Diagram
+
+> Complete workflow for delivering an epic from conception to completion
+
+```mermaid
+flowchart TD
+    subgraph WORKFLOW["epic-workflow"]
+    direction TB
+
+    discovery["Phase 1: Discovery"]
+    discovery_agents>"RESEARCH-AGENT, PM-AGENT"]
+    discovery --- discovery_agents
+    discovery_gate{"PRD Review"}
+    discovery --> discovery_gate
+    discovery_gate -->|PASS| design
+    discovery_gate -.->|FAIL| discovery
+
+    design[["Phase 2: Design"]]
+    ...
+    end
+```
+
+## Phases Summary
+
+| # | Phase | Agents | Gate | Type |
+|---|-------|--------|------|------|
+| 1 | Discovery | RESEARCH-AGENT, PM-AGENT | PRD Review | APPROVAL_GATE |
+| 2 | Design | ARCHITECT-AGENT, UX-DESIGNER | Design Review | REVIEW_GATE |
+...
+```
+
+---
+
+### 14. agent-health.sh (Agent Health Check)
+**Purpose:** Validates agent files, frontmatter, and readiness
+
+**Usage:**
+```bash
+# Check specific agent
+bash scripts/agent-health.sh BACKEND-DEV
+bash scripts/agent-health.sh research-agent
+
+# Check all agents
+bash scripts/agent-health.sh --all
+
+# Quick summary only
+bash scripts/agent-health.sh --all --summary
+
+# JSON output
+bash scripts/agent-health.sh BACKEND-DEV --json
+```
+
+**Health Checks performed:**
+1. File exists and is readable
+2. Has valid YAML frontmatter
+3. Has required 'name' field
+4. Has required 'tools' field
+5. Has valid 'model' field (sonnet/opus/haiku)
+6. Has 'description' field
+7. Has '## Workflow' section
+8. Has '## Interface' section
+9. File size is reasonable (50-1000 lines)
+10. No unfilled {{TODO}} placeholders
+11. Has handoff protocols
+12. Has error recovery section
+
+**Health Status:**
+- **HEALTHY** - All checks passed (exit code 0)
+- **DEGRADED** - Warnings present but functional (exit code 1)
+- **UNHEALTHY** - Critical issues, agent not usable (exit code 2)
+
+**Example output:**
+```
+Agent Health Check: BACKEND-DEV
+========================================
+File: .claude/agents/development/BACKEND-DEV.md
+
+  [OK] File exists and is readable
+  [OK] YAML frontmatter present
+  [OK] Name field: backend-dev
+  [OK] Tools field defined: Read, Edit, Write, Bash, Grep, Glob
+  [OK] Model field: sonnet
+  [OK] Description: Backend developer agent...
+  [OK] Workflow section present
+  [OK] Interface section present
+  [OK] File size OK (245 lines)
+  [OK] No unfilled {{TODO}} placeholders
+  [OK] Handoff protocols present
+  [OK] Error recovery section present
+
+----------------------------------------
+Results: 12 passed, 0 warnings, 0 failed
+
+[OK] BACKEND-DEV - HEALTHY
+All checks passed. Agent is ready for use.
+```
+
+**Summary mode:**
+```
+[OK] BACKEND-DEV - HEALTHY (12/12 checks passed)
+[OK] FRONTEND-DEV - HEALTHY (12/12 checks passed)
+[!] RESEARCH-AGENT - DEGRADED (2 warnings)
+[X] NEW-AGENT - UNHEALTHY (3 critical failures)
+```
+
+---
+
+## Quick Wins Scripts Summary
+
+These three scripts were added as Quick Wins (Features #17, #19, #24):
+
+| Script | Feature # | ROI | Effort | Purpose |
+|--------|-----------|-----|--------|---------|
+| **status.sh** | #24 | 10x | 1 day | Quick visibility into system state |
+| **visualize-workflow.sh** | #17 | 10x | 1-2 days | Visual understanding of workflows |
+| **agent-health.sh** | #19 | 8x | 1-2 days | Reliability improvement |
+
+---
+
+**Version:** 1.3
 **Author:** Agent Methodology Pack
-**Last Updated:** 2025-12-05
+**Last Updated:** 2025-12-14

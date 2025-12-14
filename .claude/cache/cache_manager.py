@@ -33,8 +33,9 @@ class CacheManager:
         self.config_path = config_path
         self.config = self._load_config()
 
-        # Cache directories
-        self.cache_dir = Path(".claude/cache")
+        # Cache directories - relative to config file location
+        config_file = Path(config_path)
+        self.cache_dir = config_file.parent
         self.hot_dir = self.cache_dir / "hot"
         self.cold_dir = self.cache_dir / "cold"
         self.semantic_dir = self.cache_dir / "semantic"
@@ -47,8 +48,32 @@ class CacheManager:
         self.max_hot_size_mb = self.config["hotCache"]["maxSizeMB"]
         self.hot_ttl_minutes = self.config["hotCache"]["ttlMinutes"]
 
-        # Metrics
-        self.metrics = {
+        # Metrics - load existing or initialize
+        self.metrics_file = None  # Will be set after _ensure_dirs()
+        self.operations_since_save = 0  # Track operations for auto-save
+        self.auto_save_interval = 5  # Save metrics every N operations
+
+        # Ensure directories exist first
+        self._ensure_dirs()
+
+        # Now load metrics from file (or initialize if not exists)
+        self.metrics = self._load_metrics()
+
+    def _load_config(self) -> Dict[str, Any]:
+        """Load configuration from JSON"""
+        with open(self.config_path, 'r') as f:
+            return json.load(f)
+
+    def _ensure_dirs(self):
+        """Ensure all cache directories exist"""
+        for dir_path in [self.hot_dir, self.cold_dir, self.semantic_dir, self.qa_dir, self.logs_dir]:
+            dir_path.mkdir(parents=True, exist_ok=True)
+        # Set metrics file path after logs_dir is created
+        self.metrics_file = self.logs_dir / "metrics.json"
+
+    def _load_metrics(self) -> Dict[str, Any]:
+        """Load existing metrics from file or initialize with zeros"""
+        default_metrics = {
             "hot_hits": 0,
             "hot_misses": 0,
             "cold_hits": 0,
@@ -60,18 +85,20 @@ class CacheManager:
             "tokens_saved": 0
         }
 
-        # Ensure directories exist
-        self._ensure_dirs()
-
-    def _load_config(self) -> Dict[str, Any]:
-        """Load configuration from JSON"""
-        with open(self.config_path, 'r') as f:
-            return json.load(f)
-
-    def _ensure_dirs(self):
-        """Ensure all cache directories exist"""
-        for dir_path in [self.hot_dir, self.cold_dir, self.semantic_dir, self.qa_dir, self.logs_dir]:
-            dir_path.mkdir(parents=True, exist_ok=True)
+        if self.metrics_file and self.metrics_file.exists():
+            try:
+                with open(self.metrics_file, 'r') as f:
+                    loaded_metrics = json.load(f)
+                    # Merge with defaults to ensure all keys exist
+                    default_metrics.update(loaded_metrics)
+                    print(f"[CACHE] Loaded existing metrics: {loaded_metrics.get('total_queries', 0)} queries")
+                    return default_metrics
+            except Exception as e:
+                print(f"[CACHE] Error loading metrics, starting fresh: {e}")
+                return default_metrics
+        else:
+            print("[CACHE] Starting with fresh metrics")
+            return default_metrics
 
     def _hash_key(self, query: str) -> str:
         """Generate SHA-256 hash for cache key"""
@@ -129,71 +156,79 @@ class CacheManager:
         3. Semantic cache (similar queries)
         4. None (cache miss)
         """
-        self.metrics["total_queries"] += 1
-        cache_key = self._hash_key(query)
+        try:
+            self.metrics["total_queries"] += 1
+            cache_key = self._hash_key(query)
 
-        # LAYER 2: Check hot cache (in-memory)
-        if self.config["hotCache"]["enabled"]:
-            hot_result = self._check_hot_cache(cache_key)
-            if hot_result:
-                self.metrics["hot_hits"] += 1
-                self._calculate_savings(hot_result)
-                self._log_access("hot", cache_key, "HIT")
-                return hot_result
+            # LAYER 2: Check hot cache (in-memory)
+            if self.config["hotCache"]["enabled"]:
+                hot_result = self._check_hot_cache(cache_key)
+                if hot_result:
+                    self.metrics["hot_hits"] += 1
+                    self._calculate_savings(hot_result)
+                    self._log_access("hot", cache_key, "HIT")
+                    return hot_result
 
-        self.metrics["hot_misses"] += 1
+            self.metrics["hot_misses"] += 1
 
-        # LAYER 3: Check cold cache (disk)
-        if self.config["coldCache"]["enabled"]:
-            cold_result = self._check_cold_cache(cache_key)
-            if cold_result:
-                self.metrics["cold_hits"] += 1
-                self._calculate_savings(cold_result)
-                self._log_access("cold", cache_key, "HIT")
-                # Promote to hot cache
-                self._set_hot_cache(cache_key, cold_result)
-                return cold_result
+            # LAYER 3: Check cold cache (disk)
+            if self.config["coldCache"]["enabled"]:
+                cold_result = self._check_cold_cache(cache_key)
+                if cold_result:
+                    self.metrics["cold_hits"] += 1
+                    self._calculate_savings(cold_result)
+                    self._log_access("cold", cache_key, "HIT")
+                    # Promote to hot cache
+                    self._set_hot_cache(cache_key, cold_result)
+                    return cold_result
 
-        self.metrics["cold_misses"] += 1
+            self.metrics["cold_misses"] += 1
 
-        # LAYER 4: Check semantic cache (will be implemented separately)
-        if self.config["semanticCache"]["enabled"]:
-            # TODO: Semantic search will be implemented in semantic_cache.py
-            pass
+            # LAYER 4: Check semantic cache (will be implemented separately)
+            if self.config["semanticCache"]["enabled"]:
+                # TODO: Semantic search will be implemented in semantic_cache.py
+                pass
 
-        self.metrics["semantic_misses"] += 1
-        self._log_access("all", cache_key, "MISS")
-        return None
+            self.metrics["semantic_misses"] += 1
+            self._log_access("all", cache_key, "MISS")
+            return None
+        finally:
+            # Auto-save metrics AFTER operation completes (even if exception)
+            self._auto_save_metrics()
 
     def set(self, query: str, response: Dict, metadata: Optional[Dict] = None):
         """
         Store response in cache (all applicable layers)
         """
-        cache_key = self._hash_key(query)
-        timestamp = time.time()
+        try:
+            cache_key = self._hash_key(query)
+            timestamp = time.time()
 
-        cache_entry = {
-            "query": query,
-            "response": response,
-            "metadata": metadata or {},
-            "timestamp": timestamp,
-            "cached_at": datetime.now().isoformat()
-        }
+            cache_entry = {
+                "query": query,
+                "response": response,
+                "metadata": metadata or {},
+                "timestamp": timestamp,
+                "cached_at": datetime.now().isoformat()
+            }
 
-        # Store in hot cache
-        if self.config["hotCache"]["enabled"]:
-            self._set_hot_cache(cache_key, cache_entry)
+            # Store in hot cache
+            if self.config["hotCache"]["enabled"]:
+                self._set_hot_cache(cache_key, cache_entry)
 
-        # Store in cold cache
-        if self.config["coldCache"]["enabled"]:
-            self._set_cold_cache(cache_key, cache_entry)
+            # Store in cold cache
+            if self.config["coldCache"]["enabled"]:
+                self._set_cold_cache(cache_key, cache_entry)
 
-        # Store in semantic cache (will be implemented)
-        if self.config["semanticCache"]["enabled"]:
-            # TODO: Will be implemented in semantic_cache.py
-            pass
+            # Store in semantic cache (will be implemented)
+            if self.config["semanticCache"]["enabled"]:
+                # TODO: Will be implemented in semantic_cache.py
+                pass
 
-        self._log_access("all", cache_key, "SET")
+            self._log_access("all", cache_key, "SET")
+        finally:
+            # Auto-save metrics AFTER operation completes
+            self._auto_save_metrics()
 
     def _check_hot_cache(self, key: str) -> Optional[Dict]:
         """Check hot cache (in-memory)"""
@@ -290,6 +325,14 @@ class CacheManager:
             "semantic_hit_rate": (self.metrics["semantic_hits"] / total * 100) if total > 0 else 0,
             "overall_hit_rate": overall_hit_rate
         }
+
+    def _auto_save_metrics(self):
+        """Auto-save metrics every N operations (default: 5)"""
+        self.operations_since_save += 1
+
+        if self.operations_since_save >= self.auto_save_interval:
+            self.save_metrics()
+            self.operations_since_save = 0
 
     def save_metrics(self):
         """Save metrics to JSON"""

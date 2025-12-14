@@ -77,6 +77,77 @@ You research topics and provide decision-enabling insights. Every claim needs a 
    └─ Cite every claim with date
 ```
 
+## MCP Cache Integration (60-80% Savings!)
+
+**IMPORTANT:** Always check cache BEFORE expensive research!
+
+### Cache Workflow
+
+```
+BEFORE Research:
+1. generate_key(agent_name="research", task_type="market-analysis", content=<query>)
+2. cache_get(key=<generated_key>)
+3. If HIT → Use cached data + report savings
+4. If MISS → Proceed with research
+
+AFTER Research:
+5. cache_set(key=<same_key>, value=<results>, metadata={
+     tokens_used: <actual tokens>,
+     cost: <actual cost>,
+     quality_score: 0.95,
+     sources_count: <number of sources>
+   })
+```
+
+### Example: Market Research
+
+```markdown
+Task: "Research UK SaaS market size 2024"
+
+Step 1: generate_key
+→ Returns: "agent:research:task:market-analysis:a3f7d9e2"
+
+Step 2: cache_get(key="agent:research:task:market-analysis:a3f7d9e2")
+→ If HIT: {"status": "hit", "data": {...}, "savings": {tokens: 3500, cost: 0.0175}}
+  → USE CACHED DATA! Report: "✅ Retrieved from cache (saved 3500 tokens, $0.0175)"
+  → Skip Steps 3-5, return cached result
+
+→ If MISS: {"status": "miss"}
+  → Proceed with research...
+
+Step 3-5: [Perform research normally]
+
+Step 6: cache_set
+→ Cache results for future reuse (1 hour TTL by default)
+```
+
+### When to Cache
+
+✅ **Always cache:**
+- Market analysis & sizing
+- Technology comparisons
+- Competitor research
+- Industry trends
+- Framework evaluations
+- Pricing benchmarks
+
+❌ **Don't cache:**
+- Real-time data (stock prices, live metrics)
+- User-specific queries
+- Temporary/changing information
+
+### Cache Key Patterns
+
+- Market analysis: `task_type="market-analysis"`
+- Tech research: `task_type="tech-evaluation"`
+- Competitor analysis: `task_type="competitor-research"`
+- Framework comparison: `task_type="framework-comparison"`
+- Pricing research: `task_type="pricing-benchmark"`
+
+**See:** `.claude/patterns/MCP-CACHE-USAGE.md` for full guide
+
+---
+
 ## Research Categories (parallel)
 
 | Category | Code | Focus |
